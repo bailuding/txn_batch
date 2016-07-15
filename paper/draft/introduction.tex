@@ -1,0 +1,33 @@
+\section{Motivation}
+ 
+Many transaction processing systems implicitly batch transactions for performance~\cite{tu2013speedy, thomson2012calvin, ding2015centiman}, especially at the networking module.
+
+Since we are going to batch transactions anyway, we can treat batching as the first class citizen in the core of transaction processing. 
+In this case, we can take advantage of the batching to be flexible in consolidating the work~\cite{faleiro2014lazy}, and reducing contention. 
+\magda{This makes me think that we need to assess the impact of batching on transaction processing times. What is the average and tail
+latency? We do reduce the number of restarst, which is great. But how do we affect latency. For example, if a transaction commits, was
+the transaction executed more slowly because it was part of a batch?}
+
+There are three places we can play with the batching: processor, storage, and validation.
+
+At the processor, if we have some knowledge of the reads and the writes of transactions, we could defer the execution or re-fetch the reads of the transaction if there is a large chance that the transaction will conflict with some committed, or in-flight transaction.
+\magda{We should clarify the setting. How come we know the reads and writes? Do we assume the same model/setting as some other paper that we can cite?
+We should, again, measure the impact not only on transaction restart rates but also on end-to-end latency (average and also tail latency).}
+
+At the storage, we can prioritize the writes over the reads so that the read requests will get fresher data. 
+In addition, we could consolidate the work of writes from the same key. 
+This will reduce the number of actual IOs to the storage to save the load and the cost (if it is charged by the number of IOs).
+
+If the validation is centralized, the validator can decide the order of the transactions.
+Thus, it can flexibly reorder the transactions to minimize the number of aborts or to prioritize the transactions based on some criterion, such as the number of aborts, the chance of conflicting, and the importance of the transaction.
+
+
+\section{Contribution}
+In this work, we explore the benefit of transaction batching in reducing contentions for optimistic concurrency control.  \magda{We should clarify that we use optimistic concurrency control by validation. We don't use MVCC.}
+In particular, we analyze the effect of batching at different components, i.e. processor, storage, and validation, with various strategies
+\begin{itemize}
+\item At the processor, we cluster the transactions based on their reads and writes to minimize the conflicts between batches. 
+\item At the storage, we prioritize writes before reads in the same batch to get fresher data for read requests.
+\item At the validator, we reorder the transactions based on different policies, i.e. max-commit, priority, fairness. We formulate the problem to the problem of finding minimal feedback vertex set in a directed graph~\cite{karp1972reducibility}, which is proved to be NP-complete. We propose a greedy algorithm to produce a sound feedback vertex set, and extend it to a weighted version to incorporate the priority and fairness policies.
+\item We perform a detailed analysis on when our techniques are useful, why they are useful, and the interaction between the batching effect at different components.
+\end{itemize} 

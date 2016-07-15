@@ -1,0 +1,163 @@
+\section{Reordering}
+
+At the validator, we reorder the transactions based on max-commit, priority, or fairness policy.
+
+We say an ordering of the transactions is \textbf{\emph{sound}} if the transactions can commit in that order without violation of the isolation levels.
+
+Assume we run the transactions at serializability \magda{I assume that we will discuss the different levels of isolation somewhere in this section.}, an ordering is sound if and only if there is no read-after-write dependencies from a transaction $T_{later}$ that is later in the sequence to a transaction $T_{early}$ that is earlier in the sequence, i.e. $read\_set(T_{later})\cap write\_set(T_{early})\not\emptyset$; otherwise, $T_{later}$ will read stale versions and will be conflicting with $T_{early}$. 
+\magda{What about write-write conflicts?}
+
+We first formulate the soundness of the problem as the feedback vertex
+set problem \magda{cite a source to show that this is a known type of
+  problem} in a directed graph:
+
+\paragraph{Feedback Vertex Set} Given a directed graph, a feedback vertex set of a graph is a set of vertices whose deletion makes the graph acyclic.
+
+\paragraph{Soundness} Given a batch of transactions and create a directed graph $G$ with transactions as nodes $N$ and read-after-write dependencies as edges, there exists a sound ordering corresponding to a feedback vertex set. 
+
+\paragraph{Finding a Feedback Vertex Set is Equivalent to Soundness} 
+We can construct a sound ordering with the feedback vertex set of the dependency graph. 
+Since the graph is acyclic, we can iteratively choose a vertex that does have a forward dependency, i.e. no out edges.
+On the other hand, if the ordering is sound, there is no dependency edge from a later transaction in the sequence. 
+Thus, there is no cycle in the directed graph. 
+
+\paragraph{Greedy Algorithm for Max-Commit Policy}
+Finding an order with max-commit policy can be directly reduced to the problem of finding the minimal feedback vertex set. Unfortunately, this is listed in the first set of the NP-complete problems~\cite{karp1972reducibility}.
+
+As mentioned in Section~\ref{design:subsec:batching}, it is important to come up with a good ordering rapidly so that the decreasing in in-batch aborts will not be offset by the increasing in pre-aborts.  We come up with a greedy algorithm to find a sound ordering, attempting to maximize the number of commits.
+\magda{Maybe we should compare the performance of exhaustive search and greedy?}
+
+Given a batch of transactions at hand, we first construct the dependency graph
+as shown in Algorithm~\ref{reorder:alg:graph}. We construct the graph by first creating a hash table to cache all the updates in this batch. The running time of the construction is $O(|V|+|E|)$, where $|V|$ is the number of nodes and $|E|$ is the number of edges.
+
+Then we remove all the transactions in the batch that conflict with committed transactions (Algorithm~\ref{reorder:alg:pre_abort}), i.e. pre-aborts. These transactions are bound to abort and we will not consider them in the reordering.
+
+Algorithm~\ref{reorder:alg:greedy} shows the core of the greedy algorithm. 
+The idea is to first construct a heap with all the remaining transactions that are not pre-aborted, and then to iteratively choose the transaction that will incur the least number of aborts for the unscheduled transactions until the heap becomes empty (line 6).
+After choosing a transaction $t$ (line 7), we have to abort any unscheduled transaction $t'$ that has a read-after-write dependency on $t$ (line 8-15), i.e. $t'$ should have read the update from $t$. 
+Then we clean up all the dependencies on $t$ (line 16), add $t$ to the ordered sequence (line 17), and get ready to choose the next transaction.
+The running time of the core greedy algorithm is $O(|V|log(|V|))$.
+
+Inside the heap, we order the transactions by the number of aborts that will be incurred if we schedule a transaction as the next transaction, as shown in Algorithm~\ref{reorder:alg:max_commit}. 
+
+The total running time of this greedy strategy is $O(|E|+|V|+|V|log(|V|))$. 
+which becomes $O(|V|log(|V|))$ if $|E|=O(C|V|)$ for some constant $C$.
+
+\paragraph{Weighted Greedy Algorithm for Other Policies}
+We can extend the greedy algorithm to other policies by adding some weight in the comparison function of the heap.
+
+For priority policy, as shown in Algorithm~\ref{reorder:alg:priority}, we can first check whether the two transactions have the same priority (line 1-3). 
+If not, we choose the one with higher priority; otherwise, we choose the one that will cause the least number of aborts (line 4-6).
+
+Similarly, we implement the fairness policy as shown in Algorithm~\ref{reorder:alg:fairness}. 
+If it is not fair to schedule a transaction $t$ before a transaction $t'$, we place $t'$ before $t$ (line 1-3); otherwise, we choose a transaction that will cause the least number of aborts (line 4-6).
+
+\begin{algorithm}
+\KwData{A batch of $T$ transactions with reads and writes}
+\KwResult{A read-after-write depedency graph $G$}
+\tcp{construct hash table of updates}
+$hash \gets \emptyset$\;
+\For{$t \in T$} {
+	\For{$w \in t.write\_set$} {
+		$ids = hash.get(w)$\;
+		$hash.put(w, ids.add(t.id))$\;
+	}
+}
+\tcp{construct dependency graph}
+$G\gets \emptyset$\;
+\For{$t \in T$} {
+	\For {$r \in t.read\_set$} {
+		$ids = hash.get(r)$\;
+		\For {$id \in ids$} {
+			$G.add\_edge(t.id, id)$\;
+		}
+	}
+}
+\Return{$G$}\;
+\caption{Construct the read-after-write dependency graph}
+\label{reorder:alg:graph}
+\end{algorithm}
+
+\begin{algorithm}
+\KwData{A read-after-write dependency graph $G$ and a batch $T$ of transactions}
+\KwResult{A set $S$ of transactions that do not conflict with committed transactions}
+$S \gets \emptyset$\;
+\For {$v \in G$} {
+	$t\gets T.get(v)$\;
+	\If {$validate(t) == COMMIT$} {
+		$t.dec = TBD$\;
+		$S.add(t)$\;
+	}
+	\Else {
+		$t.dec = PRE\_ABORT$\;
+	}
+}
+\Return{$S$}\;
+\caption{Remove pre-abort transactions}
+\label{reorder:alg:pre_abort}
+\end{algorithm}
+
+
+\begin{algorithm}
+\KwData{A read-after-write dependency graph $G$ and a set $S$ of transactions}
+\KwResult{A sequence $L$ of ordered transactions}
+$heap\gets \emptyset$\;
+\For {$t \in S$} {
+	$heap.add(t)$\;
+}
+$L\gets \emptyset$\;
+\While {$heap\neq\emptyset$} {
+	\tcp{schedule a transaction with the least number of aborts}
+	$v = heap.top()$\;
+	\tcp{abort unscheduled transactions depending on $v$}
+	\For {$u \in G.out\_edges(v)$} {
+		$t = S.get(u)$\;
+		\If {$t.dec == TBD$} {
+			$t.dec = IN\_BATCH\_ABORT$\;
+			$G.remove\_all\_edges(u)$\;
+			$heap.remove(u)$\;
+		}
+	}
+	\tcp{remove dependencies}
+	$G.remove\_all\_edges(v)$\;
+	$L.add(v)$\;
+}
+\caption{Greedy algorithm for max-commit policy}
+\label{reorder:alg:greedy}
+\end{algorithm}
+
+\begin{algorithm}
+\KwData{Dependency graph $G$, two transactions $t$ and $t'$}
+\KwResult{Return $true$ if it is better to schedule $t$ before $t'$}
+$e\gets G.outer\_edges(t)$\;
+$e'\gets G.outer\_edges(t')$\;
+\Return{$e.size() < e'.size()$}\;
+\caption{Compare transactions for max-commit policy}
+\label{reorder:alg:max_commit}
+\end{algorithm}
+
+\begin{algorithm}
+\KwData{Dependency graph $G$, two transactions $t$ and $t'$}
+\KwResult{Return $true$ if it is better to schedule $t$ before $t'$}
+\If {$t.priority \neq t'.priority$} {
+	\Return{$t.priority > t'.priority$}\;
+}
+$e\gets G.outer\_edges(t)$\;
+$e'\gets G.outer\_edges(t')$\;
+\Return{$e.size() < e'.size()$}\;
+\caption{Compare transactions for priority policy}
+\label{reorder:alg:priority}
+\end{algorithm}
+
+\begin{algorithm}
+\KwData{Dependency graph $G$, two transactions $t$ and $t'$}
+\KwResult{Return $true$ if it is better to schedule $t$ before $t'$}
+\If {$notFair(t, t')$} {
+	\Return{$false$}\;
+}
+$e\gets G.outer\_edges(t)$\;
+$e'\gets G.outer\_edges(t')$\;
+\Return{$e.size() < e'.size()$}\;
+\caption{Compare transactions for fairness policy}
+\label{reorder:alg:fairness}
+\end{algorithm}

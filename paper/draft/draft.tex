@@ -1,0 +1,29 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[linesnumbered]{algorithm2e}
+
+% To get colored comments
+\usepackage{color}  
+\newcommand{\johannes}[1]{{\color{blue} Johannes: [{#1}]}}
+\newcommand{\lucja}[1]{{\color{green} Lucja: [{#1}]}}
+\newcommand{\bailu}[1]{{\color{cyan} Bailu: [{#1}]}}
+\newcommand{\magda}[1]{{\color{magenta} Magda: [{#1}]}}
+
+
+
+\begin{document}
+\title{Transaction Batching}
+\author{Bailu Ding}
+
+\maketitle
+
+\input{introduction}
+\input{design}
+\input{reorder}
+\input{experiment}
+\input{related}
+
+\bibliographystyle{plain}
+\bibliography{reference}
+
+\end{document}

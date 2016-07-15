@@ -1,0 +1,96 @@
+\magda{After the introduction, we should add a ``Section 2. Background'' where we briefly review concurrency control using validation. We just want to make sure the reader has this freshly in his/her mind. Otherwise, they might mis-remember some details and mis-interpret what we are doing.}
+
+\section{Design}
+
+\subsection{Architecture}
+The transaction processing system consists of three components: processor, storage, and validator. \magda{Add an architecture diagram.} 
+There can be multiple processor and storage workers, while the validator is centralized.  \magda{Show this on the architecture diagram.}
+The system manages transactions with optimistic concurrency control, and the validator decides the order of the transactions.
+The storage is a versioned key-value store, where each item is a key-value-version triple. \magda{Why a key-value store and not a relation? We should specify that we focus on key-value stores in the introduction.}
+For write requests, the storage only installs the update if it is a newer version than the existing version of the key. \magda{Again, Section 2 is critical to
+spell out exactly the concurrency control model.}
+
+\magda{Move the describtion below to new Section 2 on Background.}
+Each transaction begins by being assigned to a processor. 
+The processor sends read requests to the storage, executes the transaction, and writes in its local workspace. 
+After it has processed the transaction, it sends read keys and versions, as well as the write keys of the transaction to the validator. 
+The validator decides the order of the transaction, i.e. sequence number, and checks whether it conflicts with previously committed transactions or not. 
+It sends the sequence number as well as the decision of the transaction back to the processor. 
+If the transaction commits, the processor sends its writes to the storage; otherwise, the transaction is either discarded (\textbf{\emph{false restart model}}) or restarts (\textbf{\emph{real restart model}}).
+
+\subsection{Transaction Batching}
+\label{design:subsec:batching}
+There are three places where we can batch transactions: processor, storage, and validator.
+
+Before going to the details of the batching strategies, let's first differentiate more careful about two different kinds of aborts.
+
+\paragraph{Pre-Abort and In-Batch Abort}
+Consider you have got a batch of transactions to check for conflicts at the validator. 
+There are two cases where a transaction can abort.
+First, it can conflict with a committed transaction, i.e. it is supposed to run at serializability 
+but has read stale versions of items. 
+We call this kind of aborts \textbf{\emph{pre-aborts}}. \magda{pre-abort is very confusing.
+I would recommend to use the terms ``Inter-batch abort'' and ``Intra-batch abort''.}
+Second, it can conflict with a transaction that is in the batch, and will be scheduled before it.
+We call this kind of aborts \textbf{\emph{in-batch aborts}}.
+
+The pre-aborts are contributed to what else is happening in the system after a transaction begins executing and before it enters validation. So when the latency of a transaction increases, or the number of conflicting transactions increases before a transaction enters validation, the chance of pre-abort increases.
+
+The in-batch aborts are related to the data contention of transactions within the batch, and the ordering of the transactions in the batch. If the contention is low in the batch, or we come up with a good ordering, the number of in-batch aborts will reduce.
+
+\paragraph{Processor} 
+
+If we batch the transactions at the processor, we could defer some transactions if we know they are bound to abort due to stale reads. In addition, we could re-fetch the reads of a transaction or restart the transaction earlier if there is a high chance that it will conflict with some existing transaction.
+\magda{We need illustrative examples to explain how defering can help.}
+
+We could employ a locking-based approach to perfectly detect the conflicts at the processor locally. But implementing the logic for lock management at the processor is non-trivial. \magda{Locking would defeat the use of optimistic concurrency control, no? Maybe we should say that detecting conflicts without locking is non-trivial? Again, we need a running example to illustrate the problem, potential solution, and why it is hard.}
+
+Instead, we simply cluster the transactions by their data accesses. \magda{Again, we need to illustrate with an example.}
+There are two potential consequences of this strategy. 
+
+First, we batch the transactions accessing similar data, and the conflicts between batches will reduce. 
+Since transactions accessing similar data are hopefully committed quite a while before executing the transactions in this batch, this batch of transactions is less likely to get stale reads. \magda{Depending on the experimental setup, it will or will not be the case that " transactions accessing similar data are hopefully committed quite a while before executing the transactions in this batch". We should either experiment with realistic configurations or try both settings when this condition holds and when it does not.}
+Thus, we reduce the number of pre-aborts. 
+
+Second, we schedule more transactions with potential conflicts in the same batch, and this increases the chance of in-batch aborts. It is opt to the validator to come up with a good ordering, but it will highly depend on the actual data accesses of the transactions in the batch.
+
+\paragraph{Storage}
+At the storage, we employ a simple strategy to perform all the write requests before any read request within the batch. 
+In this case, a read request will get the latest value of an time if there are writer requests updating the same item.
+Thus, we reduce the chance of pre-aborts.
+
+
+\paragraph{Validator}
+At the validator, we reorder the transactions to reduce conflicts based on different policies. 
+Since the pre-aborts are hopeless when the transactions arrive at the validator, we only reduce the in-batch aborts at the validator.
+The tricky thing here is that we may actually increase the pre-aborts because we need to spend sometime on coming up with a good ordering. 
+Thus, it is crucial to find a good order rapidly.
+
+The most basic policy is \textbf{\emph{max-commit}}, which means we would like to maximize the number of commit transactions.
+In addition to that, we would like to prioritize certain transactions to have a greater chance of committing, i.e. \textbf{\emph{priority}} policy.
+For example, if we want to minimize the number of restarts of transactions, we would like to schedule a transaction that has been restarted a couple of times first.
+Also, if a transaction accesses hot items or a lot of items, we want to schedule it to be validated early in the batch since it has a higher chance of being aborted.
+Moreover, if a transaction has a high monetary value, we want it not to be aborted by low-value transactions.
+
+Lastly, we may want to schedule transactions fairly, i.e. \textbf{\emph{fairness}} policy. For example, we may not want to a transaction arrives early at the validator being aborted by a transaction that arrives later than it. 
+
+We propose a greedy algorithm to uniformly handle all the policies.
+
+\paragraph{Summary}
+Table~\ref{design:tbl:batch} summarizes all the strategies and their potential effects.
+
+
+\begin{table}
+\centering
+\begin{tabular}[h]{|c|c|c|c|}
+\hline
+Component & Strategy & Pre-Aborts & In-Batch Aborts \\
+\hline
+processor & cluster transactions & reduce & increase \\
+storage & prioritize writes & reduce & none \\
+validator & reorder transactions & increase & reduce \\
+\hline
+\end{tabular}
+\caption{Summary of strategies for reducing contentions in transaction batching}
+\label{design:tbl:batch}
+\end{table}
