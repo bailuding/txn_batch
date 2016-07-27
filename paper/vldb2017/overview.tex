@@ -6,9 +6,9 @@ In this section, we explain how we can perform batching at the storage and the v
 
 The server components -- the storage and the validator -- aim to reduce both intra-batch and inter-batch aborts. The storage batches the read and write requests, and the validator batches the validation requests.
 
-Given a batch, the number of intra-batch aborts is determined by the way we order and interleave the requests in processing. Thus the main optimization strategy is \emph{reordering}. The storage manager reduces aborts by reordering individual read and write operations, while the validator reduces aborts by changing the serialization order of transactions. The overhead of the reordering impacts transaction latency, so the reordering algorithms must be as fast as possible.
+Given a batch, the number of intra-batch aborts is determined by the way we order and interleave the requests in processing. Thus the main optimization strategy is \emph{reordering}. The storage manager reduces aborts by reordering individual read and write operations, while the validator reduces aborts by changing the serialization order of transactions. The overhead of the reordering impacts transaction latency, so the reordering algorithms must be fast.
 
-Both inter-batch and intra-batch conflicts can be completely resolved by reordering. A transaction that passes validation but gets ``stuck'' for making its writes to the storage will conflict with all subsequent transactions that read the same time, causing  inter-batch conflicts. Two transactions in the same batch which read and write the same object cannot both commit, thus causing intra-batch conflicts.
+Neither inter-batch nor intra-batch conflicts can be completely eliminated by reordering. A transaction that passes validation but gets ``stuck'' before writing to the storage will conflict with all subsequent transactions that read the same item, causing unavoidable inter-batch conflicts. Two transactions in the same batch which read and write the same object cannot both commit, thus causing an unavoidable intra-batch conflict.
 
 \eat{
 To reduce the number of inter-batch aborts, the system can divide the transactions into batches in a careful manner; it can also privilege writes over reads to allow reads to see fresher values. However, at all times in the system, there are multiple batches in-flight. 

@@ -32,9 +32,9 @@ Our work has different goals and uses different techniques from all the above sy
 %\vspace{-1em}
 %\paragraph{Batching}
 {\bf Batching.}
-Batching to amortize costs and condense work is a common optimization technique. One major application is to pack networking and logging messages~\cite{castro2002practical,glendenning2011scalable, friedman1997packing, ding2015centiman}. Batching is also widely applied to application requests to improve performance, including group commits~\cite{hagmann1987reimplementing, debrabant2013anti}, condensing IO requests~\cite{debrabant2013anti, faleiro2014lazy}, and Paxos~\cite{santos2012tuning}.
-Since the use of batching is often associated with a throughput/latency tradeoff, there is work on adaptive batching~\cite{friedman2006adaptive, nagle1984congestion}.
-Those uses of batching are low-level and are not aware of the overall system infrastructure or the application semantics. Our work embraces batching as a core design principle at multiple stages of transaction execution. In addition, we focus on the use of batching for reordering, which is not explored in previous work.
+Batching to amortize costs and condense work is a common optimization technique. One application is to pack networking and logging messages~\cite{castro2002practical,glendenning2011scalable, friedman1997packing, ding2015centiman}. Batching is also widely applied to application requests to improve performance, including group commits~\cite{hagmann1987reimplementing, debrabant2013anti}, condensing IO requests~\cite{debrabant2013anti, faleiro2014lazy}, and Paxos~\cite{santos2012tuning}.
+Since batching is often associated with a throughput/latency tradeoff, there is work on adaptive batching~\cite{friedman2006adaptive, nagle1984congestion}.
+Those uses of batching are low-level and are not aware of the overall system infrastructure or the application semantics. Our work embraces batching as a core design principle at multiple stages of transaction execution. In addition, unlike previous work, we focus on the use of batching for reordering.
 
 
 %\vspace{-1em}
