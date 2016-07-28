@@ -1,7 +1,7 @@
 \section{OCC Background}\label{sec:background}
 
 % backward occ
-In this paper, we use the term ``optimistic concurrency control'' to refer to the classical backward validation based protocol introduced in~\cite{kung81tods}. As explained in the introduction, this is a protocol where every transaction goes through three execution phases. First comes a \emph{read} phase, where the transaction reads data from the storage and executes while making writes to a private ``scratch workspace''. Then the transaction enters a \emph{validation} phase. If validation is successful, the transaction enters the \emph{write} phase, when its writes are installed in the storage. 
+We use the term ``optimistic concurrency control'' to refer to the classical backward validation based protocol introduced in~\cite{kung81tods}. As explained in the introduction, every transaction goes through three execution phases. First comes a \emph{read} phase, where the transaction reads data from the storage and executes while making writes to a private ``scratch workspace''. Then the transaction enters a \emph{validation} phase. If validation is successful, the transaction enters the \emph{write} phase, when its writes are installed in the storage. 
 
 % details for validation
 OCC validation enforces serializability; we only allow a transaction to pass validation if it can be serialized after all transactions that have already committed. The validator assigns each transaction a number (timestamp) and ensures that transactions are serialized in timestamp order.
@@ -13,13 +13,16 @@ When validating a transaction with timestamp $j$ (transaction $T(j)$), the valid
 % criterion for conflicts
 $T(j)$ can be serialized after such a transaction $T(i)$ if one of the following conditions holds:
 \begin{itemize}
+\vspace{-.5em}
 \item $T(i)$ completed its write phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$, or
+\vspace{-.5em}
 \item $T(i)$ completed its read phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$ as well as $WS(i) \cap WS(j) = \emptyset$
+\vspace{-.5em}
 \end{itemize}
 
 If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. If they write to the same object, the updates must be applied in their serialization order. The original OCC~\cite{kung81tods} algorithms achieve this by putting the validation and write phases in a critical section.
 
-The batching techniques we study in this paper are applicable to most OCC systems; however, we make certain assumptions about the implementation of OCC validation, for simplicity and concreteness of our experimental setup. We clarify those assumptions now.
+The batching techniques we study in this paper are applicable to most OCC systems; however, we make certain assumptions about the implementation of OCC validation, for simplicity and concreteness of our experimental setup.\eat{We clarify those assumptions now.}
 
 Given that our architecture (Figure~\ref{fig:occ_arch}) has a single validator, we assume the validation phase is sequential. We do not require the write phase to be in a critical section; this means that write requests may arrive at the storage out of order. We deal with this using a \emph{versioned} datastore; every item in the datastore is versioned and every write request is tagged with a version number equal to the writing transaction's timestamp. If the datastore receives a write request with version (timestamp) $i$ and a higher-numbered version $j > i$ already exists for the object, the write request is ignored. 
 

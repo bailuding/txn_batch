@@ -27,7 +27,7 @@
 
 % ****************** TITLE ****************************************
 
-\title{Improving OCC Performance Through Transaction Batching}
+\title{Improving OCC Performance Through Transaction Batching and Operation Reordering}
 
 % possible, but not really needed or used for PVLDB:
 %\subtitle{[Extended Abstract]
@@ -59,7 +59,8 @@
 % without further effort on your part as the last section in
 % the body of your article BEFORE References or any Appendices.
 
-\eat{
+\numberofauthors{3}
+
 \author{
 % You can go ahead and credit any number of authors here,
 % e.g. one 'row of three' or two rows (consisting of one row of three
@@ -72,7 +73,22 @@
 % e-mail address with \email.
 %
 % 1st. author
-}
+\alignauthor Bailu Ding \\
+	\affaddr{Cornell University, Microsoft Research}\\
+    \email{badin@microsoft.com}
+% 2nd. author
+\alignauthor Lucja Kot \\
+	\affaddr{Cornell University}\\
+    \email{lucjak@gmail.com}
+% 3rd. author
+\alignauthor Magdalena Balazinska\\
+	\affaddr{University of Washington}\\
+	\affaddr{Seattle, Washington, USA}\\
+    \email{magda@cs.washington.edu}
+\and
+\alignauthor Johannes Gehrke\\
+	\affaddr{Microsoft Corporation}\\
+    \email{johannes@microsoft.com}
 }
 
 \maketitle
@@ -80,7 +96,7 @@
 \begin{abstract}
 OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. There are well-studied uses of batching for optimizations such as message-packing and group commits, however, there is little research on the benefits of a holistic approach of batching across a transaction's entire life cycle. 
 
-In this paper, we design an OLTP system using OCC that incorporates batching at multiple stages of transaction execution: Storage batching enables reordering of transaction reads and writes at the storage layer and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies to solve this problem. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show our techniques reduce the number of aborts and increase throughput. We show how different batching algorithms perform, how storage and validator batching interact with each other, and how they improve system-wide and individual transaction performance.
+In this paper, we design an OLTP system using OCC that incorporates batching at multiple stages of transaction execution: Storage batching enables reordering of transaction reads and writes at the storage layer and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies to solve this problem. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show our techniques increase transaction throughput and reduce its latency. We show how different batching algorithms perform\eat{, how storage and validator batching interact with each other, } and how they improve system-wide and individual transaction performance.
 \end{abstract}
 
 
@@ -96,9 +112,5 @@ In this paper, we design an OLTP system using OCC that incorporates batching at 
 
 \bibliographystyle{abbrv}
 \bibliography{reference}
-
-\eat{
-\input{appendix}
-}
 
 \end{document}
