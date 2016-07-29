@@ -59,7 +59,8 @@ As mentioned before, the overhead of validator reordering increases transaction 
 }
 
 % contribution 3: experiment
-Our third contribution is a detailed experimental study of the impacts of storage and validator batching in OCC. Results show batching always increases throughput and reduces transaction latency. When the workload has high data contention, batching and reordering can improve the throughput to 2.4x and reduce the average transaction latency to 21\% for both micro and realistic benchmarks.
+Our third contribution is a detailed experimental study of the impacts of storage and validator batching on transaction execution performance. 
+Our results show that batching always increases throughput and, surprisingly, also reduces transaction latency. When the workload has high data contention, batching and reordering can improve the throughput by up to 2.4x and reduce the average transaction latency by up to 21\% for both micro benchmarks and the Small Bank Benchmark~\cite{alomari2008icde}.
 
 \eat{
 % paper organization

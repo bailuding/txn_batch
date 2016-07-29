@@ -79,7 +79,7 @@
 % 2nd. author
 \alignauthor Lucja Kot \\
 	\affaddr{Cornell University}\\
-    \email{lucjak@gmail.com}
+    \email{lucja@cs.cornell.edu}
 % 3rd. author
 \alignauthor Magdalena Balazinska\\
 	\affaddr{University of Washington}\\
@@ -94,7 +94,7 @@
 \maketitle
 
 \begin{abstract}
-OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. There are well-studied uses of batching for optimizations such as message-packing and group commits, however, there is little research on the benefits of a holistic approach of batching across a transaction's entire life cycle. 
+OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. There are well-studied uses of batching for optimizations such as message packing and group commits, however, there is little research on the benefits of a holistic approach of batching across a transaction's entire life cycle. 
 
 In this paper, we design an OLTP system using OCC that incorporates batching at multiple stages of transaction execution: Storage batching enables reordering of transaction reads and writes at the storage layer and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies to solve this problem. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show our techniques increase transaction throughput and reduce its latency. We show how different batching algorithms perform\eat{, how storage and validator batching interact with each other, } and how they improve system-wide and individual transaction performance.
 \end{abstract}
