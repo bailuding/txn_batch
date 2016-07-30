@@ -20,7 +20,7 @@ $T(j)$ can be serialized after such a transaction $T(i)$ if one of the following
 \vspace{-.5em}
 \end{itemize}
 
-If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. If they write to the same object, the updates must be applied in their serialization order. The original OCC~\cite{kung81tods} algorithms achieve this by putting the validation and write phases in a critical section.
+If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. If they write to the same object, the updates must be applied in their serialization order. The original OCC algorithms achieve this by putting the validation and write phases in a critical section~\cite{kung81tods}.
 
 The batching techniques we study in this paper are applicable to most OCC systems; however, we make certain assumptions about the implementation of OCC validation, for simplicity and concreteness of our experimental setup.\eat{We clarify those assumptions now.}
 

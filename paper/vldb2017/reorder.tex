@@ -44,7 +44,7 @@ If $G$ is acyclic, then there exists a $\prec$ on $G$ that respects all read-wri
 % if there is a prec, we ensure no violation of read-write depedency exists
 We need to show that if $t \prec t'$, then there is no read-write dependency from $t'$ to $t$. Suppose $t \prec t'$ and consider the nodes $t$ and $t'$ in $G$. Assume for a contradiction there is a read-write dependency from $t'$ to $t$. Then by construction, $G$ contains an edge from $t'$ to $t$, and by construction of $\prec$ we have $t' \prec t$; however, this contradicts the statements that $t \prec t'$ and that $\prec$ is strict.
 
-Our family of algorithms for IBVR is based on constructing the dependency graph $G$ and finding a \emph{feedback vertex set} (FVS)~\cite{karp1972reducibility} on $G$. A FVS is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges.
+Our family of algorithms for IBVR is based on constructing the dependency graph $G$ and finding a \emph{feedback vertex set} (FVS) on $G$~\cite{karp1972reducibility}. A FVS is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges.
 
 Finding a minimal-size $B'$ for IBVR is exactly the problem of finding the minimal (smallest-size) feedback vertex set on $G$. If we have a more complex objective function for IBVR, we can push the objective function into the FVS computation; we assign weights to the nodes to represent the desired transaction priorities, and look for a minimum-weight FVS. 
 
@@ -53,7 +53,7 @@ Once we find the FVS $B'$, removing the nodes in $B'$ from $G$ yields an acyclic
 
 If $G$ is acyclic, then there exists a commit order $Q$ on $G$ that respects all read-write dependencies. We can construct $Q$ by repeatedly committing a transaction whose corresponding node in $G$ has no outgoing edge. This is always feasible when $G$ is acyclic.
 
-Our family of algorithms for IBVR is based on constructing the dependency graph $G$ and finding a \emph{feedback vertex set} (FVS)~\cite{karp1972reducibility} on $G$. A FVS is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges.
+Our family of algorithms for IBVR is based on constructing the dependency graph $G$ and finding a \emph{feedback vertex set} (FVS) on $G$~\cite{karp1972reducibility}. A FVS is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges.
 
 Finding a minimal-size $B'$ for IBVR is exactly the problem of finding the minimal (smallest-size) feedback vertex set on $G$. If we have a more complex objective function for IBVR, we can assign weights to the nodes to represent the desired transaction priorities, and look for a minimum-weight FVS. 
 
@@ -65,7 +65,7 @@ Once we find the FVS $B'$, removing the nodes in $B'$ from $G$ yields an acyclic
 The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. 
 
 It was listed among the first set of NP-complete problems~\cite{karp1972reducibility}. 
-The state-of-the-art study~\cite{chen2008fixed} on the hardness of the problem has shown that it is \emph{fixed-parameter tractable}, that is, it can be solved in time $O(f(k)n^c)$ for a function $f(k)$ and a constant $c$ where the number $k$ and the function $f(k)$ are independent of the instance size $n$. \cite{chen2008fixed} proposes an exact algorithm for finding a minimal DFVS in $O(4^kk!n^{O(1)})$, where $n$ is the number of vertices and $k$ is the size of the minimal solution. 
+The state-of-the-art study on the hardness of the problem has shown that it is \emph{fixed-parameter tractable}~\cite{chen2008fixed}, that is, it can be solved in time $O(f(k)n^c)$ for a function $f(k)$ and a constant $c$ where the number $k$ and the function $f(k)$ are independent of the instance size $n$. \cite{chen2008fixed} proposes an exact algorithm for finding a minimal DFVS in $O(4^kk!n^{O(1)})$, where $n$ is the number of vertices and $k$ is the size of the minimal solution. 
 
 DFVS is also APX-hard~\cite{kann1992approximability}. This means there exists a constant $c>1$ such that the existence of a polynomial-time approximate algorithm that achieves an approximation ratio strictly smaller than $c$ would imply $P=NP$. The best hardness result~\cite{dinur2005hardness} shows that it is NP-hard to approximate DFVS within a factor of 1.36, by an easy reduction from vertex cover. While it is still open whether there exists a constant factor approximation for DFVS, it is shown that it is NP-hard to approximate DFVS within any constant factor if the Unique Games Conjecture is true~\cite{guruswami2008beating}. The state-of-the-art algorithm has an approximation factor of $O(\log\tau\log\log\tau)$, where $\tau$ is the size of the exact solution, and a factor of $O(\log\tau^*\log\log\tau^*)$ for weighted directed graphs, where $\tau^*$ is the weight of the exact solution.
 
@@ -76,7 +76,7 @@ Despite the above hardness results, empirical studies have shown that simple gre
 \subsection{Our IBVR Algorithms}
 \label{subsec:validator_reordering:algorithm}
 
-The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard~\cite{karp1972reducibility} and APX-hard~\cite{kann1992approximability}, and it is still an open problem whether there exists any constant-factor approximation.
+The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
 
 We need fast FVS algorithms to avoid increasing both transaction latencies and the number of aborts. We propose two greedy algorithms for finding feedback vertex sets -- one based on the graph's strongly connected components (SCCs) and the other based on sort. We also introduce a hybrid algorithm that makes strategic use of brute-force search, and consequently is slower but more precise.
 

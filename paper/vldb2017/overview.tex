@@ -26,7 +26,7 @@ This strategy is optimal for reducing intra-batch aborts, as it ensures that all
 \subsection{Validator Batching}\label{subsec:overview:validator}
 
 The validator buffers and batches transaction validation requests as they arrive.\eat{The optimal strategy for reducing inter-batch aborts is to ensure that transactions accessing the same objects are always batched together, that is, to cluster them based on access patterns.  Otherwise, the validator cannot do anything about conflicting transactions that are ``spread out'' across batches. 
- There has been a lot of research on data clustering either online or offline~\cite{pavlo2012skew, elmore2015squall}, especially for fine-grained data partitioning. Any of these techniques can be used for validator batch creation.
+ There has been a lot of research on data clustering either online or offline~\cite{elmore2015squall, pavlo2012skew}, especially for fine-grained data partitioning. Any of these techniques can be used for validator batch creation.
 However, clustering transactions into batches based on access patterns may increase the number of intra-batch aborts.}
 Once a batch is collected, the validator can reduce intra-batch aborts by choosing a good validation (i.e., serialization) order.
 \eat{The validator may not be able to eliminate all intra-batch aborts, since it cannot actually delay the execution of a transaction. Rather, it is presented with read and write sets of transactions that have already run. }
