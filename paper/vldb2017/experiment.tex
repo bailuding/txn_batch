@@ -1,37 +1,33 @@
 \section{Evaluation}\label{sec:experiments}
-In our experimental evaluation, we study the effect of batching at the storage and the validator, the performance of our validator reordering algorithms and policies, and the impact of system configuration parameters. In particular, we asked the following questions:
+In our experimental evaluation, we wanted to understand the effect of batching at the storage and the validator, the performance of our validator reordering algorithms and policies, and the impact of system configuration parameters. In particular, we asked the following questions:
 \begin{enumerate}
 \item\vspace{-.5em} How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at the validator using these algorithms affect the end-to-end system performance?
-\item\vspace{-.5em} How does the batch size affect performance? Using larger batches should give the validator and the storage more opportunities for reordering but it should also increase transaction latency, leading to more conflicts. 
+\item\vspace{-.5em} How does the batch size impact performance? 
+%Using larger batches should give the validator and the storage more opportunities for reordering but it should also increase transaction latency, leading to more conflicts. 
 \item\vspace{-.5em} How does storage and validator batching affect the system throughput, abort rate, and latency?
-\item\vspace{-.5em} How do the different algorithm policies presented in Section~\ref{subsec:validator_reordering:policy} affect the system performance?
-\item\vspace{-.5em} How does batching and reordering perform on micro and realistic benchmarks?
+\item\vspace{-.5em} How do the different policies presented in Section~\ref{subsec:validator_reordering:policy} impact the system performance?
+\item\vspace{-.5em} How does batching and reordering perform on micro-benchmarks and real workloads?
 \end{enumerate}
 
-\subsection{Implementation and Experimental Setup}
+\subsection{Experimental Setup}
 \label{subsec:experiment:implementation}
 
-Our system consists of four components: a transaction generator, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
+%Our system architecture consists of four components: a transaction generator, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-The transaction generator continuously produces new transactions until the system reaches the maximum permitted concurrency level. 
-
-The processor multiplexes transactions, receives transaction requests from the transaction generator, sends read / write requests to the storage, sends validation requests to the validator, and replies to the transaction generator. It also restarts aborted transactions; thus, it only communicates commit decisions to the transaction generator. 
-
-The storage thread continuously processes read and write requests. When batching is enabled, it buffers a batch of requests. When it processes a batch, it first executes all the write requests in the batch (discarding a write if a newer version exists in the storage), and then all the read requests.
-
-The validator performs backward validation. It caches the write sets of committed transactions for future validations until these writes are overwritten by later committed transactions. 
+Our system architecture consists of four components: a transaction generator, a processor, storage, and a validator. The components communicate through request queues.
+% of requests.
+% that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
+The transaction generator continuously produces new transactions into the system until the system reaches the maximum permitted concurrency level. The processor component multiplexes transactions, receives transaction requests from the transaction generator, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction generator. It also restarts aborted transactions; thus, it only communicates commit decisions to the transaction generator. 
+The storage thread continuously processes read and write requests. When batching is enabled, it buffers a batch of requests. When it processes a batch, it executes the optimal strategy that we discussed in Section~\ref{sec:overview}: It first executes all the write requests in the batch (discarding a write if a newer version exists in the storage), and then all the read requests. The validator performs backward validation. It caches the write sets of committed transactions for future validations until these writes are overwritten by later committed transactions. 
 When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:validator_reordering} to determine a serialization order. Every transaction that passes validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in the storage.
-
 \eat{
 When \emph{clustering} is enabled, the validator creates transaction batches by grouping together transactions based on their access patterns. It processes each batch when either there are enough transactions in the batch, or a timeout for that batch is reached.
 }
 
-The system is implemented in Java. All the experiments run on a multicore machine, with Intel Core i7-5600U CPU @2.60GHz and 8GB RAM. We use a key-value model for the storage, which we implement as an in-memory hash table. As a default, we populate the database with 100K items, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 items and writes to 5 items. The reads and writes are drawn from a Zipfian distribution, which is implemented based on~\cite{gray1994quickly}. We limit the concurrency level to 600, i.e. at any time there are at most 600 live transactions in the system. The default batch size is 150 for both storage and validator.
+Our system is implemented in Java. All the experiments run on a multicore machine, with Intel Core i7-5600U CPU @2.60GHz and 8GB RAM. We use a key-value model for the storage, which we implement as an in-memory hash table. As a default, we populate the database with 100K items, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 items and writes to 5 items. The reads and writes are drawn from a Zipfian distribution, which is implemented based on the standard model by Gray et al.~\cite{gray1994quickly}. We limit the concurrency level to 600, i.e., at any time there are at most 600 live transactions in the system. The default batch size is 150 for both storage and validator.
 
 % other configuration
-The validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. The \emph{baseline} configuration represents the system running with both storage and validator batching turned off. 
-
-All our experimental figures show the averages of more than 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down time. The deviation was not significant in any of the experiments, so we omit the error bars for clarity.
+The validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. The baseline configuration represents the system running with both storage and validator batching turned off.  All our experimental figures show the averages of a 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down time. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation.
 
 % figures
 \begin{figure*}[t]
@@ -257,12 +253,11 @@ In our first experiment, we investigate the performance of the feedback vertex s
 
 We begin with a comparison of the algorithms with respect to their raw performance - i.e., their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{sec:ibvr}, using a variety of workloads generated from a Zipfian distribution. 
 
-We first test the algorithms offline on dependency graphs constructed at the validator when running the system. Each dependency graph is constructed from a batch of transactions at the validator, excluding non-viable transactions, i.e. transactions that have inter-batch conflicts. We compare the averages of the size of the feedback vertex set and the running time per dependency graph on each trace.
+We first test the algorithms offline on dependency graphs constructed at the validator when running the system. Each dependency graph is constructed from a batch of transactions at the validator, excluding non-viable transactions, i.e., we only use transactions that have inter-batch conflicts. We compare the averages of the size of the feedback vertex set and the running time per dependency graph on each trace.
 
 We test the SCC-based greedy algorithm with the \texttt{max-degree} ($greedy\_max$), \texttt{sum-degree} ($greedy\_sum$) and \texttt{prod-degree} policies ($greedy\_prod$). We also test the sort-based greedy algorithm $greedy\_sort$ (using the \texttt{prod-degree} policy for sorting and multi factor 2), and the hybrid algorithm $hybrid\_m$. The hybrid algorithm uses $greedy\_prod$ as a subroutine when the size of the SCC is larger than $m$, and switches to the brute force search otherwise. By increasing the threshold, we can progressively approximate the optimal solution. 
 
-
-We test these algorithms against several baselines. $search$ is an accurate, brute force FVS search algorithm. $random$ is the SCC-based greedy algorithm and removes a vertex at random from each SCC to break the cycle. Our final baseline runs the random algorithm multiple times (3 times for $random\_3$) on each graph, and returns the smallest FVS across all the runs. This mitigates the worst-case impact of bad random choices.
+We test these algorithms against several baselines: $Search$ is an accurate, brute force FVS search algorithm; $Random$ is the SCC-based greedy algorithm and removes a vertex at random from each SCC to break the cycle. Our final baseline runs the random algorithm multiple times (3 times for $random\_3$) on each graph, and returns the smallest FVS across all the runs. This mitigates the worst-case impact of bad random choices.
 
 
 Figure~\ref{fig:fvs:fvs} shows the average size of the feedback vertex set found by each algorithm. The brute force search algorithm is so slow that it cannot produce results once the skew factor increases beyond $0.7$ as the graphs become denser.
@@ -276,24 +271,18 @@ The two greedy algorithms have similar throughput when the skew is moderate. How
 
 Figure~\ref{fig:fvs:p95} shows transaction latencies by percentile. The percentile latency of $greedy\_sort$ is much lower than that of the baseline and $greedy\_prod$. This is consistent with the throughput data we have seen.
 
-In summary, the sort-based greedy algorithm is much faster than the ``smarter'' algorithms and only slightly worse in terms of accuracy. This means it gives the best end-to-end system performance. For this reason, all subsequent experiments use the sort-based greedy algorithm with a \texttt{prod-degree} policy unless otherwise specified.
+In summary, the sort-based greedy algorithm is much faster than the ``smarter'' algorithms and only slightly worse in terms of accuracy, resulting in the best end-to-end system performance. For this reason, all subsequent experiments use the sort-based greedy algorithm with a \texttt{prod-degree} policy unless otherwise specified.
 
 
 \subsection{Batch Size}
 
 In this experiment, we explore how the batch size affects system performance. 
 Smaller batch sizes should give lower latencies but they offer fewer opportunities for reordering, leading to more aborts. 
-
-We configure the system to perform both storage and validator batching with batch sizes from $50$ to $200$ ($b50$, $b100$, $b150$, $b200$), using the same batch size at the storage and the validator. As before, $baseline$ is the system with both kinds of batching turned off. 
+We configure the system to perform both storage and validator batching with batch sizes from $50$ to $200$ ($b50$, $b100$, $b150$, and $b200$), using the same batch size at the storage and the validator. As before, $baseline$ is the system with both types of batching turned off. 
 
 As expected, increasing the batch size always reduces the number of aborts due to more opportunities for reordering as shown in Figure~\ref{fig:bsize:abort}. 
-
-Figure~\ref{fig:bsize:tps} shows the throughput of the system with different batch sizes as data skew increases. As expected, the throughput first rises as we increase the size of the batch, and then degrades when the batch becomes too large.
-\eat{Thus, the throughput with batch size 150 is higher than with batch size 200. }
-The percentile latency displays a similar pattern, as shown in Figure~\ref{fig:bsize:p95}. Again the best batch size is 150; however, using batching always gives higher throughput and a better latency profile than the baseline.
-
-
-Given the above results, a batch size of 150 appears optimal for our configuration; we use this batch size in the remainder of our experiments. 
+Figure~\ref{fig:bsize:tps} shows the throughput of the system with different batch sizes as data skew increases. As expected, the throughput first rises as we increase the size of the batch, and then degrades when the batch becomes too large; the throughput with batch size 150 is higher than with batch size 200.
+The percentile latency displays a similar pattern, as shown in Figure~\ref{fig:bsize:p95}. Again the best batch size is 150; however, using batching always gives higher throughput and a better latency profile than the baseline. Given the above results, a batch size of 150 appears optimal for our configuration; we use this batch size in the remainder of our experiments. 
 
 \subsection{Storage and Validator Batching}
 \label{subsec:experiment:batching}
@@ -358,5 +347,4 @@ Figure~\ref{fig:load:latency} shows the average transaction latency. Both storag
 \eat{Figures~\ref{fig:small_bank:tps} and~\ref{fig:small_bank:latency} show the throughput and latency of the system on the Small Bank benchmark at skew factor 0.9. }
 Figures~\ref{fig:small_bank:tps} and~\ref{fig:small_bank:latency} show the throughput and latency of the system on the Small Bank benchmark. 
 The performance impacts of batching are similar to those on the micro benchmark.
-
-We ran additional experiments on both benchmarks varying the data skew; results were similar to those shown and are omitted due to space limitations.
+We ran additional experiments on both benchmarks varying the data skew; the results were similar to those shown and are omitted due to space limitations.

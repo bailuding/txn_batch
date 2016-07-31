@@ -35,10 +35,10 @@ Third, the system can perform batching at the storage level. This affects alread
 
 \begin{figure}[t]
  \centering
- \includegraphics[width=0.7\columnwidth]{figures/OCCArchitecture.pdf}
+ \includegraphics[width=0.9\columnwidth]{figures/OCCArchitecture.pdf}
  \vspace{-.5em}
  \caption{OCC System Architecture}
- \vspace{-1.5em}
+% \vspace{-1.5em}
  \label{fig:occ_arch}
 \end{figure}
 
@@ -57,7 +57,7 @@ As mentioned before, the overhead of validator reordering increases transaction 
 }
 
 % contribution 3: experiment
-Our third contribution is a detailed experimental study of the impact of storage and validator batching in a real system. Our results show that batching always increases transaction throughput but, surprisingly, also reduces transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up to 2.4 times (!) and reduce the average transaction latency by up to 21\% for both micro-benchmarks and the Small Bank Benchmark~\cite{alomari2008icde}.
+Our third contribution is a detailed experimental study of the impact of storage and validator batching in a real system. Our results show that batching always increases transaction throughput but, surprisingly, also reduces transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up a factor of 2.4 and can reduce the average transaction latency by up to 21\% for both micro-benchmarks and the Small Bank Benchmark~\cite{alomari2008icde}.
 
 %\eat{
 % paper organization
