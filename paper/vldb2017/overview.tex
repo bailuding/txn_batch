@@ -3,23 +3,23 @@
 %In this section, we introduce our novel ideas of batching at the storage and the validator in an OCC system, and we formulate the resulting algorithmic problems. 
 
 \emph{Batching} involves buffering a number of operations as they arrive at some component of the system and processing them as a group. 
-Given a batch, we then expend a small amount of CPU to run an algorithm that analyzes the batch and then reorders the operations in the batch in order to reduce aborts. We will introduce two types of batching: Validator batching and storage batching.
+Given a batch, we run a lightweight algorithm that analyzes the batch and then reorders the operations in the batch in order to reduce aborts. We will introduce two types of batching: Validator batching and storage batching.
 
 
 \subsection{Validator Batching}\label{subsec:overview:validator}
 
 In validator batching, we buffer and batch transaction validation requests at the validator as they arrive.
-We can first make a conceptual distinction between two types of transaction aborts: intra-batch and inter-batch aborts. If $T(i)$ and $T(j)$ are in the same batch, we call the resulting abort of $T(j)$ an \emph{intra-batch abort}, otherwise, we call the resulting abort of $T(j)$ an \emph{inter-batch abort}.
-The optimal strategy for reducing inter-batch aborts is to ensure that transactions accessing the same objects are always batched together, that is, to cluster them based on access patterns, since  the validator cannot do anything about conflicting inter-batch transactions. 
-There has been a lot of research on data clustering either online or offline~\cite{elmore2015squall, pavlo2012skew}, especially for fine-grained data partitioning, and any of these techniques can be used for validator batch creation.
+We can first make a conceptual distinction between two types of transaction aborts: intra-batch and inter-batch aborts. Assume $T(j)$ abort due to its conflict with $T(i)$. If $T(i)$ and $T(j)$ are in the same batch, we call the resulting abort of $T(j)$ an \emph{intra-batch abort}; otherwise, we call it an \emph{inter-batch abort}.
+The optimal strategy for reducing inter-batch aborts is to ensure that transactions accessing the same objects are always batched together. That is, to cluster them based on access patterns, since  the validator cannot do anything about conflicting inter-batch transactions. 
+There has been a lot of research on data clustering either online or offline~\cite{elmore2015squall, pavlo2012skew}, especially for fine-grained data partitioning. Any of these techniques can be used for validator batch creation.
 %However, clustering transactions into batches based on access patterns may increase the number of intra-batch aborts.
 
 Once a batch is collected, the validator can reduce intra-batch aborts by choosing a good validation (and thus resulting serialization) order.
 \eat{The validator may not be able to eliminate all intra-batch aborts, since it cannot actually delay the execution of a transaction. Rather, it is presented with read and write sets of transactions that have already run. }
-Such intra-batch transaction reordering can be done with several goals in mind. We can simply minimize intra-batch aborts, i.e., we maximize the number of transactions in each batch that commit. However, we may also want to prioritize certain transactions to have a greater chance of committing. For example, if we want to reduce the transaction tail latency, we can increase a transaction's priority every time it has to abort and restart. Priorities could also be related to external factors, e.g., a transaction's monetary value or an external, application-defined transaction priority. 
+Such intra-batch transaction reordering can be done with several goals in mind. We can simply minimize intra-batch aborts, i.e. we maximize the number of transactions in each batch that commit. However, we may also want to prioritize certain transactions to have a greater chance of committing. For example, if we want to reduce the transactions' tail latency, we can increase a transaction's priority every time it has to abort and restart. Priorities could also be related to external factors, e.g., a transaction's monetary value or an external, application-defined transaction priority. 
 %These choices suggest a range of possible policies; we explore them in the next section.
 
-We now define the problem of {\em intra-batch validator reordering of transactions (IBVR)} more formally. A \emph{batch} $B$ is a set of transactions to be validated. We assume all transactions $t \in B$ are \emph{viable}, that is, no $t \in B$ has a read-write dependency to a committed transaction. If there are non-viable transactions in $B$, they can be removed in preprocessing, as they must always abort.
+We now define the problem of {\em intra-batch validator reordering of transactions (IBVR)} more formally. A \emph{batch} $B$ is a set of transactions to be validated. We assume all transactions $t \in B$ are \emph{viable}, that is, no $t \in B$ conflicts with a committed transaction. If there are non-viable transactions in $B$, they can be removed in preprocessing, as they must always abort.
 Given $B$, the goal of IBVR is to find a $B' \subseteq B$ of transactions that must abort due to intra-batch aborts. IBVR must also find a 
 %strict (i.e. asymmetric) 
 total order $\prec$ on $B \setminus B'$ that \emph{respects all read-write dependencies}; that is, for $t,t'\in B \setminus B'$, if $t \prec t'$, then there is no read-write dependency from $t'$ to $t$.
@@ -37,7 +37,7 @@ There is always a trivial solution to any IBVR instance: aborting every transact
 
 
 \subsection{Storage Batching}
-At the storage layer, the optimal batching strategy is simple. We buffer a certain number of read and write requests into batches. The only way to reduce inter-batch aborts is to increase the batch size, but we have more flexibility for intra-batch optimizations. To reduce intra-batch aborts, we propose the following simple algorithm, which is easy to prove to be optimal given a batching:  When a batch is ready (either when there are enough requests or a timeout is reached) for each object we apply the highest-version write request on that object. It is safe to discard all other writes on that object as explained in Section~\ref{sec:background}. Next, we handle all the read requests for the same object. This strategy is optimal for reducing intra-batch aborts, as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. 
+At the storage layer, the optimal batching strategy is simple. We buffer a certain number of read and write requests into batches. The only way to reduce inter-batch aborts is to increase the batch size.\eat{, but we have more flexibility for intra-batch optimizations.} To reduce intra-batch aborts, we propose the following simple algorithm, which is easy to prove to be optimal given a batching:  When a batch is ready (either when there are enough requests or a timeout is reached), for each object we apply the highest-version write request on that object. It is safe to discard all other writes on that object as explained in Section~\ref{sec:background}. Next, we handle all the read requests for the same object. This strategy is optimal for reducing intra-batch aborts, as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. 
 
 
 
