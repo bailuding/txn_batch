@@ -1,0 +1,300 @@
+\relax 
+\citation{friedman1997packing}
+\citation{ding2015centiman}
+\citation{hagmann1987reimplementing}
+\citation{debrabant2013anti}
+\citation{faleiro2014lazy}
+\citation{kung81tods}
+\citation{bernstein11cidr}
+\citation{bernstein11vldb}
+\citation{baker11cidr}
+\citation{patterson12vldb}
+\citation{peng10osdi}
+\citation{corbett12osdi}
+\citation{warp}
+\citation{bernstein2015optimizing}
+\citation{adya97podc}
+\citation{agrawal1987concurrency}
+\citation{thomson2012calvin}
+\citation{faleiro2014rethinking}
+\citation{mu2014extracting}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}}
+\newlabel{sec:intro}{{1}{1}}
+\citation{karp1972reducibility}
+\citation{kung81tods}
+\citation{kung81tods}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces OCC System Architecture\relax }}{2}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:occ_arch}{{1}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}OCC Background}{2}}
+\newlabel{sec:background}{{2}{2}}
+\citation{ding2015centiman}
+\citation{pavlo2012skew}
+\citation{elmore2015squall}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Batching Overview}{3}}
+\newlabel{sec:overview}{{3}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Storage Batching}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Validator Batching}{3}}
+\newlabel{subsec:overview:validator}{{3.2}{3}}
+\citation{karp1972reducibility}
+\citation{karp1972reducibility}
+\citation{chen2008fixed}
+\citation{chen2008fixed}
+\citation{kann1992approximability}
+\citation{dinur2005hardness}
+\citation{guruswami2008beating}
+\citation{cutello2015targeting}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces An example of a directed graph; node 1 forms a feedback vertex set.\relax }}{4}}
+\newlabel{fig:fvs}{{2}{4}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Validator Reordering}{4}}
+\newlabel{sec:validator_reordering}{{4}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Intra-Batch Validator Reordering (IBVR)}{4}}
+\newlabel{sec:ibvr}{{4.1}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}IBVR using feedback vertex set}{4}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Complexity of FVS}{4}}
+\newlabel{subsec:FVS_stateoftheart}{{4.1.2}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Our IBVR Algorithms}{4}}
+\newlabel{subsec:validator_reordering:algorithm}{{4.2}{4}}
+\citation{tarjan1972depth}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces SCC-based greedy algorithm\relax }}{5}}
+\newlabel{alg:scc}{{1}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}SCC-based greedy algorithm}{5}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {2}{\ignorespaces Sort-based greedy algorithm\relax }}{5}}
+\newlabel{alg:sort}{{2}{5}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Sort-based greedy algorithm}{5}}
+\citation{cutello2015targeting}
+\newlabel{fig:scc:g0}{{3a}{6}}
+\newlabel{sub@fig:scc:g0}{{a}{6}}
+\newlabel{fig:scc:g1}{{3b}{6}}
+\newlabel{sub@fig:scc:g1}{{b}{6}}
+\newlabel{fig:scc:g3}{{3c}{6}}
+\newlabel{sub@fig:scc:g3}{{c}{6}}
+\newlabel{fig:scc:g5}{{3d}{6}}
+\newlabel{sub@fig:scc:g5}{{d}{6}}
+\newlabel{fig:scc:g7}{{3e}{6}}
+\newlabel{sub@fig:scc:g7}{{e}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces An example of the SCC-based greedy algorithm using \texttt  {prod-degree} policy\relax }}{6}}
+\newlabel{fig:scc}{{3}{6}}
+\newlabel{fig:simple:g0}{{4a}{6}}
+\newlabel{sub@fig:simple:g0}{{a}{6}}
+\newlabel{fig:simple:g2}{{4b}{6}}
+\newlabel{sub@fig:simple:g2}{{b}{6}}
+\newlabel{fig:simple:g4}{{4c}{6}}
+\newlabel{sub@fig:simple:g4}{{c}{6}}
+\newlabel{fig:simple:g6}{{4d}{6}}
+\newlabel{sub@fig:simple:g6}{{d}{6}}
+\newlabel{fig:simple:g8}{{4e}{6}}
+\newlabel{sub@fig:simple:g8}{{e}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces An example of the sort-based greedy algorithm using \texttt  {prod-degree} policy and multi factor 1\relax }}{6}}
+\newlabel{fig:simple}{{4}{6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}Hybrid algorithm}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Example}{6}}
+\newlabel{subsec:alg_example}{{4.3}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Algorithm Policies}{6}}
+\newlabel{subsec:validator_reordering:policy}{{4.4}{6}}
+\citation{gray1994quickly}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{7}}
+\newlabel{sec:experiments}{{5}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Implementation and Experimental Setup}{7}}
+\newlabel{subsec:experiment:implementation}{{5.1}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Validator Reordering Algorithms}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Size of FVS per graph with different algorithms\relax }}{8}}
+\newlabel{fig:fvs:fvs}{{5}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Running time of finding FVS with different algorithms\relax }}{8}}
+\newlabel{fig:fvs:latency}{{6}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Throughput with SCC-based and sort-based greedy algorithms\relax }}{8}}
+\newlabel{fig:fvs:tps}{{7}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Percentile latency for greedy algorithms\relax }}{8}}
+\newlabel{fig:fvs:p95}{{8}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Throughput with various batch sizes\relax }}{8}}
+\newlabel{fig:bsize:tps}{{9}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Abort rate with various batch sizes\relax }}{8}}
+\newlabel{fig:bsize:abort}{{10}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Percentile latency with various batch sizes\relax }}{9}}
+\newlabel{fig:bsize:p95}{{11}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Throughput under workloads of Zipfian distribution\relax }}{9}}
+\newlabel{fig:basic:tps}{{12}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Abort rate under workloads of Zipfian distribution\relax }}{9}}
+\newlabel{fig:basic:abort}{{13}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Inter-batch aborts under workloads of Zipfian distribution\relax }}{9}}
+\newlabel{fig:basic:preabort}{{14}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Intra-batch aborts under workloads of Zipfian distribution\relax }}{9}}
+\newlabel{fig:basic:in_batch_abort}{{15}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Percentile latency under workloads of Zipfian distribution\relax }}{9}}
+\newlabel{fig:basic:p95}{{16}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Batch Size}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Storage and Validator Batching}{9}}
+\newlabel{subsec:experiment:batching}{{5.4}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Throughput with tail latency optimized policies\relax }}{10}}
+\newlabel{fig:restart:tps}{{17}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Abort rate with tail latency optimized policies\relax }}{10}}
+\newlabel{fig:restart:abort}{{18}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Percentile latency with tail latency optimized policies\relax }}{10}}
+\newlabel{fig:restart:p100}{{19}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Throughput with heterogeneous workload\relax }}{10}}
+\newlabel{fig:weighted:tps}{{20}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Abort rate with heterogeneous workload\relax }}{10}}
+\newlabel{fig:weighted:abort}{{21}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {22}{\ignorespaces Percentile latency with heterogeneous workload\relax }}{10}}
+\newlabel{fig:weighted:p95}{{22}{10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}More Policies for Validator Reordering}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.1}Reducing tail latencies}{10}}
+\citation{alomari2008icde}
+\@writefile{lof}{\contentsline {figure}{\numberline {23}{\ignorespaces Throughput of large size transactions\relax }}{11}}
+\newlabel{fig:weighted:tps1}{{23}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {24}{\ignorespaces Abort rate of large size transactions\relax }}{11}}
+\newlabel{fig:weighted:abort1}{{24}{11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {25}{\ignorespaces Percentile latency of large size transactions\relax }}{11}}
+\newlabel{fig:weighted:p951}{{25}{11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.2}Helping hard transactions commit}{11}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.5.3}Validator Clustering}{11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}End-to-End Performance on Benchmarks}{11}}
+\newlabel{subsec:experiment:end2end}{{5.6}{11}}
+\citation{franaszek1985limitations}
+\citation{agrawal1987concurrency}
+\citation{thomasian1998distributed}
+\citation{yu1992analysis}
+\citation{helal1993adaptive}
+\citation{shasha1995transaction}
+\citation{mu2014extracting}
+\citation{xie2015high}
+\citation{xie2014salt}
+\citation{xie2015high}
+\citation{bayer1982dynamic}
+\citation{ding2015centiman}
+\citation{boksenbaum1987concurrent}
+\citation{haritsa1993value}
+\citation{haritsa1990dynamic}
+\citation{lam1995real}
+\citation{lee1993using}
+\citation{abbott1992scheduling}
+\citation{lin1990concurrency}
+\citation{huang1991experimental}
+\citation{thomson2012calvin}
+\citation{mu2014extracting}
+\citation{faleiro2014rethinking}
+\citation{petersen1997flexible}
+\citation{li2012making}
+\citation{roy2015homeostasis}
+\citation{li2012making}
+\citation{faleiro2014lazy}
+\citation{jorwekar2007automating}
+\citation{warp}
+\citation{castro2002practical}
+\citation{glendenning2011scalable}
+\citation{friedman1997packing}
+\citation{ding2015centiman}
+\citation{hagmann1987reimplementing}
+\citation{debrabant2013anti}
+\citation{debrabant2013anti}
+\citation{faleiro2014lazy}
+\citation{santos2012tuning}
+\citation{friedman2006adaptive}
+\citation{nagle1984congestion}
+\citation{tsangaris1991stochastic}
+\citation{kernighan1970efficient}
+\citation{karypis1998fast}
+\citation{ding2001min}
+\citation{karypis1995metis}
+\citation{pavlo2012skew}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Related Work}{12}}
+\newlabel{sec:relwork}{{6}{12}}
+\bibstyle{abbrv}
+\bibdata{reference}
+\bibcite{abbott1992scheduling}{1}
+\bibcite{adya97podc}{2}
+\bibcite{agrawal1987concurrency}{3}
+\bibcite{alomari2008icde}{4}
+\bibcite{baker11cidr}{5}
+\bibcite{bayer1982dynamic}{6}
+\bibcite{bernstein2015optimizing}{7}
+\bibcite{bernstein11cidr}{8}
+\bibcite{bernstein11vldb}{9}
+\bibcite{boksenbaum1987concurrent}{10}
+\bibcite{castro2002practical}{11}
+\bibcite{chen2008fixed}{12}
+\bibcite{corbett12osdi}{13}
+\bibcite{cutello2015targeting}{14}
+\bibcite{debrabant2013anti}{15}
+\bibcite{ding2015centiman}{16}
+\bibcite{ding2001min}{17}
+\bibcite{dinur2005hardness}{18}
+\bibcite{elmore2015squall}{19}
+\bibcite{warp}{20}
+\bibcite{faleiro2014rethinking}{21}
+\bibcite{faleiro2014lazy}{22}
+\bibcite{franaszek1985limitations}{23}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusions and Future Work}{13}}
+\newlabel{sec:conclusion}{{7}{13}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}References}{13}}
+\bibcite{friedman2006adaptive}{24}
+\bibcite{friedman1997packing}{25}
+\bibcite{glendenning2011scalable}{26}
+\bibcite{gray1994quickly}{27}
+\bibcite{guruswami2008beating}{28}
+\bibcite{hagmann1987reimplementing}{29}
+\bibcite{haritsa1993value}{30}
+\bibcite{haritsa1990dynamic}{31}
+\bibcite{helal1993adaptive}{32}
+\bibcite{huang1991experimental}{33}
+\bibcite{jorwekar2007automating}{34}
+\bibcite{kann1992approximability}{35}
+\bibcite{karp1972reducibility}{36}
+\bibcite{karypis1995metis}{37}
+\bibcite{karypis1998fast}{38}
+\bibcite{kernighan1970efficient}{39}
+\bibcite{kung81tods}{40}
+\bibcite{lam1995real}{41}
+\bibcite{lee1993using}{42}
+\bibcite{li2012making}{43}
+\bibcite{lin1990concurrency}{44}
+\bibcite{mu2014extracting}{45}
+\bibcite{nagle1984congestion}{46}
+\bibcite{patterson12vldb}{47}
+\bibcite{pavlo2012skew}{48}
+\bibcite{peng10osdi}{49}
+\bibcite{petersen1997flexible}{50}
+\bibcite{roy2015homeostasis}{51}
+\bibcite{santos2012tuning}{52}
+\bibcite{shasha1995transaction}{53}
+\bibcite{tarjan1972depth}{54}
+\bibcite{thomasian1998distributed}{55}
+\bibcite{thomson2012calvin}{56}
+\bibcite{tsangaris1991stochastic}{57}
+\bibcite{xie2014salt}{58}
+\bibcite{xie2015high}{59}
+\bibcite{yu1992analysis}{60}
+\@writefile{lof}{\contentsline {figure}{\numberline {26}{\ignorespaces Throughput with validator clustering\relax }}{16}}
+\newlabel{fig:cluster:tps}{{26}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {27}{\ignorespaces Abort rate with validator clustering\relax }}{16}}
+\newlabel{fig:cluster:abort}{{27}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {28}{\ignorespaces Percentile latency with validator clustering\relax }}{16}}
+\newlabel{fig:cluster:p95}{{28}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {29}{\ignorespaces Throughput with micro benchmark (skew factor: 0.5)\relax }}{16}}
+\newlabel{fig:load:z0.5:tps}{{29}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {30}{\ignorespaces Average latency with micro benchmark (skew factor: 0.5)\relax }}{16}}
+\newlabel{fig:load:z0.5:latency}{{30}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {31}{\ignorespaces Throughput with micro benchmark (skew factor: 0.6)\relax }}{16}}
+\newlabel{fig:load:z0.6:tps}{{31}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {32}{\ignorespaces Average latency with micro benchmark (skew factor: 0.6)\relax }}{16}}
+\newlabel{fig:load:z0.6:latency}{{32}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {33}{\ignorespaces Throughput with micro benchmark (skew factor: 0.7)\relax }}{16}}
+\newlabel{fig:load:tps}{{33}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {34}{\ignorespaces Average latency with micro benchmark (skew factor: 0.7)\relax }}{16}}
+\newlabel{fig:load:latency}{{34}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {35}{\ignorespaces Throughput with micro benchmark (skew factor: 0.8)\relax }}{16}}
+\newlabel{fig:load:z0.8:tps}{{35}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {36}{\ignorespaces Average latency with micro benchmark (skew factor: 0.8)\relax }}{16}}
+\newlabel{fig:load:z0.8:latency}{{36}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {37}{\ignorespaces Throughput with micro benchmark (skew factor: 0.9)\relax }}{16}}
+\newlabel{fig:load:z0.9:tps}{{37}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {38}{\ignorespaces Average latency with micro benchmark (skew factor: 0.9)\relax }}{17}}
+\newlabel{fig:load:z0.9:latency}{{38}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {39}{\ignorespaces Throughput with Small Bank benchmark (skew factor: 0.9)\relax }}{17}}
+\newlabel{fig:small_bank:tps}{{39}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {40}{\ignorespaces Average latency with Small Bank benchmark (skew factor: 0.9)\relax }}{17}}
+\newlabel{fig:small_bank:latency}{{40}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {41}{\ignorespaces Throughput with Small Bank benchmark (skew factor: 0.8)\relax }}{17}}
+\newlabel{fig:small_bank:z0.8:tps}{{41}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {42}{\ignorespaces Average latency with Small Bank benchmark (skew factor: 0.8)\relax }}{17}}
+\newlabel{fig:small_bank:z0.8:latency}{{42}{17}}

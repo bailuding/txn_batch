@@ -1,0 +1,28 @@
+\section{OCC Background}\label{sec:background}
+
+% backward occ
+In this paper, we use the term ``optimistic concurrency control'' to refer to the classical backward validation based protocol introduced in~\cite{kung81tods}. As explained in the introduction, this is a protocol where every transaction goes through three execution phases. First comes a \emph{read} phase, where the transaction reads data from the storage and executes while making writes to a private ``scratch workspace''. Then the transaction enters a \emph{validation} phase. If validation is successful, the transaction enters the \emph{write} phase, when its writes are installed in the storage. 
+
+% details for validation
+OCC validation enforces serializability; we only allow a transaction to pass validation if it can be serialized after all transactions that have already committed. The validator assigns each transaction a number (timestamp) and ensures that transactions are serialized in timestamp order.
+
+To validate a transaction, we need to examine its reads and writes, and compare them to the reads and writes of previously committed transactions in the system. For a given transaction, we call the set of objects it has read its \emph{read set} and the set of objects it has written its \emph{write set}. When a transaction enters validation, its read set and write set are known, as are the read and write sets of all transactions that have previously passed validation and committed. For a transaction with timestamp $i$, we denote its read set by $RS(i)$ and its write set by $WS(i)$.
+
+% the scope of validation
+When validating a transaction with timestamp $j$ (transaction $T(j)$), the validator needs to check for conflicts with any transaction with timestamp $i$ (transaction $T(i)$) that have already committed (so $i < j$) and that overlapped temporally with $T(j)$, i.e. $T(i)$ hadn't committed when $T(j)$ started. 
+% criterion for conflicts
+$T(j)$ can be serialized after such a transaction $T(i)$ if one of the following conditions holds:
+\begin{itemize}
+\item $T(i)$ completed its write phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$, or
+\item $T(i)$ completed its read phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$ as well as $WS(i) \cap WS(j) = \emptyset$
+\end{itemize}
+
+If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. That is, if they write to the same object, the updates must be applied in their serialization order. In the original OCC~\cite{kung81tods}, this is ensured by putting the validation phase and the write phase into a critical section.
+
+The batching techniques we study in this paper are applicable to most OCC systems; however, we make certain assumptions about the implementation of OCC validation, for simplicity and concreteness of our experimental setup. We clarify those assumptions now.
+
+Given that our architecture (Figure~\ref{fig:occ_arch}) has a single validator, we assume the validation phase occurs in a critical section; that is, only one transaction is in the validation phase at a time. We do not require the write phase to be in a critical section; this means that write requests may arrive at the storage out of order. We deal with this using a \emph{versioned} datastore; every item in the datastore is versioned and every write request is tagged with a version number equal to the writing transaction's timestamp. If the datastore receives a write request with version (timestamp) $i$ and a higher-numbered version $j > i$ already exists for the object, the write request is ignored. 
+
+The above discussion implies that validation only needs to check, for every transaction $T(j)$ and all transactions $T(i)$ overlapping temporally with $T(j)$, where $i<j$, that $WS(i) \cap RS(j) = \emptyset$. Data versioning provides an easy way to determine whether $T(j)$ overlapped temporally with $T(i)$; every time a transaction performs a read, we tag the read with the version of the item that was read. If $T(j)$'s read set contains an item $X$ and the read saw version $k$, the validator only needs to check the write sets of all $T(i)$ with $k < i < j$ to see whether they contain $X$. This use of versioning in validation is identical to the one described in~\cite{ding2015centiman}.
+
+

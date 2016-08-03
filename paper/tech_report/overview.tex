@@ -1,0 +1,27 @@
+\section{Batching Overview}\label{sec:overview}
+
+In this section, we explain how we can perform batching at the storage and the validator in an OCC system. 
+
+\emph{Batching} involves buffering a number of requests as they arrive at some component of the system and processing them as a group. The goal of batching is to reduce the number of conflicts by reordering the operations in each batch, thus increasing the throughput. As explained in Section~\ref{sec:background}, aborts happen due to read-write dependencies involving a committed transaction $T(i)$ that wrote to some object, and a later transaction $T(j)$ that read the same object but did not see $T(i)$'s update. If $T(i)$ and $T(j)$ are in the same batch at the validator, we call this an \emph{intra-batch} abort of $T(j)$; if they are in a different batch, we call it an \emph{inter-batch} abort.
+
+The server components -- the storage and the validator -- aim to reduce both intra-batch and inter-batch aborts. The storage batches the read and write requests, and the validator batches the validation requests.
+
+Once a batch is fixed, the number of intra-batch aborts is determined by the amount of data contention among the requests in the batch and by the way we order and interleave the requests in processing. Thus the main optimization strategy is \emph{reordering}. The storage manager reduces aborts by reordering individual read and write operations, while the validator reduces aborts by changing the serialization order of transactions. The overhead of the reordering impacts transaction latency, so the reordering algorithms must be as fast as possible.
+
+To reduce the number of inter-batch aborts, the system can divide the transactions into batches in a careful manner; it can also privilege writes over reads to allow reads to see fresher values. However, at all times in the system, there are multiple batches in-flight. No component can thus eliminate inter-batch aborts completely and unilaterally. The worst case is a slow transaction that writes an object and passes validation, but whose write gets ``stuck'' in the system and doesn't make it to the storage for a long time. This transaction will conflict with -- and cause inter-batch aborts of -- all subsequent transactions that read the same item, until the write is actually applied.
+
+We now explain the specific batching strategies that are available at the storage and the validator.
+
+\subsection{Storage Batching}
+At the storage layer, the optimal batching strategy is simple. We buffer a certain number of read and write requests into batches. When a batch is ready, either when there are enough requests or a timeout is reached, for each object we apply the highest-version write request on that object. It is safe to discard all other writes on that object, as explained in Section~\ref{sec:background}. Next, we handle all the read requests for the same object. 
+
+This strategy is optimal for reducing intra-batch aborts, as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. The only way to reduce inter-batch aborts is to increase the batch size.
+
+\subsection{Validator Batching}\label{subsec:overview:validator}
+
+The validator buffers and batches transaction validation requests as they arrive. The optimal strategy for reducing inter-batch aborts is to ensure that transactions accessing the same objects are always batched together, that is, to cluster them based on access patterns.  Otherwise, the validator cannot do anything about conflicting transactions that are ``spread out'' across batches. There has been a lot of research on data clustering either online or offline~\cite{pavlo2012skew, elmore2015squall}, especially for fine-grained data partitioning. Any of these techniques can be used for validator batch creation. Of course, clustering transactions into batches based on access patterns may increase the number of intra-batch aborts.
+
+Once the batches are fixed, the validator can reduce intra-batch aborts by choosing a good validation (i.e., serialization) order. The validator may not be able to eliminate all intra-batch aborts, since it cannot actually delay the execution of a transaction. Rather, it is presented with read and write sets of transactions that have already run. 
+
+Intra-batch transaction reordering can be done with several goals in mind. We can simply minimize intra-batch aborts, i.e. maximize the number of transactions in each batch that commit. However, we may also want to prioritize certain transactions to have a greater chance of committing. For example, if we want to reduce the number of aborts \emph{per transaction}, we can increase a transaction's priority every time it has to abort and restart. Priorities could also be related to external factors (e.g. a transaction's monetary value or its chance of committing). These choices suggest a range of possible policies; we explore them in the next section.
+
