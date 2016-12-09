@@ -1,0 +1,66 @@
+\section{Introduction}\label{sec:intro}
+
+% batching is important
+Transaction processing is a fundamental aspect of database functionality, and improving OLTP system performance has long been a key research goal in our community. It is well-known that the throughput of OLTP systems can be increased through \emph{batching}-based optimizations, whereby some component buffers a number of transactions or requests as they arrive and processes them as a group.
+
+% batching for obvious reason: low level
+Batching can improve system performance for several reasons. First, it increases the efficiency of communication by packing messages~\cite{ding2015centiman,friedman1997packing}. Second, it amortizes the cost of system calls by condensing multiple requests into a single one, as in group commit~\cite{debrabant2013anti,hagmann1987reimplementing}. Third, it reduces the number of requests by discarding duplicate or stale requests, such as writes to the same record~\cite{faleiro2014lazy}. However, all of those are local optimizations based on low-level techniques.
+
+% our proposal at a high level: batching at higher level for OCC 
+We propose an OLTP system design that embraces batching as a core design principle at multiple stages of a transaction's execution. In particular, we explore the benefits of batching in optimistic concurrency control (OCC) to reduce conflicts~\cite{kung81tods}, and thus improve both system-wide and individual transaction performance. OCC is a popular concurrency control protocol due to its low overhead in low-contention settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr, bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi}. However, it wastes resources when conflicts are frequent~\cite{agrawal1987concurrency}. We show how batching reduces the number of conflicts and how we can thus use OCC even with higher-contention workloads.
+
+
+Figure~\ref{fig:occ_arch} shows a distributed OCC-based transaction processing system with centralized validation. The system consists of three components: processors, storage nodes, and a single validator. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
+
+The transaction now enters the \emph{validation} phase. In OCC with \emph{backward validation}, the validator checks whether the transaction conflicts with any previously committed transactions, and makes a ``success'' or ``failure'' validation decision. 
+%jg01: We need a citation after ``decision.''
+One example of a conflict that would cause validation to fail is a \emph{stale read}. Suppose a transaction $t$ reads an object, and a second transaction $t'$ writes to the same object after $t$'s read. If $t'$ commits before $t$, $t$ has a conflict, since it should have read the update $t'$ made to the object but it did not. Thus $t$ must fail validation. 
+
+
+If a transaction passes validation, the processor sends its writes to the storage; this is the \emph{write} phase. Otherwise, the processor aborts and restarts the transaction.
+
+% why OCC for batching
+The architecture of OCC with backward validation presents unique opportunities for batching because transactions are only serialized prior to commit. 
+% batching at processor
+There are three obvious times and locations to apply batching. The first is the processor in the transactions' read phase, where transaction requests can be batched before execution. There is recent work in the context of locking-based protocols that  batches transactions and serializes them before execution to reduce overhead~\cite{faleiro2014rethinking,mu2014extracting,thomson2012calvin}; these techniques could be adapted and applied in OCC as well.
+
+% batching at validator
+The second place we can batch is the validator, for transactions in the validation phase. If the validator buffers the validation requests as they arrive, it has the flexibility to choose a validation order. This allows the validator to reduce the number of conflicts and aborts. Recall our previous example of a validation failure. A transaction $t$ reads an object, and a second transaction $t'$ writes to the same object after $t$'s read. If $t'$ arrives at the validator before $t$ and commits, $t$ must fail since it should have read the value written by $t'$ but it didn't. Instead, with batching, if transactions $t$ and $t'$ are both in the same batch waiting for validation, we can choose to serialize $t$ before $t'$. Thus, we avoid conflicts and both transactions can commit.
+
+% batching at storage
+Third, the system can perform batching at the storage level. This affects already-validated transactions in their write phase as well as transactions still in their read phase. The storage can buffer read and write requests into batches as they arrive. If a batch contains multiple read and write requests for the same object, the system can apply all the writes first, in the serialization order. Next, it can process the reads. Prioritizing writes over reads is always optimal in the sense that it reduces the number of aborts as much as possible. This is because OCC reads come from uncommitted transactions, while writes come from validated transactions that will commit soon. Thus if the storage has both a pending read and a pending write on the same object, but schedules the read before the write, the reading transaction will see a stale value and is guaranteed to fail validation. 
+
+% drawback of batching
+%Batching at these three levels in the system reduces aborts due to conflicts, and thus can increase throughput.\eat{However, it may also increase latency.}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.9\columnwidth]{figures/OCCArchitecture.pdf}
+ \vspace{-.5em}
+ \caption{OCC System Architecture}
+% \vspace{-1.5em}
+ \label{fig:occ_arch}
+\end{figure}
+
+
+% contribution
+{\bf Contributions of this Paper.}
+In this paper, we explore in-depth the benefits of transaction batching in OCC with backward validation. Since there is substantial existing work on processor batching, we focus on storage and validator batching, which have received little research focus so far.
+% contribution 1: system design
+Our first contribution is an enhanced OCC system architecture that creatively includes batching at the storage and the validator levels. We analyze the reasons for transaction conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce these aborts through batching and operation reordering.
+% contribution 2: validator reordering algorithms
+Our second contribution is an optimal algorithm for storage batching and approximate algorithms for validator batching. We show that optimal transaction reordering within a validator batch is NP-hard, and we describe two classes of greedy algorithms. These algorithms produce transaction orderings that are close to the optimal solution, and they are sufficiently fast for practical use. Since the overhead of validator reordering increases transaction latency, it may hurt the end-to-end throughput of the system even it reduces the number of aborts within a batch. Our algorithms explore this trade-off and show how we can achieve low abort rates with little overhead. We also extend our algorithms to weighted versions that can incorporate features such as transaction priorities.\eat{ Thus our second contribution actually enables storage and validator batching in a real system.}
+
+
+\eat{
+As mentioned before, the overhead of validator reordering increases transaction latency. Thus, even as validator reordering reduces the number of conflicts, it may hurt the end-to-end throughput of the system. Our two classes of greedy algorithms explore this trade-off. Additionally, we extend our algorithms to weighted versions that can incorporate features such as transaction priorities.
+}
+
+% contribution 3: experiment
+Our third contribution is a detailed experimental study of the impact of storage and validator batching in a prototype system. Our results show that batching always increases transaction throughput and, surprisingly, also reduces transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up to a factor of 2.4 and can reduce the average transaction latency down to 21\% for both micro-benchmark and the Small Bank Benchmark~\cite{alomari2008icde}.
+
+%\eat{
+% paper organization
+The remainder of the paper is organized as follows. In Section~\ref{sec:background}  we review OCC with backward validation. In Section~\ref{sec:overview} we discuss challenges, opportunities and techniques for storage and validator batching. In Section~\ref{sec:validator_reordering}, we introduce our algorithms for intra-batch transaction reordering at the validator. In Section~\ref{sec:experiments}, we present an extensive experimental study of batching in our system. We discuss related work in Section~\ref{sec:relwork} and conclude in Section~\ref{sec:conclusion}.
+%}
+

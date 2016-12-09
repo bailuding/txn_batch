@@ -1,0 +1,48 @@
+\section{Related Work}\label{sec:relwork}
+
+We discussed OCC and its applications in Sections~\ref{sec:intro}. 
+\eat{A detailed discussion on related work for the feedback vertex set problem can be found in~\cite{ding2016tr}.} 
+Here, we discuss related work on concurrency control under high data contention, transaction scheduling, and batching. \eat{, and data clustering techniques.}
+
+%\vspace{-1em}
+{\bf High contention concurrency control.}
+% data contention is bad for CC
+The performance of concurrency control protocols suffers when concurrency level and data contention are high~\cite{franaszek1985limitations}; this has particular impacts on OCC~\cite{agrawal1987concurrency}. Hybrid approaches combine OCC and locking to limit the number of transaction restarts~\cite{thomasian1998distributed,yu1992analysis}. The problem can also be addressed by adjusting the concurrency level adaptively, limiting the number of arriving transactions and/or using an exponential backoff for aborted transactions~\cite{helal1993adaptive}. Transaction chopping reduces contention by partitioning transactions into smaller pieces and executing dependent pieces in a chained manner~\cite{mu2014extracting,shasha1995transaction,xie2015high}. It is also possible to reduce conflicts by executing transactions at heterogeneous isolation levels~\cite{xie2014salt,xie2015high}, using eventual consistency for non-critical transactions. While we also address the problem of reducing conflicts under data contention, our batching and reordering techniques are different from previous work.
+
+%\vspace{-1em}
+%\paragraph{Transaction scheduling}
+{\bf Transaction scheduling.}
+The dynamic timestamp assignment technique assigns each transaction a timestamp interval and flexibly picks the commit timestamp from the interval~\cite{bayer1982dynamic}. A similar technique can be used to optimize read-only transactions in distributed asynchronous OCC~\cite{ding2015centiman}. This approach can be extended to dynamically update the timestamp intervals of live transactions while committing a different transaction~\cite{boksenbaum1987concurrent}. Dynamic timestamp assignment is compatible with our batching.
+
+\eat{Also relevant is prior research on dynamic real-time transaction scheduling. }
+
+Transactions in a real-time database system are associated with a soft or hard deadline, where completing after the deadline is either useless or undesirable.
+Thus, urgent or high value transactions must be prioritized~\cite{haritsa1993value}.
+OCC with forward validation enables the validator to choose what to abort or defer a transaction if it would cause live transactions with higher priority to abort~\cite{haritsa1990dynamic, lam1995real,lee1993using}. There are also systems that use locking and preemption~\cite{abbott1992scheduling}, as well as hybrid optimistic/pessimistic methods~\cite{huang1991experimental, lin1990concurrency}. These approaches can be viewed as a simplified version of our validator reordering; moreover, none of the systems uses batching. 
+
+Calvin uses a deterministic locking-based approach, which fixes a partial order for transactions prior to execution~\cite{thomson2012calvin}. ROCOCO proposes a variation of Calvin with distributed scheduler~\cite{mu2014extracting}. \cite{faleiro2014rethinking} extended Calvin to multi-version concurrency control. These are complementary to our work. Our approach is more flexible as it allows reordering at multiple stages in a transaction's life cycle. 
+
+
+\eat{
+Conflict resolution for replicated systems may increase throughput by allowing replicas to diverge. Consistency can be achieved by reconciliation and merging~\cite{petersen1997flexible}. Re-establishing consistency may not be necessary if transaction operations commute~\cite{li2012making, roy2015homeostasis}, or the updates are not read by later transactions~\cite{faleiro2014lazy, li2012making}. Serializable snapshot isolation achieves serializability by running transactions at snapshot isolation and aborting transactions that can potentially induce write skew~\cite{jorwekar2007automating}. Warp is a distributed OLTP system based on OCC. It organizes servers in a chain~\cite{warp}. At validation, it passes each transaction around the chain of servers that it accessed, builds the dependency graph and decides a serialization ordering along the way, and finally transmits the ordering back along the chain. 
+
+Our work has different goals and uses different techniques from all the above systems.
+}
+
+%\vspace{-1em}
+%\paragraph{Batching}
+{\bf Batching.}
+Batching to amortize costs and condense work is a common optimization technique. One application is to pack networking and logging messages~\cite{castro2002practical,ding2015centiman,friedman1997packing,glendenning2011scalable}. Batching is also widely applied to application requests to improve performance, including group commits~\cite{debrabant2013anti,hagmann1987reimplementing}, condensing IO requests~\cite{debrabant2013anti, faleiro2014lazy}, and Paxos~\cite{santos2012tuning}.
+Since batching is often associated with a throughput/latency tradeoff, there is work on adaptive batching~\cite{friedman2006adaptive, nagle1984congestion}.
+Those uses of batching are low-level and are not aware of the overall system infrastructure or the application semantics. Our work embraces batching as a core design principle at multiple stages of transaction execution. In addition, unlike previous work, we focus on the use of batching for reordering.
+
+
+%\vspace{-1em}
+%\paragraph{Data clustering}
+%\vspace{-1em}
+\eat{
+{\bf Data clustering.}
+As mentioned in Section~\ref{subsec:overview:validator}, it is desirable to create validator batches that cluster transactions by access patterns. Clustering items that are likely to be accessed together in a transaction in an OLTP workload has been modeled as graph partitioning~\cite{tsangaris1991stochastic}, which is NP complete; however, there are many sophisticated heuristics that can help~\cite{karypis1998fast, ding2001min, kernighan1970efficient}. Free and highly-optimized software libraries are also available~\cite{karypis1995metis}. 
+This problem has gained recent attention due to its application in data-partitioned OLTP systems~\cite{pavlo2012skew}. All the techniques mentioned can be incorporated into intelligent batch creation at the validator.
+}
+
