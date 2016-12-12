@@ -274,15 +274,38 @@ To alleviate this problem, we can devise policies that combine information about
 
 We can also devise policies that handle hard transactions. In many workloads some transactions are naturally more prone to conflicts, e.g., those that access many objects and/or ``hot'' objects. If we use graph degree based policies, such transactions are likely to be included in the FVS and aborted repeatedly. To avoid starvation, we can adjust our policies to increase the probability that these transactions can commit. For example, we can approximate the ``hardness'' of a transaction by the size of its read and write sets and include that as a weighting factor in the policy. 
 
-\subsection{Parallel Reordering}
+\subsection{Parallel Reordering and Validation}
 \label{subsec:validator_reordering:parallel}
 Since the reordering sits at the critical path of the transaction execution, it can increase the latency of a transaction, resulting in higher chance of conflicts. 
 
 In addition to reduce the overhead of the reordering algorithm, we further parallelize the reordering so that its amortized overhead decreases.
 
 In centralized reordering, validator takes a batch of transactions, reorders them, and then validates the transactions and caches the updates of committed ones.
-This centralized component can be decomposed into three subcomponents: batch preparation, 
+This centralized component can be decomposed into four subcomponents: batch preparation, transaction reordering, transaction validation, and cache update. In the batch preparation component, transactions are organized as batches upon arriving at validator. Each batch of transactions are then reordered to minimize the conflicts within a batch. A batch of transactions is validated against previously committed updates. Finally, the updates from committed transactions in the batch are applied to the validator cache in their serialization order.
 
+% Pipeline parallelism
+We can first introduce pipeline parallelism into validator. Each of the four subcomponents can be operated on a different thread. The batch preparation subcomponent receives requests from the transaction coordinator, packages transaction into batches, and sends a reordering request to the transaction reordering subcomponent. Next, the transaction reordering subcomponent first pre-validates a batch of transactions based on the latest database snapshot available, then reorders the remaining transactions, and sends a validation request consisting of the remaining transactions to the transaction validation subcomponent. 
+The transaction validation subcomponent takes a batch of ordered transactions, and validates them against updates from previously committed transactions. The cache update subcomponent finally applies the updates from transactions that pass the validation, serialized in the order that the reordering subcomponent computes. 
 
+% Compare to single threaded case.
+In the single threaded centralized validator, a batch of transactions is pre-validated against the current snapshot of the database. Thus, the transactions that pass the pre-validation can only conflict with transactions within the batch, and will not conflict with previous committed transactions. So after reordering, the remaining transactions all commit.
 
+In the pipelined reordering, the validation is decoupled into two phases. Let's denote a database snapshot as $S_k$, where transactions whose timestamps are less or equal to $k$ has been committed in this snapshot. In the reordering subcomponent, a batch of transactions $B$ is validated against the latest database snapshot $S_m$ available. The remaining transactions after pre-filtering is reordered as a batch $B'$ and sent to the validation subcomponent. $B'$ is again validated against the current database snapshot $S_n$. Since the validation subcomponent can be validating uncommitted transactions while $B$ is being processed at the reordering subcomponent, when $B$ arrives at the validation subcomponent, the snapshot of the database can be advanced and $n\geq m$. Thus, transactions in $B'$ can still abort due to conflicts with previously committed transactions in $S_n$.
+
+% Parallelism in each subcomponent.
+We can further introduce parallelism into subcomponents. In batch preparation, multiple threads can package transactions into batches. We can either assign each transaction coordinator sends its validation request to a specific batch preparation thread, or we can create a consumer-producer queue to connect the coordinators and the batch preparation threads. In transaction reordering, multiple threads can consume reordering requests from the batch preparation threads, and reordering batches of transactions concurrently. Since the transactions are not serialized yet in the reordering stage, the threads can send the processed batches to the validation subcomponent in any order. At the validation subcomponent, transactions are serialized and validated against all previously committed transactions. We cannot simply validate each individual transaction on different threads since transactions come from different batches can conflict with each other. However, within an ordered batch, since the only source of conflicts is from all the transactions committed prior the batch, the validation of each transaction within the batch can be processed in parallel. Since conflicts can happen across batch boundaries, processing a new batch should only start after all the threads finish processing the previous batch. The transactions are first serialized at the batch level. Within each ordered batch, the transactions are serialized by the ordering produced from the reorder subcomponent, after removing the transactions that conflict against the current database snapshot at the validation subcomponent. The cache update subcomponent applies the updates in serialized order. While its operation is light-weight, if needed, we can introduce partitioned parallelism to update the cache concurrently. The idea is to partition the key space and break a transaction into smaller pieces, and one thread is assigned to apply the updates to one database partition. 
+
+% Figure
+Figure~\ref{fig:reorder:validator} shows the architecture of parallel validator. It has pipeline parallelism with the four subcomponents: batch preparation, transaction reordering, transaction validation, and cache update. The requests within each subcomponent can be processed concurrently. 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=1\columnwidth]{./figures/validator}
+	\vspace{-1em}
+	\caption{The architecture of parallel validator. It is decoupled into four subcomponents for pipeline parallelism: batch preparation, transaction reordering, transaction validation, and cache update. Each subcomponent can be further parallelized. The reordering subcomponent pre-validates transactions in a batch against the latest database snapshot available. The validation subcomponent validates transactions concurrently within the boundary of an ordered batch. The cache update subcomponet applies the update from an ordered and validated batch to create a new database snapshot.}
+	\vspace{-1em}
+	\label{fig:reorder:validator}
+\end{figure}
+
+Alternatively, the transaction validation can use partitioned parallelism as in the cache update subcomponent. More discussion on this design can be found in our previous Centiman system~\cite{ding2015centiman}.
 
