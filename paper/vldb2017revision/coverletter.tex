@@ -62,7 +62,7 @@ We have proposed parallel reordering and validation in Section 4.4. We first int
 \end{itemize}
 We have addressed the concern on the efficiency of the graph-based validation, in particular, the graph-based transaction reordering with parallelization as described in Section 4.4. 
 
-We have attemped to implement our prototype on top of open-source OLTP kernels, and investigated possible options. However, as pointed out by reviewer 2 in W4, with the need of customization on the validation protocol, especially with the redesigned parallel validator,  it is non-trivial for us to benefit from the existing open-source kernels, except for its storage engine. In Section 1, we have added a short discussion on implementing the system on top of key-value stores. In our experiment, we chose to implement a in-memory hash table instead to reduce the overhead from the storage layer.
+We have attempted to implement our prototype on top of open-source OLTP kernels, and investigated possible options. However, as pointed out by reviewer 2 in W4, with the need of customization on the validation protocol, especially with the redesigned parallel validator,  it is non-trivial for us to benefit from the existing open-source kernels, except for its storage engine. In Section 1, we have added a short discussion on implementing the system on top of key-value stores. In our experiment, we chose to implement a in-memory hash table instead to reduce the overhead from the storage layer.
 
 \begin{itemize}
 \item[(M4)]  \emph{Add more details about how the algorithms are implemented efficiently.}
@@ -108,7 +108,7 @@ We next explain in detail how we addressed each of the individual reviewers' com
 
 \emph{W1. It is unclear if creating the transaction dependency graph is an efficient mechanism to achieve serializability for OCC. (See D1 and D2.)}
 
-We shared the concern that the dependency graph based reordering is at the critical path of the transaction execution, and its effiency is critical. We have described in more details how we implemented the reordering algorithms efficiently at validator. Further more, we have redesigned the validator component to introduce pipeline parallelism, parallel reordering, and parallel validation. The amortized latency of transactions has greatly improved. Section 4.4 has a more detailed description of the parallelization. Section 5.3 demonstrates an evaluation of the parallel validator reordering.
+We shared the concern that the dependency graph based reordering is at the critical path of the transaction execution, and its efficiency is critical. We have described in more details how we implemented the reordering algorithms efficiently at validator. Further more, we have redesigned the validator component to introduce pipeline parallelism, parallel reordering, and parallel validation. The amortized latency of transactions has greatly improved. Section 4.4 has a more detailed description of the parallelization. Section 5.3 demonstrates an evaluation of the parallel validator reordering.
 
 \emph{W2. There are no details about how to implement the proposed algorithms. (See D3.)}
 
@@ -150,7 +150,7 @@ We discussed an additional heuristic on setting a  limit the size of the graph i
 
 The latency is measured as the time between a transaction starts and it commits. If a transaction aborts due to conflicting with previously committed transactions, it gets restarted. A transaction can get restarted multiple times before it commits. 
 
-The baseline has a higher latency percisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
+The baseline has a higher latency precisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
 
 As we discussed in Section 3.2, the storage reordering priorities writes before reads, cache miss rate can be reduced for objects that are both updated and read in the same batch. The validator reordering is less likely to benefit from lower cache misses, and reducing the number of restarts for transactions is the primary reason for the improved latency.
 
@@ -170,7 +170,7 @@ The search algorithm in the Figure is exactly the brute-force approach that show
 
 \emph{W1. Requiring serialization of reads/writes, as well as of validation, seems like a terrible idea in todays multi-core age. }
 
-We have discussed and implemented multi-threaded storage with versioned data in Section 2 and Section 5. In addition, we have completely redesigned the valiator component to allow multiple levels of parallelism, including pipeline parallelism, parallel reordering, and parallel validation. Section 4.4 has a detailed discussion on parallelism in validator, and Section 5.3 has an evaluation of parallel reordering.
+We have discussed and implemented multi-threaded storage with versioned data in Section 2 and Section 5. In addition, we have completely redesigned the validator component to allow multiple levels of parallelism, including pipeline parallelism, parallel reordering, and parallel validation. Section 4.4 has a detailed discussion on parallelism in validator, and Section 5.3 has an evaluation of parallel reordering.
 
 \emph{W2. The performance study evades the above problem by having a single thread perform reads and writes, as well as validation, and showing performance benefits under this assumption. There is no attempt made to compare the performance with a setting where things can run concurrently. }
 
@@ -193,12 +193,12 @@ See the response to W1 from reviewer 2.
 
 \emph{While the paper claims that OCC validation is done sequentially in most of the literature, I don't believe this is the case in practice. Real systems typically use some form of short term locking during validation, so unrelated transactions can be validated concurrently. Even OCC algorithms need to deal with 2PC in any real database, and hence any implementation has to deal with blocked transactions. A nice description of validation for OCC algorithms can be found in the Hekaton concurrency control paper from VLDB 2011 (High-Performance Concurrency Control Mechanisms for Main-Memory Databases, by Larson et al.). }
 
-We agree with you that in practice, OCC is less popular in real systems and rarely implemented in a pure OCC fashion, i.e., without locking. Concurrent validation has been studied in a couple of recent systems with different trade-offs. For example, Hekaton uses a latch-free versioned storage and concurrently updates the commit dependencies. However, cascading aborts are possible if there is conflct. The performance could potentially degrade significantly when the data contention is high.
+We agree with you that in practice, OCC is less popular in real systems and rarely implemented in a pure OCC fashion, i.e., without locking. Concurrent validation has been studied in a couple of recent systems with different trade-offs. For example, Hekaton uses a latch-free versioned storage and concurrently updates the commit dependencies. However, cascading aborts are possible if there is conflict The performance could potentially degrade significantly when the data contention is high.
 
 \emph{The footnote in Page 3 says the extension of the techniques to snapshot isolation is straightforward. I'm not so convinced. In particular, SI has to deal with W-W conflicts, which are a non-issue for OCC. No reordering will help with a W-W conflict.
 }
 
-A transaction has a start timestamp and a commit timestamp when it runs at snapshot isolation. In our loosely coupled OCC architecture, the storage does not offer a consistent snapshot of the database, transactions can abort due to reading data from an invalid snapshot of database (more details of this architecture are discusses in our preivous work on Centiman [1]). In this case, the storage can reorder the request with the same protocol. If the storage is multi-versioned and a consistent snapshot is offered at the storage for transaction to read, no reordering is needed.
+A transaction has a start timestamp and a commit timestamp when it runs at snapshot isolation. In our loosely coupled OCC architecture, the storage does not offer a consistent snapshot of the database, transactions can abort due to reading data from an invalid snapshot of database (more details of this architecture are discusses in our previous work on Centiman [1]). In this case, the storage can reorder the request with the same protocol. If the storage is multi-versioned and a consistent snapshot is offered at the storage for transaction to read, no reordering is needed.
 
 At validator, for any two transactions in the same batch, they conflict with each other if they write to the same object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the protocol stay the same. Consider the case where $T_1$, $T_2$, and $T_3$ are in the same batch, where $T_1$ writes to $X$, $T_2$ writes to $Y$, and $T_3$ writes to $X$ and $Y$. Committing $T_3$ will lead to the aborts of $T_1$ and $T_2$. But if we choose to abort $T_3$, $T_1$ and $T_2$ can both commit.
 
@@ -237,7 +237,7 @@ See the response to M9.
 
 \emph{W2: The graphs are hard to read in print.}
 
-See the repsonse to M10.
+See the response to M10.
 
 \emph{Reiterating W2, the evaluation covers a lot of ground and would benefit from a high-level summary. In particular, it would be nice to give brief, concrete answers to the questions posed at the beginning of the section.}
 
