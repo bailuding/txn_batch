@@ -47,54 +47,57 @@ We have made the following changes to the paper since the original submission:
 \section{Changes based on meta-reviewer comments}
 
 \begin{itemize}
-\item[(1)] \emph{Withdraw the claim that the use of serial validation is standard. }
+\item[(M1)] \emph{Withdraw the claim that the use of serial validation is standard. }
 \end{itemize}
-TODO.
+We have clarified in Section 1 that our serial validation is based on a loosely coupled architecture of OCC with backward validation.
 
 \begin{itemize}
-\item[(2)] \emph{Describe in more details how the proposed algorithms can work in a concurrent validation setting. }
+\item[(M2)] \emph{Describe in more details how the proposed algorithms can work in a concurrent validation setting. }
 \end{itemize}
-TODO.
+We have proposed parallel reordering and validation in Section 4.4. We first introduced pipeline parallelism to decouple the processing at validator into four subcomponents: batch preparation, transaction reordering, transaction validation, and cache update. Each subcomponent can be further parallelized to allow concurrent processing. We have also added experiments on parallel reordering in Section 5.3. 
 
 \begin{itemize}
-\item[(3)]  \emph{Connect your contribution with an open-source OTLP kernel from recent prior work to show whether the graph-based validation procedure would be the bottleneck.}
+\item[(M3)]  \emph{Connect your contribution with an open-source OTLP kernel from recent prior work to show whether the graph-based validation procedure would be the bottleneck.}
 \end{itemize}
-TODO.
+We have addressed the concern on the efficiency of the graph-based validation, in particular, the graph-based transaction reordering with parallelization as described in Section 4.4. 
+
+We have attemped to implement our prototype on top of open-source OLTP kernels, and investigated possible options. However, as pointed out by reviewer 2 in W4, with the need of customization on the validation protocol, especially with the redesigned parallel validator,  it is non-trivial for us to benefit from the existing open-source kernels, except for its storage engine. In Section 1, we have added a short discussion on implementing the system on top of key-value stores. In our experiment, we chose to implement a in-memory hash table instead to reduce the overhead from the storage layer.
 
 \begin{itemize}
-\item[(4)]  \emph{Add more details about how the algorithms are implemented efficiently.}
+\item[(M4)]  \emph{Add more details about how the algorithms are implemented efficiently.}
 \end{itemize}
-TODO.
+We have discussed the algorithmic implementation of the reordering algorithms in Section 4.1 and additional implementation details in Section 5. We have improved our implementation with a heuristics to limit the size of the dependency graph (Section 5), and further discussed and evaluated parallelizing the reordering algorithms in Section 4.4 and Section 5.3. 
 
 \begin{itemize}
-\item[(5)]  \emph{Evaluate on a platform where multiple threads can concurrently perform reads and writes.}
+\item[(M5)]  \emph{Evaluate on a platform where multiple threads can concurrently perform reads and writes.}
 \end{itemize}
-TODO.
+We have enhanced the parallelism in the system. We implemented multi-threaded transaction generators, storage workers, and redesigned validator with pipeline parallelism, parallel reordering, and parallel validation. Supporting multi-threaded transaction generators and storage workers are straightforward. Parallelizing validator is described in detail in Section 4.4. We also conducted additional experiment to evaluate parallel reordering, and enhanced our experiment on Small Bank benchmark.
 
 \begin{itemize}
-\item[(6)] \emph{Use more realistic workloads, in particular, with read-write contention on the same object, to conduct experiments.}
+\item[(M6)] \emph{Use more realistic workloads, in particular, with read-write contention on the same object, to conduct experiments.}
 \end{itemize}
-TODO.
+
+We have enhanced our experiments by adding read-write contention on the same object for our mirco benchmark. In our micro benchmark, a transaction has 5 reads and 5 writes, where one of the read and the write is on the same object. Section 5.1 has described the micro benchmark in detail.
 
 \begin{itemize}
-\item[(7)] \emph{Confirm and explain the performance numbers on low-contention workloads.}
+\item[(M7)] \emph{Confirm and explain the performance numbers on low-contention workloads.}
 \end{itemize}
-TODO
+We have optimized our implementation for the baseline and re-evaluated its performance.
 
 \begin{itemize}
-	\item[(8)] \emph{Present the intuition of batching more explicitly and earlier in the paper. }
+\item[(M8)] \emph{Present the intuition of batching more explicitly and earlier in the paper. }
 \end{itemize}
-TODO
+We have explained intuitively that the latency of transactions is improved because the number of restarts is lower with batching and reordering in the contribution part of Section 1.
 
 \begin{itemize}
-	\item[(9)] \emph{Give a short summary of evaluation results answering the questions posted in the beginning of the section.}
+\item[(M9)] \emph{Give a short summary of evaluation results answering the questions posted in the beginning of the section.}
 \end{itemize}
-TODO
+We have summarized the experiment results in Section 5.8.
 
 \begin{itemize}
-	\item[(10)] \emph{Improve the graphs for better readability.}
+\item[(M10)] \emph{Improve the graphs for better readability.}
 \end{itemize}
-TODO
+We have increased the font size and made the lines bolder in the figures as much as possible to make them more readable in print.
 
 \section{Changes based on individual comments}
 
@@ -102,44 +105,43 @@ We next explain in detail how we addressed each of the individual reviewers' com
 
 \subsection{Reviewer 1}
 
-\emph{D1. The throughput of the baseline is very low given that it operates on a table with 100k 8-byte entries that can fit comfortably in the LLC cache. This raises the question of whether the graph-based validation procedure would be the bottleneck in a faster OLTP kernel: even if validating a batch of 150 transactions only takes 0.2 msec, this caps the peak throughput to 750k tx/sec. The experimental evaluation would be much stronger if it demonstrates some benefit for a fast open-source OLTP kernel from prior work. For instance, [SILO] has shown throughput that is nearly millions of TX/sec, and a recent paper augments Silo to take into account transactional dependencies [BCC]. Another choice could be [ERMIA], which aims to improve performance of heterogeneous workloads as done in Section 5.5.2.}
-
-\bigskip
-TODO.
-
-\bigskip
-
 \emph{W1. It is unclear if creating the transaction dependency graph is an efficient mechanism to achieve serializability for OCC. (See D1 and D2.)}
 
 \bigskip
-TODO
-
+We shared the concern that the dependency graph based reordering is at the critical path of the transaction execution, and its effiency is critical. We have described in more details how we implemented the reordering algorithms efficiently at validator. Further more, we have redesigned the validator component to introduce pipeline parallelism, parallel reordering, and parallel validation. The amortized latency of transactions has greatly improved. Section 4.4 has a more detailed description of the parallelization. Section 5.3 demonstrates an evaluation of the parallel validator reordering.
 \bigskip
 
 \emph{W2. There are no details about how to implement the proposed algorithms. (See D3.)}
 
 \bigskip
-TODO
+See the response to M2.
 
 \bigskip
 
 \emph{W3. Defining the batching factor as a number of admitted transactions and pushing its configuration to the user seems crude. (The same can be said about setting the boundaries of "epochs" in prior work.) The dependency graph conveys more information about transactions, hence maybe the system can decide what transactions should be batched and how big the size of the batch should be for maximum performance. This could be a very convincing argument on why reconstructing the dependency graph is necessary.}
 
 \bigskip
-TODO
+We mentioned in Section 7 as future work that determining the batch size in a more automated and intelligent way is a very valuable enhancement for our system. In the experiment on the batch size, we wanted to demonstrate that there exists a sweet spot for the batch size where the system performs best for both the throughput and the latency. While the experiment helped us to select the batch size empirically for the micro benchmark under our configuration, the best batch size can be different for a different configuration, including the hardware, the workload, the concurrency and the degrees of parallelism at the system components, and the other system parameters. In addition, if the workload is dynamic, the batch size should also adapt to the changes.
+
+While systematically exploring how to intelligently configure the batch size is beyond the scope of this paper, we are very interested in further investigating along this direction in our future work.
 \bigskip
 
 \emph{D1. The throughput of the baseline is very low given that it operates on a table with 100k 8-byte entries that can fit comfortably in the LLC cache. This raises the question of whether the graph-based validation procedure would be the bottleneck in a faster OLTP kernel: even if validating a batch of 150 transactions only takes 0.2 msec, this caps the peak throughput to 750k tx/sec. The experimental evaluation would be much stronger if it demonstrates some benefit for a fast open-source OLTP kernel from prior work. For instance, [SILO] has shown throughput that is nearly millions of TX/sec, and a recent paper augments Silo to take into account transactional dependencies [BCC]. Another choice could be [ERMIA], which aims to improve performance of heterogeneous workloads as done in Section 5.5.2.}
 
 \bigskip
-TODO
+
+It is very attempting to implement our system on top of a high performance OLTP kernel such as Silo. However, it is non-trivial for us to benefit from existing OLTP kernels as explained in the response to M3. 
+
+We have redesigned the validator component to lessen the concern of efficiency of the graph-based reordering algorithms. The responses to M2 and M4 discussed this in more details.
 
 \bigskip
 
 \emph{D2. In the experimental evaluation, increasing the skew simultaneously increases intra-batch conflicts (for which the paper proposes a solution) with inter-batch conflicts (which aren't handled). There may be a stronger statement about performance if a synthetic workload is used that has many R-W conflicts within a batch, but no conflicts across batches. (This could occur with partitionable OLTP workloads if the validator can batch transactions to the same partition together.)}
 
 \bigskip
-TODO
+We mentioned in Section 3.1 that if the data is soft or hard partitioned, and we can cluster the transactions from the same partition, there is a better chance for reordering to avoid conflicts. We had a preliminary evaluation on batching and reordering on a synthetic partitioned workload with a simple clustering algorithm. We observed that while each batch consists of transactions from the same partition, unless we limit the number of live transactions from each partition to be the same as the size of a batch, there can be multiple outstanding batches waiting at storage or validator. Thus, we still suffered from intra-batch conflicts. 
+
+As future worker, we are interested to understand the impact of more sophisticated clustering algorithms and customized strategies for partitioned database. But a systematic investigation towards this direction is out of the scope for this paper.
 
 \bigskip
 
@@ -152,15 +154,24 @@ TODO
 
 \bigskip
 
-TODO
+We have added additional details on how the algorithm is implemented in the validator in Section 5.1. The validation request consists of a transaction has the keys and versions of its reads and the keys of its writes. The validator caches the updates of previously committed transactions in a hash table, until they are overwritten by later updates. 
+
+In our analysis in Section 4.1, constructing the dependency graph can take up to $O(|B|^2+|R|+|W|)$, where $|B|$ is the size of the batch, $|W|$ is the total number of writes in the batch, and $|R|$ is the total number of reads in the batch. The worst running time complexity of the sort-based reordering algorithm itself is $O(C|B|^2)$, where $|B|$ is the size of the batch, and $|C|$ includes updating the sort order after removal of the nodes, and the reduction on the number of iterations with the multi-factor. 
+
+We use the adjacency list to represent the dependency graph in memory. 
+
+We discussed an additional heuristic on setting a  limit the size of the graph in Section 5.1, where the dependency graph is discarded during construction once we detect that it has become too dense, and directly validate the transactions without reordering instead. Batching at validator is less likely to enjoy cache benefit as compared to batching at the storage. We are interested in exploring the impact of caching in the future, but we haven't investigated it systematically in this paper.
 
 \bigskip
 
 \emph{D4. The paper touts the latency improvement as a counter-intuitive benefit of batching, but it never explains why (1) the baseline has so high and variable latency on an in-memory database and (2) how does batching improve latency: is it better lower cache miss rates?}
 
 \bigskip
+The latency is measured as the time between a transaction starts and it commits. If a transaction aborts due to conflicting with previously committed transactions, it gets restarted. A transaction can get restarted multiple times before it commits. 
 
-TODO
+The baseline has a higher latency percisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
+
+As we discussed in Section 3.2, the storage reordering priorities writes before reads, cache miss rate can be reduced for objects that are both updated and read in the same batch. The validator reordering is less likely to benefit from lower cache misses, and reducing the number of restarts for transactions is the primary reason for the improved latency.
 
 \bigskip
 
@@ -168,22 +179,20 @@ TODO
 
 \bigskip
 
-TODO
+We have described in the following sentence that the nodes with high in-degree or out degree are likely to be included in a FVS.
 
 \bigskip
 \emph{D6. In the evaluation section, "good throughput" is used without definition. Please clarify.}
 
 \bigskip
-
-TODO
+When we say 'good throughput', we mean the number of committed transactions per second, to avoid the confusion with the throughput (the number of transactions processed per second) metric reported in some literatures. We have added an explanation of the term in Section 5.1.  
 
 \bigskip
 \emph{D7. The evaluation of the validator reordering algorithms would be more convincing if the smallest ("optimal") FVS is also shown in Figure 5. This can be as simple as brute-force between choose(150, i) choices for i=1,2,3.}
 
 \bigskip
 
-TODO
-
+The search algorithm in the Figure is exactly the brute-force approach that shows the smallest ("optimal") FVS. For the micro-benchmark with skew factor 0.5, 0.6, and 0.7, the brute-force approach is able to finish in time. Its result is used to measure the accuracy of other approximate algorithms. Unfortunately, it has become prohibitively expensive for the workload with skew factor 0.8 and 0.9. Thus, we were not able to plot its results for these two workloads.
 \bigskip
 
 \subsection{Reviewer 2}
@@ -191,53 +200,43 @@ TODO
 \emph{W1. Requiring serialization of reads/writes, as well as of validation, seems like a terrible idea in todays multi-core age. }
 
 \bigskip
-TODO
+We have discussed and implemented multi-threaded storage with versioned data in Section 2 and Section 5. In addition, we have completely redesigned the valiator component to allow multiple levels of parallelism, including pipeline parallelism, parallel reordering, and parallel validation. Section 4.4 has a detailed discussion on parallelism in validator, and Section 5.3 has an evaluation of parallel reordering.
 
 \bigskip
 
 \emph{W2. The performance study evades the above problem by having a single thread perform reads and writes, as well as validation, and showing performance benefits under this assumption. There is no attempt made to compare the performance with a setting where things can run concurrently. }
 
 \bigskip
-TODO
-
+We have introduced parallelism into the system architecture by implementing multi-threaded the transaction generators, storage workers, and validator. We have added an detailed discussion on parallelizing reordering and validation in Section 4.4, and evaluated its impact on Section 5.3.
 \bigskip
 
 \emph{W3. The workload appears to have reads and writes to different objects, which is totally unrealistic, and gives an artificial boost to the proposed algorithms.}
 
 \bigskip
-TODO
-
+We have enhanced the micro-benchmark by adding a write-after-read object in each transaction, and re-evaluated the system.
 \bigskip
 
 \emph{W4. It seems non-trivial to carry these results into an actual database implementation. This issue is just not discussed in the paper.}
 
 \bigskip
-TODO
+We agree with you that it is non-trivial to integrate our system with existing database kernels since we require customized validation, especially with the redesigned parallel validator. This is precisely why we have attempted but decided not to implement the system on an existing open source database kernel.
 
+As we mentioned in Section 1, our architecture is best suited to integrate with an in-memory versioned key-value store. Our previous work Centiman proposed a loosely coupled architecture of OCC on top of key-value stores. This work follows its architecture and enhanced its design with batching and reordering.
 \bigskip
-
-\emph{The core ideas are certainly interesting. The ideas could perhaps be used in the context of deadlocks with locking based concurrency control as well. However, the implementation as well as performance study are very unrealistic.}
-
-
-\bigskip
-TODO
-
-\bigskip
-
 
 \emph{The techniques in this paper, as well as the experimental evaluation, assume sequential execution of reads/writes and of validation. But neither is reasonable in a multi-core era. This is obvious for reads/writes, but also true for validation. 
 }
 
 
 \bigskip
-TODO
+See the response to W1 from reviewer 2.
 \bigskip
 
 \emph{While the paper claims that OCC validation is done sequentially in most of the literature, I don't believe this is the case in practice. Real systems typically use some form of short term locking during validation, so unrelated transactions can be validated concurrently. Even OCC algorithms need to deal with 2PC in any real database, and hence any implementation has to deal with blocked transactions. A nice description of validation for OCC algorithms can be found in the Hekaton concurrency control paper from VLDB 2011 (High-Performance Concurrency Control Mechanisms for Main-Memory Databases, by Larson et al.). }
 
 
 \bigskip
-TODO
+We agree with you that in practice, OCC is less popular in real systems and rarely implemented in a pure OCC fashion, i.e., without locking. Concurrent validation has been studied in a couple of recent systems with different trade-offs. For example, Hekaton uses a latch-free versioned storage and concurrently updates the commit dependencies. However, cascading aborts are possible if there is conflct. The performance could potentially degrade significantly when the data contention is high.
 \bigskip
 
 \emph{The footnote in Page 3 says the extension of the techniques to snapshot isolation is straightforward. I'm not so convinced. In particular, SI has to deal with W-W conflicts, which are a non-issue for OCC. No reordering will help with a W-W conflict.
@@ -245,42 +244,50 @@ TODO
 
 
 \bigskip
-TODO
+A transaction has a start timestamp and a commit timestamp when it runs at snapshot isolation. In our loosely coupled OCC architecture, the storage does not offer a consistent snapshot of the database, transactions can abort due to reading data from an invalid snapshot of database (more details of this architecture are discusses in our preivous work on Centiman [1]). In this case, the storage can reorder the request with the same protocol. If the storage is multi-versioned and a consistent snapshot is offered at the storage for transaction to read, no reordering is needed.
+
+At validator, for any two transactions in the same batch, they conflict with each other if they write to the same object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the protocol stay the same. Consider the case where $T_1$, $T_2$, and $T_3$ are in the same batch, where $T_1$ writes to $X$, $T_2$ writes to $Y$, and $T_3$ writes to $X$ and $Y$. Committing $T_3$ will lead to the aborts of $T_1$ and $T_2$. But if we choose to abort $T_3$, $T_1$ and $T_2$ can both commit.
+
+If we only look at any pair of conflicting transactions in the same batch, as you pointed out, one of them has to abort. But we can still minimize the number of aborts of the full batch using the reordering algorithm in the similar way as for the serial case.
+
 \bigskip
 
 \emph{Section 4.1: I don't think your complexity analysis is correct. What if half the transactions read an item, and the other half write it? Then the graph itself is of size $B^2$, contradicting your claim of $O(B+R+W)$ for graph construction.}
 
 
 \bigskip
-TODO
+Thanks for pointing this out! We had a typo in the computation of the time complexity. We intended to claim the graph construction can take $O(B^2+R+W)$. We corrected the typo and added a short explanation for the worst case running time analysis.
+
+In your example, if half the transactions read an item, and the other half write it, the graph size is $B/2\times B/2=B^2/4$ (since a read does not conflict with reads). But if each transaction reads and writes the same object, the graph size is $B\times (B-1)^2$, which is the worst case.
+
 \bigskip
 
 \emph{Section 3.2: the text can be misconstrued to believe aborts happen at the storage layer. Reword to make clear that the storage layer reduces aborts that could happen later during validation.}
 
 
 \bigskip
-TODO
+We have emphasized the conflict actually happens at validator in the paragraph. 
 \bigskip
 
 \emph{All performance numbers are on artificially created benchmarks on an arguably artificial system. Can't you use TPC-E or similar benchmark, running on an actual database system?}
 
 
 \bigskip
-TODO
+We have enhanced our micro-benchmark and Small Bank benchmark as described in Section 5. We have added a short discussion in Section 1 to explain how we can integrate our design to a practical system.
 \bigskip
 
 \emph{Your performance numbers under low contention are hard to believe: your algorithms do twice as well as the baseline. How is this even possible if contention is low. Perhaps it is an artifact of some implementation detail.}
 
 
 \bigskip
-TODO
+See the response to M7.
 \bigskip
 
 \emph{Your main workload has 5 reads and 5 writes, randomly generated (with skew). As far as I can tell they are on different objects. In the real world transactions typically read any object that they write and no reordering would help, unlike your artificial workload. The only experiment where reads and writes appear to be on the same object is the small bank benchmark. Here the skew is set to .9, which makes it unrealistic. }
 
 
 \bigskip
-TODO
+This is a very valid point. We have enhanced both benchmarks. For micro-benchmark, a transaction has 5 reads and 5 writes, where 1 object appears in both the read and the write set, to simulate the scenario of write-after-read. In Small Bank benchmark, we have implemented multi-threaded transaction generators to enable faster transaction generation, to compensate for the less system load due to its shorter transactions. In Section 5.7, we have demonstrated the performance with additional skew factors, i.e., 0.7, 0.8, and 0.9.
 \bigskip
 
 \subsection{Reviewer 3}
@@ -288,34 +295,35 @@ TODO
 \emph{W1: The evaluation is so extensive that it is hard at times to see the forest for the trees. It would benefit from a high-level summary of the takeaways for Section 5 as a whole. }
 
 \bigskip
-TODO
+See the response to M9.
 \bigskip
 
 \emph{W2: The graphs are hard to read in print.}
 
 \bigskip
-TODO
+See the repsonse to M10.
 \bigskip
 
 \emph{Reiterating W2, the evaluation covers a lot of ground and would benefit from a high-level summary. In particular, it would be nice to give brief, concrete answers to the questions posed at the beginning of the section.}
 
 
 \bigskip
-TODO
+See the response to M9.
 \bigskip
 
 \emph{Most readers will come to the paper with the intuition that batching (in the context of message packing and group commit) trades latency for throughput. The results in this paper show that batching can improve end-to-end latency of transactions as well. I think I see why and how, but the intuition should be presented more explicitly and earlier in the draft.}
 
 
 \bigskip
-TODO
+See the response to M8.
 \bigskip
 
 \emph{One imagines that the optimal batch size will differ from workload to workload based on (among other things) temporal and spatial locality of accesses. Is the simple synthetic workload used really sufficient to determine the right batch size? Or do the authors recommend "conditioning" a system with a collection of workloads to choose batch sizes?}
 
 
 \bigskip
-TODO
+As with W3 from the first reviewer, we agree that it is important to automatically and intelligently decide the best batch size under a given configuration and workload. We are interested to further explore along this direction systematically in the future work. 
+
 \bigskip
 
 \end{document}

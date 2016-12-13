@@ -1,8 +1,8 @@
 \subsection{Batch Size}
 In this experiment, we explore how the batch size affects system performance. 
 Smaller batch sizes should give lower latency but they offer fewer opportunities for reordering, leading to more aborts. 
-We configure the system to perform both storage and validator batching with batch sizes from $50$ to $200$ ($b50$, $b100$, $b150$, and $b200$), using the same batch size at the storage and the validator. As before, $baseline$ is the system with both types of batching turned off. 
+We configure the system to perform both storage and validator batching with batch sizes from $20$ to $80$ ($b20$, $b40$, $b60$, and $b80$), using the same batch size at the storage and the validator. As before, $baseline$ is the system with both types of batching turned off. 
 
-As expected, increasing the batch size always reduces the number of aborts due to more opportunities for reordering as shown in Figure~\ref{fig:bsize:abort}. 
-Figure~\ref{fig:bsize:tps} shows the throughput of the system with different batch sizes as data skew increases. As expected, the throughput first rises as we increase the size of the batch, and then degrades when the batch becomes too large.\eat{; the throughput with batch size 150 is higher than with batch size 200} Batch size 150 gives the best throughput.
-The percentile latency displays a similar pattern, as shown in Figure~\ref{fig:bsize:p95}. Again the best batch size is 150. However, using batching always gives higher throughput and a better latency profile than the baseline. Given the above results, a batch size of 150 appears optimal for our configuration; we use this batch size in the remainder of our experiments. 
+Figure~\ref{fig:bsize:tps} and~\ref{fig:bsize:latency} shows the good throughput and the average latency of the system with different batch sizes as data skew increases. As expected, the throughput first rises as we increase the size of the batch, and then degrades when the batch becomes too large. Batch size 40 gives the best throughput.
+
+The percentile latency displays a similar pattern, as shown in Figure~\ref{fig:bsize:p95}. Again the best batch size is 40. However, using batching always gives higher throughput and a better latency profile than the baseline. Given the above results, a batch size of 40 appears optimal for our configuration; we use this batch size in the remainder of our experiments. 

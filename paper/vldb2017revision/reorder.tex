@@ -63,31 +63,9 @@ The directed graph FVS (DFVS) problem is well-studied as it has many application
 We propose two greedy algorithms for finding feedback vertex sets -- one based on the graph's strongly connected components (SCCs) and the other based on sort. We also introduce a hybrid algorithm that makes strategic use of brute-force search, and consequently is slower but more precise.
 
 All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.
-Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. We can implement this by creating a hash table from the write sets and probing it with the read sets. The time complexity of building $G$ is $O(|B|+|R|+|W|)$, where $|B|$ is the size of $B$, $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
+Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. We can implement this by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the worst time complexity to probe hash table for a single write is $O(|B|)$. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|B|^2$ is the size of $B$, $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
 
 We now process $G$ to find a feedback vertex set. Both before and during the execution of our FVS algorithms, we \emph{trim} the graph to remove all nodes which have no incoming edges and/or no outgoing edges; such nodes cannot participate in any cycles and are unnecessary to include in any FVS.
-
-\eat{
-\begin{algorithm}[t]
-\caption{SCC-based greedy algorithm}
-\label{alg:scc}
-\begin{algorithmic}[1]
-%\SetAlgoLined\DontPrintSemicolon
-%\SetKwProg{main}{Algorithm}{}{}
-\Procedure{GreeduSccGraph}{$G$,$P$}
-%\main{GreedySccGraph($G$, $P$)}{
-%\KwIn{Directed graph $G$, policy $P$}
-%\KwOut{$V$, a feedback vertex set for $G$}
-\State $V\gets \emptyset$
-\State $G'\gets trim(G)$
-\State $SCC = StronglyConnectedComponents(G')$
-\For {$S \in SCC$} 
-	\State $V\gets V\cup GreedyComponent(S, P)$
-\EndFor
-\Return{$V$}
-\end{algorithmic}
-\end{algorithm}
-}%end \eat
 
 \begin{algorithm}[t]
 \SetAlgoLined\DontPrintSemicolon
@@ -245,7 +223,7 @@ The policy $P$ is at the heart of the algorithm, and it affects both its accurac
 {\bf Sort-Based Greedy Algorithm.} Our first algorithm relied on a SCC partitioning routine that takes linear time in the size of the graph. As this routine is called several times throughout the algorithm, it can cause a non-trivial overhead. Here we propose a faster greedy algorithm which uses a sort-based approach to remove nodes. Through extensive empirical tests of the SCC-based greedy algorithm we found that nodes with certain properties are very likely to be included in a FVS. Such nodes generally have high in-degree and/or out-degree. Our second algorithm is based on this observation; it sorts the nodes according to their policy $P$, and includes the top-ranked $k$ nodes in the FVS. We call $k$ the \emph{multi factor} of the algorithm. The algorithm removes these nodes and iterates on the remaining graph.
 
 Algorithm~\ref{alg:sort} shows this in more detail. We trim the graph (line 3); if the graph has no more than $k$ nodes, we reduce the multi-factor to 1 (line 5-8). Otherwise, we sort the nodes into a queue $Q$ using $P$, and include the top-ranked $k$ nodes in $V$ (line 9-13).
-After removing the selected nodes from $G$, we trim the remaining the graph again (line 14). We repeat this procedure until the graph is empty (line 4). This algorithm is faster but less accurate than the SCC-based greedy algorithm. However, as we will see in Section~\ref{sec:experiments}, in practice it produces results of comparable accuracy to the SCC-based algorithm.
+After removing the selected nodes from $G$, we trim the remaining the graph again (line 14). We repeat this procedure until the graph is empty (line 4). The worst running time complexity of this algorithm is $O(C|B|^2)$, where $|B|$ is the size of the batch, and $|C|$ includes updating the sort order after removal of the nodes, and the reduction on the number of iterations with the multi-factor. In practice, this algorithm is faster but less accurate than the SCC-based greedy algorithm. However, as we will see in Section~\ref{sec:experiments}, it produces results of comparable accuracy to the SCC-based algorithm.
 
 {\bf Hybrid Algorithm.}
 %\subsubsection{Hybrid algorithm} 

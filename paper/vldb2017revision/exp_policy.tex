@@ -1,10 +1,7 @@
 
-\subsection{More Policies for Validator Reordering}
+\subsection{More Policies for Validator Reordering: Reducing Tail Latency}
 
-In the next set of experiments, we explore validator reordering with the more complex policies presented in Section~\ref{subsec:validator_reordering:policy}; specifically, we look at policies that aim to reduce the transaction tail latency, and at policies that help ``hard transactions'' with many dependencies commit.
-
-
-\subsubsection{Reducing tail latency}
+We explore validator reordering with a more complicated policy presented in Section~\ref{subsec:validator_reordering:policy}; specifically, we look at policies that aim to reduce the transaction tail latency.
 
 We explore the possibility of reducing transaction tail latency with latency-specific policies. Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as the $baseline$ with no batching. 
 
@@ -12,15 +9,15 @@ Our first tail-latency aware policy ($rst\hbox{-}cnt$) favors transactions that 
 
 The second latency-aware policy considers both the number of restarts and a degree-based measurement of a transaction. It computes the weight of a node as the product of in-degree and out-degree over the exponential of the number of restarts with base 2. When choosing a node to include in the feedback vertex set, the nodes are sorted in descending order by their weights. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
 
-Figure~\ref{fig:restart:tps} and Figure~\ref{fig:restart:abort} show the transaction throughput and abort rate. As expected, the impact of tail-latency aware policies on overall transaction policies is slightly worse than the \texttt{prod-degree} policy due to its suboptimality in finding the minimal feedback vertex set.
+Figure~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the transaction throughput and average latency. As expected, the impact of tail-latency aware policies on overall transaction throughput and average latency are negligible as compared towhen we maximize the number of commits ($max\hbox{-}c$).
 
-Figure~\ref{fig:restart:p100} shows the tail latency from 90\% to 100\%, i.e., the latency threshold for from up to 90\% to up to 100\% of the transactions. While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects.
+Figure~\ref{fig:restart:p100} shows the tail latency from 90\% to 100\%, i.e., the latency threshold for from up to 90\% to up to 100\% of the transactions. While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline when the skew factor is high. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects. Our first latency-aware policy $rst\hbox{-}cnt$ performs similar as $max-c$.
+ 
+In contrast, while our first latency-aware policy $rst\hbox{-}cnt$ performs similar to $max-c$, the more sophisticated policy $rst\hbox{-}cnt$ consistently performs significantly better than all the others, especially for tail latency from 99.9\% to 100\%.  \eat{, although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}
 
-In contrast, the latency-aware policies $rst\hbox{-}cnt$ and $rst\hbox{-}deg$ have similar overall performance profiles and consistently perform significantly better than $baseline$ and $max\hbox{-}c$, especially for tail latency from 99.9\% to 100\%.  \eat{, although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}
+In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, the latency-ware policy that combines the graph degree and the number of restarts together performs significantly better as compared to the others.
 
-In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, a simple latency-aware policy that privileges the number of restarts over the graph degree is as effective as a more sophisticated policy that combines the graph degree and the number of restarts together.
-
-
+\eat{
 \subsubsection{Helping hard transactions commit}
 
 We simulate a heterogeneous workload by including 80\% of normal transactions with 5 reads and 5 writes, and 20\% of ``hard transactions'' with 10 reads and 10 writes. All the data accesses are drawn from the same Zipfian distribution. The larger transactions are more likely to conflict with others and less likely to commit; thus, we assign them higher priorities in the validator reordering. We compare the system performance with unweighted ($srvc$) validator reordering and a weighted ($srvs$) validator reordering policy that privileges the larger transactions. In both cases, storage batching is enabled. As before, the $baseline$ configuration uses no batching.
@@ -28,3 +25,4 @@ We simulate a heterogeneous workload by including 80\% of normal transactions wi
 Figures~\ref{fig:weighted:tps} and~\ref{fig:weighted:p95} show the overall throughput and the percentile latency. Since the ratio of large transactions is small, the overall performance under weighted and unweighted reordering policies is similar.
 
 Figures~\ref{fig:weighted:tps1},~\ref{fig:weighted:abort1}, and~\ref{fig:weighted:p951} show the throughput, the abort rate, and the percentile latency of the larger transactions alone. While the throughput of unweighted and weighted validator reordering is still similar, weighted validator reordering gives a much better transaction profile as far as the abort rate and the percentile latency are concerned.
+}
