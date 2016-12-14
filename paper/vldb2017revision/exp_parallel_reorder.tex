@@ -1,7 +1,7 @@
 \subsection{Parallel Validator Reordering}
 In this experiment, we study the benefit of introducing parallelism into validator. Since we have observed that the reordering of the feedback vertex set is the most time consuming subcomponent in validator, we increase the number of threads to parallelize batch reordering as described in Section~\ref{subsec:validator_reordering:parallel}. 
 
-Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the good throughput and the average latency with the number of reordering workers from 1 to 4 ($rw-1$, $rw-2$, $rw-3$, $rw-4$). As we increased the number of threads in transaction reordering, both the throughput and latency improves significantly when the skew factor is medium to high. When the contention is fairly low, adding more reordering workers is not beneficial for the overhead it incurs.
+Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the throughput and the average latency with the number of reordering workers from 1 to 4 ($rw-1$, $rw-2$, $rw-3$, $rw-4$). As we increased the number of threads in transaction reordering, both the throughput and latency improves significantly when the skew factor is medium to high. When the contention is fairly low, adding more reordering workers is not beneficial for the overhead it incurs.
 
 Figure~\ref{fig:reorder:p95} shows the percentile transaction latency. As we increase the number of reordering workers, more transactions are reordered concurrently, and the queuing time for each transaction at validator has reduced. Thus, the tail latency of a transaction has greatly improved. 
 

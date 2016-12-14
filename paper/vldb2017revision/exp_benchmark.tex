@@ -4,11 +4,11 @@ In our final experiment, we explore the end-to-end performance of batching in a 
 \eat{, i.e., the limit of active transactions in the system}
 
 % Overall performance.
-Overall, in the micro benchmark, batching has improved the good throughput up to 2.4x, while reduced up to 58\% of the average latency. In Small Bank benchmark, batching has improved the good throughput up to 3.1x, while reduced up to 68\% of the average latency.
+Overall, in the micro benchmark, batching has improved the throughput up to 2.4x, while reduced up to 58\% of the average latency. In Small Bank benchmark, batching has improved the throughput up to 3.1x, while reduced up to 68\% of the average latency.
 
-On the micro benchmark, Figure~\ref{fig:load_z0.8:tps} shows the throughput with skew factor 0.8. Overall, batching has improved the throughput 
+On the micro benchmark, Figure~\ref{fig:load_z0.7:tps} shows the throughput with skew factor 0.7. Overall, batching has improved the throughput 
 Using batching doubles the throughput as compared to the baseline, both for a given load and when considering the peak throughput over different loads. When the load is moderate, storage batching by itself performs best. As the load increases and the transactions become more conflict-prone, the benefit of validator batching outweighs its cost. 
 
-Figure~\ref{fig:load_z0.8:latency} shows the average transaction latency with skew factor 0.8. Both storage and validator batching reduce the latency as compared to the baseline. The validator batching gives the lowest latency when the data is extremely skewed. In addition, validator batching always reduces latency regardless of whether storage batching is enabled, again confirming our findings in Section~\ref{subsec:experiment:batching}. The performance impacts of batching are similar to those on the micro benchmark. 
+Figure~\ref{fig:load_z0.7:latency} shows the average transaction latency with skew factor 0.7. Both storage and validator batching reduce the latency as compared to the baseline. Validator batching gives the lowest latency when the data is extremely skewed. In addition, validator batching always reduces latency regardless of whether storage batching is enabled, again confirming our findings in Section~\ref{subsec:experiment:batching}. The performance impacts of batching are similar to those on the micro benchmark. 
 
 The experiments with additional parameters show similar performance impact with batching. We omit the figures due to the space limit.
