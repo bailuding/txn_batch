@@ -26,6 +26,7 @@
 \begin{document}
 \title{Response to Reviews for VLDB December 2016 Revision ID 608}
 \author{Bailu Ding, Lucja Kot, Magdalena Balazinska, Johannes Gehrke}
+\date{}
 \maketitle
 
 We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments.
@@ -61,7 +62,7 @@ We have provided more algorithmic details about reordering in Section 4.1 and ad
 \item[(M5)]  \emph{Evaluate on a platform where multiple threads can concurrently perform reads and writes.}
 \end{itemize}
 \vspace{-1em}
-We have enhanced the parallelism in the system. We implemented multi-threaded transaction generators, storage workers, and redesigned our validator to utilize pipeline parallelism, parallel reordering, and parallel validation, as described in detail in Section 4.4. We also conducted additional experiments to evaluate parallel reordering, and enhanced our experiments on the Small Bank benchmark.
+We have enhanced the parallelism in the system. We implemented multi-threaded transaction generators, storage workers, and redesigned our validator to utilize pipelined parallelism, parallel reordering, and parallel validation, as described in detail in Section 4.4. We also conducted additional experiments to evaluate parallel reordering, and enhanced our experiments on the Small Bank benchmark.
 
 \begin{itemize}
 \item[(M6)] \emph{Use more realistic workloads, in particular, with read-write contention on the same object, to conduct experiments.}
@@ -73,7 +74,7 @@ We have enhanced our experiments by adding read-write contention on the same obj
 \item[(M7)] \emph{Confirm and explain the performance numbers on low-contention workloads.}
 \end{itemize}
 \vspace{-1em}
-We have optimized the baseline by implementing a separate code path to avoid its overhead from the general batching-based architecture, i.e, skip the reordering worker at validator. In addition, we separate the impact of batching and reordering by adding a new batch baseline, where transactions are batched but not reordered. Our experiments have demonstrated that reordering consistently improves the throughput and latency on top of batching, and significantly reduces the tail latency.
+We have optimized the baseline by implementing a separate code path when the transaction is not batched, to avoid the overhead of batching, i.e., skipping the reordering workers at validator. Section 5.1 described the implementation details. In addition, we separate the impact of batching and reordering by adding a new batch mode, where transactions are batched but not reordered. Our experiments have demonstrated that reordering consistently improves the throughput and latency on top of batching, and significantly reduces the tail latency.
 
 \begin{itemize}
 \item[(M8)] \emph{Present the intuition of batching more explicitly and earlier in the paper. }
@@ -105,7 +106,7 @@ In our experiments that vary batch size, we wanted to demonstrate that there exi
 
 \emph{D2. In the experimental evaluation, increasing the skew simultaneously increases intra-batch conflicts (for which the paper proposes a solution) with inter-batch conflicts (which aren't handled). There may be a stronger statement about performance if a synthetic workload is used that has many R-W conflicts within a batch, but no conflicts across batches. (This could occur with partitionable OLTP workloads if the validator can batch transactions to the same partition together.)}
 
-We mention in Section 3.1 that if the data is soft- or hard-partitioned, and we can cluster transactions from the same partition, there is a better chance for reordering to avoid conflicts. We carried out a preliminary evaluation on batching and reordering on a synthetic partitioned workload with a simple clustering algorithm. We observed that while each batch consists of transactions from the same partition, unless we limit the number of live transactions from each partition to be the same as the size of a batch, there can be multiple outstanding batches waiting at the storage or validator. Thus, we still suffered from intra-batch conflicts. 
+This is a very good point. We mention in Section 3.1 that if the data is soft- or hard-partitioned, and we can cluster transactions from the same partition, there is a better chance for reordering to avoid conflicts. We carried out a preliminary evaluation on batching and reordering on a synthetic partitioned workload with a simple clustering algorithm. We observed that while each batch consists of transactions from the same partition, unless we limit the number of live transactions from each partition to be the same as the size of a batch, there can be multiple outstanding batches waiting at the storage or validator. Thus, we still suffered from intra-batch conflicts. 
 
 In future work, we plan to investigate more sophisticated clustering strategies.
 
@@ -123,15 +124,13 @@ In our analysis in Section 4.1, constructing the dependency graph can take up to
 
 Dependency graphs are represented using adjacency lists. Each node also stores extra bookkeeping information, such as the number of remaining in-degrees and out-degrees. An extra boolean array marks whether a node has been removed from the graph during reordering.
 
-In Section 5.1, we discussed an additional heuristic that limits the size of the graph. If we detect that the dependency graph is too dense, we discard it and directly validate the transactions without reordering. Batching at the validator allows tighter loops in validating the transactions for better caching. We have separated the effect of batching and reordering with our newly added batch baseline. We are interested in exploring the impact of caching in the future, but we haven't investigated it systematically in this paper.
+In Section 5.1, we discussed an additional heuristic that limits the size of the graph. If we detect that the dependency graph is too dense, we discard it and directly validate the transactions without reordering. Batching at the validator allows tighter loops in validating the transactions for better caching. We have separated the effect of batching and reordering with our newly added batch mode. We are interested in exploring the impact of caching in the future, but we haven't investigated it systematically in this paper.
 
 \emph{D4. The paper touts the latency improvement as a counter-intuitive benefit of batching, but it never explains why (1) the baseline has so high and variable latency on an in-memory database and (2) how does batching improve latency: is it better lower cache miss rates?}
 
-The latency is measured as the time between a transaction's start and commit. If a transaction aborts due to conflicting with previously committed transactions, it gets restarted. A transaction can be restarted multiple times before it commits. 
+This is an important point. The latency is measured as the time between a transaction's start and commit. If a transaction aborts due to conflicting with previously committed transactions, it gets restarted. A transaction can be restarted multiple times before it commits. 
 
-The baseline as well as the newly added batch baseline has a higher latency precisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
-
-Batching allows tighter loops in processing the transactions and benefits from better caching. Yet, as we have shown with our newly added batch baseline, the improved latency is mostly due to reducing the number of restarts for transactions by reordering.
+Batching allows tighter loops in processing the transactions and benefits from better caching. Yet, as we have shown with our newly added batch mode, the improved latency with our reordering approaches is mostly due to reducing the number of restarts for transactions by reordering.
 
 \emph{D7. The evaluation of the validator reordering algorithms would be more convincing if the smallest ("optimal") FVS is also shown in Figure 5. This can be as simple as brute-force between choose(150, i) choices for i=1,2,3.}
 
