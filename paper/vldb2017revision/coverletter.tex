@@ -36,8 +36,7 @@ We would like to thank the reviewers and the meta-reviewer for their insightful 
 \item[(M1)] \emph{Withdraw the claim that the use of serial validation is standard. }
 \end{itemize}
 \vspace{-1em}
-We have clarified in Section 1 that our serial validation is based on a loosely coupled architecture based on OCC with backward validation.
-
+We withdrew the claim and clarified in Section 1 that our serial validation is based on a loosely coupled architecture of OCC with backward validation. We further proposed parallel validation and added additional experiment.
 \begin{itemize}
 \item[(M2)] \emph{Describe in more detail how the proposed algorithms can work in a concurrent validation setting. }
 \end{itemize}
@@ -48,11 +47,9 @@ We have described how to parallelize reordering and validation in Section 4.4; p
 \item[(M3)]  \emph{Connect your contribution with an open-source OTLP kernel from recent prior work to show whether the graph-based validation procedure would be the bottleneck.}
 \end{itemize}
 \vspace{-1em}
-We attempted to implement our prototype on top of several open-source OLTP kernels. However, as reviewer 2 points out, this is nontrivial due to the need to customize the validation protocol.
+As we mentioned in Section 1, our architecture is best suited for integration with an in-memory versioned key-value store. Our previous work on the Centiman system proposed a loosely coupled architecture of OCC on top of key-value stores. The system in the current paper follows Centiman’s architecture and enhances its design with batching and reordering. In our experiments, we chose to implement an in-memory hash table to reduce the overhead from the storage layer.
 
-As we mentioned in Section 1, our architecture is best suited for integration with an in-memory versioned key-value store. Our previous work on the Centiman system proposed a loosely coupled architecture of OCC on top of key-value stores. The system in the current paper follows Centiman's architecture and enhances its design with batching and reordering. In our experiments, we chose to implement an in-memory hash table to reduce the overhead from the storage layer.
-
-We have also addressed the concern about the efficiency of our graph-based validation by explaining how to improve performance with parallelization in Section 4.4. 
+We also attempted to implement our prototype on top of several open-source OLTP kernels. However, as reviewer 2 points out, this is nontrivial due to the need to customize the validation protocol. We decided instead to use the revision time-window to implement parallel validation as also requested by the reviewers. The parallel reordering reduces the amortized running time of the graph-based validation and increases its capacity, preparing the protocol for better performed OLTP kernels.
 
 \begin{itemize}
 \item[(M4)]  \emph{Add more details about how the algorithms are implemented efficiently.}
