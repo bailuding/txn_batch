@@ -144,8 +144,8 @@ Nodes in SCCs of size one cannot belong to any cycle. For a SCC that contains
 more than one node, we choose a vertex to remove according to some \emph{policy}. The policy is a ranking function over vertices, and we greedily choose the top-ranked vertex to remove. We then recurse on the remaining graph. Algorithm~\ref{alg:scc} shows the details of this procedure. We begin by trimming and partitioning the graph into SCCs  (lines 3-4). We process each SCC $S$ using $GreedyComponent(S, P)$ (lines 5-7). This subroutine starts by eliminating SCCs of size one (lines 10-12). Next, it chooses the top-ranked vertex $v$ from $S$ under Policy $P$ (line 14). It includes $v$ in the $FVS$ of $S$ (line 15), removes it from $S$ (line 16), and it recursively calls $GreedySccGraph$ on the remaining graph (line 17). Finally, it returns the union of all the FVSs obtained in processing $S$ (line 18). When the top-level procedure $GreedyComponent(G, P)$ has processed all the SCCs of $G$, it returns the union of the FVSs obtained (line 8).
 
 % Time complexity analysis
-The time complexity to update the graph after removing a node is $O(|V|)$ per
-node. \emph{trim} takes $O(|V| + |E|)$ in total since each node / edge can be trimmed only once. In the worst case, we may only remove one node per iteration. So the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
+Updating the graph after removing a node takes $O(|V| + |E|)$ per
+graph in total, since each node / edge can be removed only once. Similarly, \emph{trim} takes $O(|V| + |E|)$ in total. In the worst case, we may only remove one node per iteration. Since SCC takes $O(|V|+|E|)$ per iteration, the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
 
 The policy $P$ is at the heart of the algorithm, and it affects both its accuracy and runtime. Fortunately, there is no trade-off between accuracy and running time; a more accurate policy will lead to a smaller FVS and faster termination. We discuss possible policies in Section \ref{subsec:validator_reordering:policy}.
 
@@ -237,7 +237,7 @@ After removing the selected nodes from $G$, we trim the remaining the graph
 again (line 14). We repeat this procedure until the graph is empty (line 4). 
 
 % time complexity analysis.
-As with the previous algorithm, updating the graph after removing a node is $O(|V|)$, and \emph{trim} takes $O(|V|+|E|)$ in total. The
+As with the previous algorithm, updating the graph after removing a node and \emph{trim} takes $O(|V|+|E|)$ in total. The
 Quickselect algorithm~\cite{hoare61cacm} has an amortized time complexity of
 $O(|V|)$. In the worst case, it will take $O(|V|/k)$ iterations to terminate. So
 the overall time complexity is $O(|V|^2/k + |V|^2 + |V| + |E|)=O(|V|^2+|E|)$.

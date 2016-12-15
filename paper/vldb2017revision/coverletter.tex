@@ -74,7 +74,7 @@ We have enhanced our experiments by adding read-write contention on the same obj
 \item[(M7)] \emph{Confirm and explain the performance numbers on low-contention workloads.}
 \end{itemize}
 \vspace{-1em}
-We have optimized the baseline by implementing a separate code path when the transaction is not batched, to avoid the overhead of batching, i.e., skipping the reordering workers at validator. Section 5.1 described the implementation details. In addition, we separate the impact of batching and reordering by adding a new batch mode, where transactions are batched but not reordered. Our experiments have demonstrated that reordering consistently improves the throughput and latency on top of batching, and significantly reduces the tail latency.
+We have optimized the baseline by implementing a separate code path when the transaction is not batched, to avoid the overhead of batching, i.e., skipping the reordering workers at validator. Section 5.1 described the implementation details. In addition, we separate the impact of batching and reordering by adding a new batch mode, where transactions are batched but not reordered. Our experiments have demonstrated that reordering consistently improves the throughput and latency on top of batching, and significantly reduces the tail latency. Section 5.5 describes the experimental results in detail.
 
 \begin{itemize}
 \item[(M8)] \emph{Present the intuition of batching more explicitly and earlier in the paper. }

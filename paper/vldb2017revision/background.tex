@@ -13,11 +13,11 @@ The validator assigns each transaction a timestamp $i$, and it examines the tran
 When validating a transaction $T(j)$ with timestamp $j$, the validator needs to check for conflicts with all transactions $T(i)$ with timestamp $i<j$ that have already committed and that overlapped temporally with $T(j)$, i.e., $T(i)$ had not committed when $T(j)$ started. 
 % criterion for conflicts
 $T(j)$ can be serialized after such a transaction $T(i)$ if one of the following conditions holds:
-\begin{itemize}
-\vspace{-.5em}
+\begin{itemize}[leftmargin=*]
+\vspace{-.8em}
 \item $T(i)$ completed its write phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$, or
-\vspace{-.5em}
-\item $T(i)$ completed its read phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$ as well as $WS(i) \cap WS(j) = \emptyset$
+\vspace{-.8em}
+\item $T(i)$ completed its read phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$ and $WS(i) \cap WS(j) = \emptyset$
 \vspace{-.5em}
 \end{itemize}
 If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. If they write to the same object, the updates must be applied in their serialization order. The original OCC algorithms achieve this by putting the validation and write phases in a critical section~\cite{kung81tods}, but there has been much progress on OCC over the last decades that allows system designers to relax most of these assumptions. 

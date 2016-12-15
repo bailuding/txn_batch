@@ -1,13 +1,12 @@
 \section{Evaluation}\label{sec:experiments}
-In our experimental evaluation, we wanted to understand the effect of batching and reordering at storage and validator, the performance of our validator reordering algorithms and policies, parallelizing transaction reordering at validator, and the impact of system configuration parameters. In particular, we asked the following questions:
-\begin{enumerate}
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. In particular, we asked the following questions:
+\begin{enumerate}[leftmargin=*]
 \item\vspace{-.8em} How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
 \item\vspace{-.8em} What's the impact of batch size on performance? 
 \item\vspace{-.8em} How does parallel reordering affect performance?
 \item\vspace{-.8em} How does storage and validator batching and reordering
   affect system performance?
-\item\vspace{-.8em} How well do the different policies presented in
-  Section~\ref{subsec:validator_reordering:policy} work?
+\item\vspace{-.8em} How well do the different policies from Section~\ref{subsec:validator_reordering:policy} work?
 \item\vspace{-.8em} How does batching and reordering perform on real workloads?
 \end{enumerate}
 
@@ -323,7 +322,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 We now summarize the results of our evaluation:
 \vspace{-.5em}
-\begin{enumerate}
+\begin{enumerate}[leftmargin=*]
 \item The simple sort-based FVS greedy algorithm strikes a balance between accuracy and time complexity, and leads to the best overall system performance. 
 \vspace{-.8em}
 \item There is a sweet spot for the batch size, where the system achieves its best combination of throughput, average latency, and percentile latency. We empirically selected the best batch size for our configuration and workload based on the experiment results.

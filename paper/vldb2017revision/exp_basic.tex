@@ -9,7 +9,7 @@ Next, we perform a detailed analysis on the effects of storage and validator bat
 
 Figure~\ref{fig:basic:tps},~\ref{fig:basic:latency}, and~\ref{fig:basic:p95} show the throughput, the average latency, and the percentile latency of different system modes under a variety of data skew parameters. 
 
-Overall, using batching at storage and/or validator consistently leads to significant improvements in the throughput and the latency profiles over the baseline. Batching alone ($batch$) improves the throughput significantly due to lower amortized overhead per transaction and better caching with tighter loops in processing. In addition, storage reordering and validator reordering consistently further improve the throughput. Moreover, validator reordering significantly reduces the average latency and the percentile latencies.
+Overall, using batching at storage and/or validator consistently leads to significant improvements in performance, up to 2.7x in throughput. In addition, storage and validator reordering consistently further improve the throughput to up to 1.3x as compared to $batch$. Moreover, validator reordering significantly reduces the average latency, by up to 67\%, and the percentile latencies, by up to 82\%, as compared to $baseline$.
 
 \eat{When batching is enabled ($sr$ and $srvc$), the throughput is 2.1x-2.4x that of the baseline ($baseline$). In addition, using validator batching always gives a better latency profile (Figure~\ref{fig:basic:p95}).}
 
@@ -18,7 +18,7 @@ When the data contention is extremely high, the number of intra-batch conflicts
 that cannot be resolved by validator reordering increases. Validator reordering
 is slower due to denser graphs, while bringing less benefit. Thus, the best throughput is achieved by using storage batching only ($sr$). 
 
-We conducted additional experiments with the batch size fixed to evaluate the system's peak performance with the load varied. Figure~\ref{fig:load_z0.7:tps} shows the throughput of the system with batch size 20 and skew factor 0.7. The throughput increases with the concurrency level of the system, and then degrades as the system is overloaded. Enabling both storage and validator batching consistently outperforms the others. The figures on additional metrics and parameters are omitted due to the space limit.
+We conducted additional experiments with the batch size fixed to evaluate the system's peak performance with the load varied. Figure~\ref{fig:load_z0.7:tps} shows the throughput of the system with batch size 20 and skew factor 0.7. Enabling both storage and validator batching consistently outperforms the others. The throughput increases to up to 2.5x, and the average latency reduces by up to 63\% as compared to $baseline$. The figures on additional metrics and parameters are omitted due to the space limit.
 
 \eat{
 To summarize, it is always beneficial to enable storage batching since this technique reduces inter-batch aborts at a minimal cost. While validator batching consistently gives a percentile latency, it is most effective in mid-contention settings, when the reduction of intra-batch conflicts that it brings is sufficient to justify its cost. }
