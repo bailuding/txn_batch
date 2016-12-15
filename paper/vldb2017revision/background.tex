@@ -1,7 +1,7 @@
 \section{Background}\label{sec:background}
 
 % backward occ
-We use the term optimistic concurrency control (OCC) to refer to the classical backward validation based OCC protocol introduced by Kung~\cite{kung81tods}.
+We use the term optimistic concurrency control (OCC) to refer to the backward validation based OCC protocol introduced by Kung~\cite{kung81tods} in a loosely coupled architecture.
 % with read, write, and validation phases.
 As explained in the introduction, every transaction goes through three phases. First comes a \emph{read} phase, where the transaction reads data from the storage and executes while making writes to a private ``scratch workspace''. Then the transaction enters a \emph{validation} phase. If validation is successful, the transaction enters the \emph{write} phase, when its writes are installed in the storage. 
 % details for validation

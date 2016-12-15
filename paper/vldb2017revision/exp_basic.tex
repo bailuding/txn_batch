@@ -9,7 +9,7 @@ Next, we perform a detailed analysis on the effects of storage and validator bat
 
 Figure~\ref{fig:basic:tps},~\ref{fig:basic:latency}, and~\ref{fig:basic:p95} show the throughput, the average latency, and the percentile latency of different system modes under a variety of data skew parameters. 
 
-Overall, using batching at storage and/or validator consistently leads to significant improvements in performance, up to 2.7x in throughput. In addition, storage and validator reordering consistently further improve the throughput to up to 1.3x as compared to $batch$. Moreover, validator reordering significantly reduces the average latency, by up to 67\%, and the percentile latencies, by up to 82\%, as compared to $baseline$.
+Overall, using batching at storage and/or validator consistently leads to significant improvements in performance, up to 2.7x in throughput. In addition, storage and validator reordering consistently further improve the throughput to up to 1.3x as compared to $batch$. Moreover, validator reordering significantly reduces the average latency, by up to 67\%, and the percentile latencies, by up to 82\%, as compared to $baseline$, and by up to 25\% and 70\% as compared to $batch$.
 
 \eat{When batching is enabled ($sr$ and $srvc$), the throughput is 2.1x-2.4x that of the baseline ($baseline$). In addition, using validator batching always gives a better latency profile (Figure~\ref{fig:basic:p95}).}
 
