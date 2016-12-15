@@ -10,7 +10,7 @@ The validator assigns each transaction a timestamp $i$, and it examines the tran
 %For a transaction with timestamp $i$, we denote its read set by $RS(i)$ and its write set by $WS(i)$.
 %%OCC validation enforces serializability; we only allow a transaction to pass validation if it can be serialized after all transactions that have already committed. and ensures that transactions are serialized in timestamp order.
 % the scope of validation
-When validating a transaction $T(j)$ with timestamp $j$ , the validator needs to check for conflicts with all transactions $T(i)$ with timestamp $i<j$ that have already committed and that overlapped temporally with $T(j)$, i.e., $T(i)$ had not committed when $T(j)$ started. 
+When validating a transaction $T(j)$ with timestamp $j$, the validator needs to check for conflicts with all transactions $T(i)$ with timestamp $i<j$ that have already committed and that overlapped temporally with $T(j)$, i.e., $T(i)$ had not committed when $T(j)$ started. 
 % criterion for conflicts
 $T(j)$ can be serialized after such a transaction $T(i)$ if one of the following conditions holds:
 \begin{itemize}

@@ -1,0 +1,262 @@
+\begin{thebibliography}{10}
+
+\bibitem{abbott1992scheduling}
+R.~K. Abbott and H.~Garcia-Molina.
+\newblock Scheduling real-time transactions: A performance evaluation.
+\newblock {\em TODS}, 17(3), 1992.
+
+\bibitem{adya97podc}
+A.~Adya and B.~Liskov.
+\newblock Lazy consistency using loosely synchronized clocks.
+\newblock In {\em {PODC}}, 1997.
+
+\bibitem{agrawal1987concurrency}
+R.~Agrawal, M.~J. Carey, et~al.
+\newblock Concurrency control performance modeling: alternatives and
+  implications.
+\newblock {\em TODS}, 12(4), 1987.
+
+\bibitem{alomari2008icde}
+M.~Alomari, M.~Cahill, et~al.
+\newblock The cost of serializability on platforms that use snapshot isolation.
+\newblock In {\em ICDE}, 2008.
+
+\bibitem{baker11cidr}
+J.~Baker, C.~Bond, et~al.
+\newblock Megastore: Providing scalable, highly available storage for
+  interactive services.
+\newblock In {\em {CIDR}}, 2011.
+
+\bibitem{bayer1982dynamic}
+R.~Bayer, K.~Elhardt, et~al.
+\newblock Dynamic timestamp allocation for transactions in database systems.
+\newblock In {\em DDB}, 1982.
+
+\bibitem{bernstein2015optimizing}
+P.~A. Bernstein, S.~Das, B.~Ding, and M.~Pilman.
+\newblock Optimizing optimistic concurrency control for tree-structured,
+  log-structured databases.
+\newblock In {\em SIGMOD}, 2015.
+
+\bibitem{bernstein11cidr}
+P.~A. Bernstein, C.~W. Reid, and S.~Das.
+\newblock Hyder - {A} transactional record manager for shared flash.
+\newblock In {\em {CIDR}}, 2011.
+
+\bibitem{bernstein11vldb}
+P.~A. Bernstein, C.~W. Reid, et~al.
+\newblock Optimistic concurrency control by melding trees.
+\newblock {\em {PVLDB}}, 4(11), 2011.
+
+\bibitem{boksenbaum1987concurrent}
+C.~Boksenbaum, M.~Cart, et~al.
+\newblock Concurrent certifications by intervals of timestamps in distributed
+  database systems.
+\newblock {\em TSE}, SE-13(4), 1987.
+
+\bibitem{castro2002practical}
+M.~Castro and B.~Liskov.
+\newblock Practical byzantine fault tolerance and proactive recovery.
+\newblock {\em TODS}, 20(4), 2002.
+
+\bibitem{corbett12osdi}
+J.~C. {Corbett~et~al.}
+\newblock Spanner: Google's globally-distributed database.
+\newblock In {\em {OSDI}}, 2012.
+
+\bibitem{cutello2015targeting}
+V.~Cutello and F.~Pappalardo.
+\newblock Targeting the minimum vertex set problem with an enhanced genetic
+  algorithm improved with local search strategies.
+\newblock In {\em Intelligent Computing Theories and Methodologies}. 2015.
+
+\bibitem{debrabant2013anti}
+J.~DeBrabant, A.~Pavlo, et~al.
+\newblock Anti-caching: A new approach to database management system
+  architecture.
+\newblock {\em VLDB}, 6(14), 2013.
+
+\bibitem{ding2015centiman}
+B.~Ding, L.~Kot, A.~Demers, and J.~Gehrke.
+\newblock Centiman: elastic, high performance optimistic concurrency control by
+  watermarking.
+\newblock In {\em SOCC}, 2015.
+
+\bibitem{elmore2015squall}
+A.~J. Elmore, V.~Arora, et~al.
+\newblock Squall: Fine-grained live reconfiguration for partitioned main memory
+  databases.
+\newblock In {\em SIGMOD}, 2015.
+
+\bibitem{warp}
+R.~Escriva, B.~Wong, and E.~G. Sirer.
+\newblock Warp: Lightweight multi-key transactions for key-value stores.
+\newblock Technical report, Cornell University, Ithaca, NY, USA, 2013.
+
+\bibitem{faleiro2014rethinking}
+J.~M. Faleiro and D.~J. Abadi.
+\newblock Rethinking serializable multiversion concurrency control.
+\newblock {\em {PVLDB}}, 2015.
+
+\bibitem{faleiro2014lazy}
+J.~M. Faleiro, A.~Thomson, and D.~J. Abadi.
+\newblock Lazy evaluation of transactions in database systems.
+\newblock In {\em {SIGMOD}}, 2014.
+
+\bibitem{franaszek1985limitations}
+P.~Franaszek and J.~T. Robinson.
+\newblock Limitations of concurrency in transaction processing.
+\newblock {\em TODS}, 10(1), 1985.
+
+\bibitem{friedman2006adaptive}
+R.~Friedman and E.~Hadad.
+\newblock Adaptive batching for replicated servers.
+\newblock In {\em SRDS}, Oct 2006.
+
+\bibitem{friedman1997packing}
+R.~Friedman and R.~Van~Renesse.
+\newblock Packing messages as a tool for boosting the performance of total
+  ordering protocols.
+\newblock In {\em HPDC}, 1997.
+
+\bibitem{glendenning2011scalable}
+L.~Glendenning, I.~Beschastnikh, et~al.
+\newblock Scalable consistency in {Scatter}.
+\newblock In {\em SOSP}, 2011.
+
+\bibitem{gray1994quickly}
+J.~Gray, P.~Sundaresan, et~al.
+\newblock Quickly generating billion-record synthetic databases.
+\newblock In {\em SIGMOD Rec.}, volume~23, 1994.
+
+\bibitem{hagmann1987reimplementing}
+R.~Hagmann.
+\newblock Reimplementing the cedar file system using logging and group commit.
+\newblock {\em SIGOPS Oper. Syst. Rev.}, 21(5), Nov. 1987.
+
+\bibitem{haritsa1993value}
+J.~R. Haritsa, M.~J. Canrey, and M.~Livny.
+\newblock Value-based scheduling in real-time database systems.
+\newblock {\em The VLDB Journal}, 2(2), 1993.
+
+\bibitem{haritsa1990dynamic}
+J.~R. Haritsa, M.~J. Carey, et~al.
+\newblock Dynamic real-time optimistic concurrency control.
+\newblock In {\em RTSS}, 1990.
+
+\bibitem{helal1993adaptive}
+A.~Helal, T.-H. Ku, et~al.
+\newblock Adaptive transaction scheduling.
+\newblock In {\em CIKM}, 1993.
+
+\bibitem{huang1991experimental}
+J.~Huang, J.~A. Stankovic, et~al.
+\newblock Experimental evaluation of real-time optimistic concurrency control
+  schemes.
+\newblock In {\em VLDB}, volume~91, 1991.
+
+\bibitem{kann1992approximability}
+V.~Kann.
+\newblock {\em On the approximability of NP-complete optimization problems}.
+\newblock PhD thesis, Royal Institute of Technology Stockholm, 1992.
+
+\bibitem{karp1972reducibility}
+R.~M. Karp.
+\newblock {\em Reducibility among combinatorial problems}.
+\newblock 1972.
+
+\bibitem{kung81tods}
+H.~T. Kung and J.~T. Robinson.
+\newblock On optimistic methods for concurrency control.
+\newblock {\em {ACM} Trans. Database Syst.}, 6(2), 1981.
+
+\bibitem{lam1995real}
+K.-W. Lam, K.-Y. Lam, et~al.
+\newblock Real-time optimistic concurrency control protocol with dynamic
+  adjustment of serialization order.
+\newblock In {\em RTSS}, 1995.
+
+\bibitem{lee1993using}
+J.~Lee and S.~H. Son.
+\newblock Using dynamic adjustment of serialization order for real-time
+  database systems.
+\newblock In {\em RTSS}, 1993.
+
+\bibitem{lin1990concurrency}
+Y.~Lin and S.~H. Son.
+\newblock Concurrency control in real-time databases by dynamic adjustment of
+  serialization order.
+\newblock In {\em RTSS}, 1990.
+
+\bibitem{mu2014extracting}
+S.~Mu, Y.~Cui, et~al.
+\newblock Extracting more concurrency from distributed transactions.
+\newblock In {\em OSDI}, 2014.
+
+\bibitem{nagle1984congestion}
+J.~Nagle.
+\newblock Congestion control in {IP/TCP} internetworks.
+\newblock {\em SIGCOMM Comput. Commun. Rev.}, 14(4), Oct. 1984.
+
+\bibitem{patterson12vldb}
+S.~Patterson, A.~J. Elmore, et~al.
+\newblock Serializability, not serial: Concurrency control and availability in
+  multi-datacenter datastores.
+\newblock {\em {PVLDB}}, 5(11), 2012.
+
+\bibitem{pavlo2012skew}
+A.~Pavlo, C.~Curino, and S.~Zdonik.
+\newblock Skew-aware automatic database partitioning in shared-nothing,
+  parallel oltp systems.
+\newblock In {\em SIGMOD}, 2012.
+
+\bibitem{peng10osdi}
+D.~Peng and F.~Dabek.
+\newblock Large-scale incremental processing using distributed transactions and
+  notifications.
+\newblock In {\em {OSDI}}, 2010.
+
+\bibitem{santos2012tuning}
+N.~Santos and A.~Schiper.
+\newblock Tuning paxos for high-throughput with batching and pipelining.
+\newblock In {\em Distributed Computing and Networking}. 2012.
+
+\bibitem{shasha1995transaction}
+D.~Shasha, F.~Llirbat, et~al.
+\newblock Transaction chopping: Algorithms and performance studies.
+\newblock {\em TODS}, 20(3), 1995.
+
+\bibitem{tarjan1972depth}
+R.~Tarjan.
+\newblock Depth-first search and linear graph algorithms.
+\newblock {\em SIAM journal on computing}, 1(2), 1972.
+
+\bibitem{thomasian1998distributed}
+A.~Thomasian.
+\newblock Distributed optimistic concurrency control methods for
+  high-performance transaction processing.
+\newblock {\em TKDE}, 10(1), 1998.
+
+\bibitem{thomson2012calvin}
+A.~Thomson, T.~Diamond, et~al.
+\newblock Calvin: fast distributed transactions for partitioned database
+  systems.
+\newblock In {\em SIGMOD}, 2012.
+
+\bibitem{xie2014salt}
+C.~Xie, C.~Su, et~al.
+\newblock Salt: Combining {ACID} and {BASE} in a distributed database.
+\newblock In {\em OSDI}, volume~14, 2014.
+
+\bibitem{xie2015high}
+C.~Xie, C.~Su, et~al.
+\newblock High-performance {ACID} via modular concurrency control.
+\newblock In {\em SOSP}, 2015.
+
+\bibitem{yu1992analysis}
+P.~S. Yu and D.~M. Dias.
+\newblock Analysis of hybrid concurrency control schemes for a high data
+  contention environment.
+\newblock {\em TSE}, 18(2), 1992.
+
+\end{thebibliography}
