@@ -119,7 +119,7 @@ $G\gets trim(G)$\;
 	 	$V\gets V\cup GreedySortGraph(G, P, 1)$\;
 	 	break\;
 	}
-	$Q\gets sort(G, P)$\;
+	$Q\gets QuickSelect(G, P, k)$\;
 	\For {$i=1; i\leq k; ++i$} {
 		$V\gets V\cup Q[i]$\;
 		$G\gets remove(G, Q[i])$\;
@@ -140,6 +140,9 @@ $G\gets trim(G)$\;
 
 Nodes in SCCs of size one cannot belong to any cycle. For a SCC that contains
 more than one node, we choose a vertex to remove according to some \emph{policy}. The policy is a ranking function over vertices, and we greedily choose the top-ranked vertex to remove. We then recurse on the remaining graph. Algorithm~\ref{alg:scc} shows the details of this procedure. We begin by trimming and partitioning the graph into SCCs  (lines 3-4). We process each SCC $S$ using $GreedyComponent(S, P)$ (lines 5-7). This subroutine starts by eliminating SCCs of size one (lines 10-12). Next, it chooses the top-ranked vertex $v$ from $S$ under Policy $P$ (line 14). It includes $v$ in the $FVS$ of $S$ (line 15), removes it from $S$ (line 16), and it recursively calls $GreedySccGraph$ on the remaining graph (line 17). Finally, it returns the union of all the FVSs obtained in processing $S$ (line 18). When the top-level procedure $GreedyComponent(G, P)$ has processed all the SCCs of $G$, it returns the union of the FVSs obtained (line 8).
+
+% Time complexity analysis
+The time complexity to update the graph after removing a node is $O(|V|)$ per node. The trim of the graph takes $O(|V| + |E|)$ in total since each node / edge can be trimmed only once. In the worst case, we may only remove one node per iteration. So the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
 
 The policy $P$ is at the heart of the algorithm, and it affects both its accuracy and runtime. Fortunately, there is no trade-off between accuracy and running time; a more accurate policy will lead to a smaller FVS and faster termination. We discuss possible policies in Section \ref{subsec:validator_reordering:policy}.
 
@@ -226,11 +229,14 @@ The policy $P$ is at the heart of the algorithm, and it affects both its accurac
 
 {\bf Sort-Based Greedy Algorithm.} Our first algorithm relies on a SCC partitioning routine that takes linear time in the size of the graph. As this routine is called several times throughout the algorithm, it can cause a non-trivial overhead. Here we propose a faster greedy algorithm using a sort-based approach to remove nodes. Through extensive empirical tests of the SCC-based greedy algorithm we found that at each iteration, all the top ranked nodes in the graph are very likely to be included in the final FVS. Our second algorithm is based on this observation; it sorts the nodes according to their policy $P$, and includes the top-ranked $k$ nodes in the FVS. We call $k$ the \emph{multi factor} of the algorithm. The algorithm removes these nodes and iterates on the remaining graph.
 
-% TODO(blding): fix the description, replace |B| with |V| and |E|, fix C, use partition algorithm.
-Algorithm~\ref{alg:sort} shows this in more detail. We trim the graph (line 3); if the graph has no more than $k$ nodes, we reduce the multi-factor to 1 (line 5-8). Otherwise, we sort the nodes into a queue $Q$ using $P$, and include the top-ranked $k$ nodes in $V$ (line 9-13).
+Algorithm~\ref{alg:sort} shows this in more detail. We start by trimming the graph (line 3); if the graph has no more than $k$ nodes, we reduce the multi-factor to 1 (line 5-8). Otherwise, we sort and select top ranked $k$ nodes into a queue $Q$ using $P$ with the Quickselect algorithm~\cite{hoare61cacm}, and include the $k$ nodes in $V$ (line 9-13).
 After removing the selected nodes from $G$, we trim the remaining the graph
-again (line 14). We repeat this procedure until the graph is empty (line 4). The
-time complexity of this algorithm is $O(C|B|)$, where $|B|$ is the size of the batch, and $C$ is a constant for sorting, updating the graph, and the reduction of iterations using the multi-factor. Since the nodes are mostly sorted after updating the graph, the sorting in each iteration (except for the first one) is mostly linear. In practice, this algorithm is faster but less accurate than the SCC-based greedy algorithm. However, as we will see in Section~\ref{sec:experiments}, it produces results of comparable accuracy to the SCC-based algorithm in practice.
+again (line 14). We repeat this procedure until the graph is empty (line 4). 
+
+% time complexity analysis.
+As with the previous algorithm, the time complexity to update the graph after removing a node is $O(|V|)$, and the trim takes $O(|V|+|E|)$ in total. The Quickselect algorithm~\cite{hoare61cacm} has an amortized time complexity of $O(|V|)$. In the worst case, it will take $O(|V|/k)$ iterations to terminate. So the time complexity of this algorithm is $O(|V|^2/k + |V|^2 + |V| + |E|)=O(|V|^2+|E|)$.
+
+In practice, this algorithm is faster but less accurate than the SCC-based greedy algorithm. However, as we will see in Section~\ref{sec:experiments}, it produces results of comparable accuracy to the SCC-based algorithm in practice.
 
 {\bf Hybrid Algorithm.}
 %\subsubsection{Hybrid algorithm} 
