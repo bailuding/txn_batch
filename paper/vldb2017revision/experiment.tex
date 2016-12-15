@@ -315,21 +315,20 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \input{exp_benchmark} % include load and small bank experiments.
 
 \subsection{Experiment Summary}
-We have conducted a set of experiments to understand the effect of batching and reordering at storage and validator, the performance of different reordering algorithms and policies, parallelizing transaction reordering at the validator, and the impact of system configuration parameters.
 
-From the experiment results, we observed that 
-\vspace{-1em}
+We now summarize the results of our evaluation.
+
 \begin{enumerate}
-\item The simple sort-based greedy algorithm for finding the feedback vertex set strikes a balance between accuracy and time complexity, and leads to the best overall system performance. 
+\item The simple sort-based FVS greedy algorithm strikes a balance between accuracy and time complexity, and leads to the best overall system performance. 
 \vspace{-.8em}
-\item There is a sweet spot for the batch size, where the system achieves its best performance for the throughput, the average latency, and the percentile latency. We empirically selected the best batch size for our configuration and workload based on the experiment results.
+\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput, average latency, and percentile latency. We empirically selected the best batch size for our configuration and workload based on the experiment results.
 \vspace{-.8em}
 \item As we increase the level of parallelism in validator reordering, the throughput, the average latency, and the percentile latency all improve, especially when the data contention is medium to high.
 \vspace{-.8em}
-\item Batching alone improves throughput significantly. Adding ordering on top of batching consistently improves throughput, and significantly reduces the average and the percentile latency. It is always beneficial to enable storage reordering. While validator reordering consistently improves the percentile transaction latency, it sometimes hurt the throughput and latency when the data contention is at extremes.
+\item Batching by itself improves throughput significantly. Adding reordering consistently improves throughput, and significantly reduces the average and the percentile latency. It is always beneficial to use storage reordering. Validator reordering consistently improves the percentile transaction latency but can hurt the throughput and latency when the data contention is at the extremes.
 \vspace{-.8em}
 \item For alternative reordering policies at the validator, privileging transactions with a metric that combines the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency.
 \vspace{-.8em}
-\item Finally, in Small Bank benchmark, batching and reordering provides significantly better performance in the throughput, the average latency, and the percentile latency as compared to the baseline. 
+\item Finally, in the Small Bank benchmark, batching and reordering provides significantly better performance with respect to the throughput, the average latency, and the percentile latency as compared to the baseline. 
 \vspace{-.8em}
 \end{enumerate}  
