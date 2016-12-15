@@ -60,7 +60,9 @@ Despite the above hardness results, empirical studies have shown that simple gre
 
 %We need fast algorithms to avoid increasing both transaction latencies and the number of aborts. 
 The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
-We propose two greedy algorithms for finding feedback vertex sets -- one based on the graph's strongly connected components (SCCs) and the other based on sort. We also introduce a hybrid algorithm that makes strategic use of brute-force search, and consequently is slower but more precise.
+We propose two greedy algorithms for finding feedback vertex sets -- one based
+on the graph's strongly connected components (SCCs) and the other based on sort.
+We also introduce a hybrid algorithm that makes strategic use of brute-force search; this is slower but more precise.
 
 All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.
 Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. This can be implemented by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the worst time complexity to probe hash table for a single write is $O(|B|)$, where $|B|$ is the size of the batch. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
@@ -142,7 +144,8 @@ Nodes in SCCs of size one cannot belong to any cycle. For a SCC that contains
 more than one node, we choose a vertex to remove according to some \emph{policy}. The policy is a ranking function over vertices, and we greedily choose the top-ranked vertex to remove. We then recurse on the remaining graph. Algorithm~\ref{alg:scc} shows the details of this procedure. We begin by trimming and partitioning the graph into SCCs  (lines 3-4). We process each SCC $S$ using $GreedyComponent(S, P)$ (lines 5-7). This subroutine starts by eliminating SCCs of size one (lines 10-12). Next, it chooses the top-ranked vertex $v$ from $S$ under Policy $P$ (line 14). It includes $v$ in the $FVS$ of $S$ (line 15), removes it from $S$ (line 16), and it recursively calls $GreedySccGraph$ on the remaining graph (line 17). Finally, it returns the union of all the FVSs obtained in processing $S$ (line 18). When the top-level procedure $GreedyComponent(G, P)$ has processed all the SCCs of $G$, it returns the union of the FVSs obtained (line 8).
 
 % Time complexity analysis
-The time complexity to update the graph after removing a node is $O(|V|)$ per node. The trim of the graph takes $O(|V| + |E|)$ in total since each node / edge can be trimmed only once. In the worst case, we may only remove one node per iteration. So the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
+The time complexity to update the graph after removing a node is $O(|V|)$ per
+node. \emph{trim} takes $O(|V| + |E|)$ in total since each node / edge can be trimmed only once. In the worst case, we may only remove one node per iteration. So the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
 
 The policy $P$ is at the heart of the algorithm, and it affects both its accuracy and runtime. Fortunately, there is no trade-off between accuracy and running time; a more accurate policy will lead to a smaller FVS and faster termination. We discuss possible policies in Section \ref{subsec:validator_reordering:policy}.
 
@@ -234,7 +237,10 @@ After removing the selected nodes from $G$, we trim the remaining the graph
 again (line 14). We repeat this procedure until the graph is empty (line 4). 
 
 % time complexity analysis.
-As with the previous algorithm, the time complexity to update the graph after removing a node is $O(|V|)$, and the trim takes $O(|V|+|E|)$ in total. The Quickselect algorithm~\cite{hoare61cacm} has an amortized time complexity of $O(|V|)$. In the worst case, it will take $O(|V|/k)$ iterations to terminate. So the time complexity of this algorithm is $O(|V|^2/k + |V|^2 + |V| + |E|)=O(|V|^2+|E|)$.
+As with the previous algorithm, updating the graph after removing a node is $O(|V|)$, and \emph{trim} takes $O(|V|+|E|)$ in total. The
+Quickselect algorithm~\cite{hoare61cacm} has an amortized time complexity of
+$O(|V|)$. In the worst case, it will take $O(|V|/k)$ iterations to terminate. So
+the overall time complexity is $O(|V|^2/k + |V|^2 + |V| + |E|)=O(|V|^2+|E|)$.
 
 In practice, this algorithm is faster but less accurate than the SCC-based greedy algorithm. However, as we will see in Section~\ref{sec:experiments}, it produces results of comparable accuracy to the SCC-based algorithm in practice.
 
@@ -255,7 +261,7 @@ Figure~\ref{fig:simple} shows the same example using the sort-based greedy algor
 \subsection{Incorporating Policies}
 \label{subsec:validator_reordering:policy}
 
-Policies are of upmost importance for our algorithms. Recall that a policy is a ranking function on vertices of the graph, and a good policy ranks vertices which are likely to be in a desirable FVS highly. 
+Policies are of utmost importance for our algorithms. Recall that a policy is a ranking function on vertices of the graph, and a good policy ranks vertices which are likely to be in a desirable FVS highly. 
 
 We first discuss policies that aim at minimizing the number of conflicts, i.e., the size of the FVS. The simplest such policy is \texttt{random} that assigns all nodes random rankings. Alternatively, we can rank nodes using degree-based heuristics, which use the intuition that the removal of a node will break many cycles if the node is high in some measurement of its graph degree. Such heuristics have  been shown to work well for FVS computation~\cite{cutello2015targeting}. For example, the policy \texttt{max-degree} chooses the node with the largest degree (either in-degree or out-degree), \texttt{sum-degree} chooses the node with the largest total degree (in-degree plus out-degree), and \texttt{prod-degree} chooses the node with the largest product of in-degree and out-degree. 
 
@@ -273,10 +279,15 @@ In centralized reordering, the validator prepares a batch of transactions, reord
 
 % Pipeline parallelism
 For pipelined parallelism, we can run each of the four validator subcomponents in a different thread. The batch preparation \eat{subcomponent }receives requests from the transaction coordinator, packages transaction into batches, and sends a reordering request to the transaction reordering subcomponent. Next, the transaction reordering \eat{subcomponent }first pre-validates a batch of transactions based on the latest database snapshot available, then reorders the remaining transactions, and sends a validation request consisting of the remaining transactions to the transaction validation subcomponent. 
-The transaction validation\eat{ subcomponent} takes a batch of ordered transactions, and validates them against updates from previously committed transactions. The cache update subcomponent finally applies the updates from transactions that pass the validation, serialized first by the order that the transaction validation subcomponent validates the batch, and then by the order that the reordering subcomponent computes within a batch. 
+The transaction validation\eat{ subcomponent} takes a batch of ordered
+transactions, and validates them against updates from previously committed
+transactions. The cache update subcomponent finally applies the updates from
+transactions that pass validation, serialized first by the order that the transaction validation subcomponent validates the batch, and then by the order that the reordering subcomponent computes within a batch. 
 
 % Compare to single threaded case.
-In the single threaded centralized validator, a batch of transactions is pre-validated against the current snapshot of the database. Thus, the transactions that pass the pre-validation can only conflict with transactions within the batch, and will not conflict with previous committed transactions. So after reordering, the remaining transactions all commit.
+In the single threaded centralized validator, a batch of transactions is
+pre-validated against the current snapshot of the database. Thus, the
+transactions that pass pre-validation can only conflict with transactions within the batch, and will not conflict with previous committed transactions. So after reordering, the remaining transactions all commit.
 
 In the pipelined reordering, the validation is decoupled into two phases. We denote a database snapshot as $S_k$, where transactions whose timestamps are less or equal to $k$ have been committed as of this snapshot. In the reordering subcomponent, a batch of transactions $B$ is validated against the latest database snapshot $S_m$. The remaining transactions after pre-filtering are reordered as a batch $B'$ and sent to the validation\eat{ subcomponent}. $B'$ is again validated against the current database snapshot $S_n$. Since the validation subcomponent can be validating uncommitted transactions while $B$ is being processed at the reordering subcomponent, when $B'$ arrives at the validation\eat{ subcomponent},  we may have $n\geq m$. Thus, transactions in $B'$ can still abort due to conflicts with previously committed transactions in $S_n$.
 
