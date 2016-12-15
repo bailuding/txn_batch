@@ -35,19 +35,19 @@ We would like to thank the reviewers and the meta-reviewer for their insightful 
 \begin{itemize}
 \item[(M1)] \emph{Withdraw the claim that the use of serial validation is standard. }
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have clarified in Section 1 that our serial validation is based on a loosely coupled architecture based on OCC with backward validation.
 
 \begin{itemize}
 \item[(M2)] \emph{Describe in more detail how the proposed algorithms can work in a concurrent validation setting. }
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have described how to parallelize reordering and validation in Section 4.4; parallelization is achieved with a four-stage pipeline, where the stages are batch preparation, transaction reordering, transaction validation, and cache update. Each of these subcomponents can be further parallelized to allow concurrent processing. We have also added experiments on parallel reordering in Section 5.3. 
 
 \begin{itemize}
 \item[(M3)]  \emph{Connect your contribution with an open-source OTLP kernel from recent prior work to show whether the graph-based validation procedure would be the bottleneck.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We attempted to implement our prototype on top of several open-source OLTP kernels. However, as reviewer 2 points out, this is nontrivial due to the need to customize the validation protocol.
 
 As we mentioned in Section 1, our architecture is best suited for integration with an in-memory versioned key-value store. Our previous work on the Centiman system proposed a loosely coupled architecture of OCC on top of key-value stores. The system in the current paper follows Centiman's architecture and enhances its design with batching and reordering. In our experiments, we chose to implement an in-memory hash table to reduce the overhead from the storage layer.
@@ -57,43 +57,43 @@ We have also addressed the concern about the efficiency of our graph-based valid
 \begin{itemize}
 \item[(M4)]  \emph{Add more details about how the algorithms are implemented efficiently.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have provided more algorithmic details about reordering in Section 4.1 and additional implementation details in Section 5. We have improved our implementation with a heuristic to limit the size of the dependency graph (Section 5), and further discussed and evaluated parallelizing the reordering algorithms in Section 4.4 and Section 5.3. 
 
 \begin{itemize}
 \item[(M5)]  \emph{Evaluate on a platform where multiple threads can concurrently perform reads and writes.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have enhanced the parallelism in the system. We implemented multi-threaded transaction generators, storage workers, and redesigned our validator to utilize pipeline parallelism, parallel reordering, and parallel validation, as described in detail in Section 4.4. We also conducted additional experiments to evaluate parallel reordering, and enhanced our experiments on the Small Bank benchmark.
 
 \begin{itemize}
 \item[(M6)] \emph{Use more realistic workloads, in particular, with read-write contention on the same object, to conduct experiments.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have enhanced our experiments by adding read-write contention on the same object for our micro benchmark. Every transaction has 5 reads and 5 writes, where one of the reads and one of the writes affect the same object. Section 5.1 describes the micro benchmark in detail.
 
 \begin{itemize}
 \item[(M7)] \emph{Confirm and explain the performance numbers on low-contention workloads.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have optimized the baseline by implementing a separate code path to avoid its overhead from the general batching-based architecture, i.e, skip the reordering worker at validator. In addition, we separate the impact of batching and reordering by adding a new batch baseline, where transactions are batched but not reordered. Our experiments have demonstrated that reordering consistently improves the throughput and latency on top of batching, and significantly reduces the tail latency.
 
 \begin{itemize}
 \item[(M8)] \emph{Present the intuition of batching more explicitly and earlier in the paper. }
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have clarified in Section 1 that batching reduces the latency of transactions because it reduces the number of restarts.
 
 \begin{itemize}
 \item[(M9)] \emph{Give a short summary of evaluation results answering the questions posted in the beginning of the section.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have summarized our experimental results in Section 5.8.
 
 \begin{itemize}
 \item[(M10)] \emph{Improve the graphs for better readability.}
 \end{itemize}
-\vspace{-.5em}
+\vspace{-1em}
 We have increased the font size and made the lines bolder in the figures as much as possible to make them more readable in print.
 
 \section{Changes based on individual reviewer comments}
@@ -122,17 +122,17 @@ We have added additional details on how the algorithm is implemented in Section 
 
 The validation request for a transaction contains the keys and versions of its reads and the keys of its writes. The validator caches the write keys of prior transactions that have passed the validation in a hash table, until they are overwritten by later updates. 
 
-In our analysis in Section 4.1, constructing the dependency graph can take up to $O(|B|^2+|R|+|W|)$, where $|B|$ is the size of the batch, $|W|$ is the total number of writes in the batch, and $|R|$ is the total number of reads in the batch. The worst case  time complexity of the sort-based reordering algorithm itself is $O(C|B|^2)$, where $|B|$ is the size of the batch, and $|C|$ includes updating the sort order after removal of the nodes, and the reduction on the number of iterations with the multi-factor. 
+In our analysis in Section 4.1, constructing the dependency graph can take up to $O(|B|^2+|R|+|W|)$, where $|B|$ is the size of the batch, $|W|$ is the total number of writes in the batch, and $|R|$ is the total number of reads in the batch. This is implemented by creating a hash table of the writes from the transactions in the batch, and probing the hash table with the reads. The space complexity of a hash table can be considered linear to the number of keys, that is $O(|R|+|W|)$. The size of the graph can be $O(|B|^2)$ in the worst case.
 
-Dependency graphs are represented using adjacency lists.
+Dependency graphs are represented using adjacency lists. Each node also stores extra bookkeeping information, such as the number of remaining in-degrees and out-degrees. An extra boolean array marks whether a node has been removed from the graph during reordering.
 
-In Section 5.1, we discussed an additional heuristic that limits the size of the graph. If we detect that the dependency graph is too dense, we discard it and directly validate the transactions without reordering. Batching at the validator allows tighter loops in validating the transactions for better caching. We have separated the effect of batching and reordering with our new batch baseline. We are interested in exploring the impact of caching in the future, but we haven't investigated it systematically in this paper.
+In Section 5.1, we discussed an additional heuristic that limits the size of the graph. If we detect that the dependency graph is too dense, we discard it and directly validate the transactions without reordering. Batching at the validator allows tighter loops in validating the transactions for better caching. We have separated the effect of batching and reordering with our newly added batch baseline. We are interested in exploring the impact of caching in the future, but we haven't investigated it systematically in this paper.
 
 \emph{D4. The paper touts the latency improvement as a counter-intuitive benefit of batching, but it never explains why (1) the baseline has so high and variable latency on an in-memory database and (2) how does batching improve latency: is it better lower cache miss rates?}
 
 The latency is measured as the time between a transaction's start and commit. If a transaction aborts due to conflicting with previously committed transactions, it gets restarted. A transaction can be restarted multiple times before it commits. 
 
-The baseline has a higher latency precisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
+The baseline as well as the newly added batch baseline has a higher latency precisely because transactions abort more often, and thus get restarted for more times as compared to our batching and reordering approaches. 
 
 Batching allows tighter loops in processing the transactions and benefits from better caching. Yet, as we have shown with our newly added batch baseline, the improved latency is mostly due to reducing the number of restarts for transactions by reordering.
 

@@ -1,13 +1,12 @@
 \section{Evaluation}\label{sec:experiments}
-In our experimental evaluation, we wanted to understand the effect of batching at storage and validator, the performance of our validator reordering algorithms and policies, parallelizing transaction reordering at validator, and the impact of system configuration parameters. In particular, we asked the following questions:
+In our experimental evaluation, we wanted to understand the effect of batching and reordering at storage and validator, the performance of our validator reordering algorithms and policies, parallelizing transaction reordering at validator, and the impact of system configuration parameters. In particular, we asked the following questions:
 \begin{enumerate}
-\item\vspace{-.5em} How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
-\item\vspace{-.5em} How does the batch size impact performance? 
-%Using larger batches should give the validator and the storage more opportunities for reordering but it should also increase transaction latency, leading to more conflicts. 
-\item\vspace{-.5em} How does parallel reordering impact the system performance?
-\item\vspace{-.5em} How does storage and validator batching affect the system throughput, abort rate, and latency?
-\item\vspace{-.5em} How do the different policies presented in Section~\ref{subsec:validator_reordering:policy} impact the system performance?
-\item\vspace{-.5em} How does batching and reordering perform on micro-benchmarks and real workloads?
+\item\vspace{-.8em} How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
+\item\vspace{-.8em} How does the batch size impact performance? 
+\item\vspace{-.8em} How does parallel reordering impact the system performance?
+\item\vspace{-.8em} How does storage and validator batching and reordering affect the system performance?
+\item\vspace{-.8em} How do the different policies presented in Section~\ref{subsec:validator_reordering:policy} impact the system performance?
+\item\vspace{-.8em} How does batching and reordering perform on real workloads?
 \end{enumerate}
 
 \subsection{Experimental Setup}
@@ -15,30 +14,35 @@ In our experimental evaluation, we wanted to understand the effect of batching a
 
 %Our system architecture consists of four components: a transaction generator, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-Our system architecture consists of four components: a transaction generator, a processor, storage, and a validator. The components communicate through request queues.
+Our system architecture consists of four components: transaction generation, a processor, storage, and validation. The components communicate through consumer-producer queues.
 
-% of requests.
-% that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
-The transaction generator continuously produces new transactions into the system until the system reaches the maximum permitted concurrency level. The processor component multiplexes transactions, receives transaction requests from the transaction generator, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction generator. It also restarts aborted transactions; thus, it only communicates commit decisions to the transaction generator. 
-The storage worker continuously processes read and write requests. When batching is enabled, it buffers a batch of requests. When it processes a batch, it executes the optimal strategy that we discussed in Section~\ref{sec:overview}: It first executes all the write requests in the batch (discarding a write if a newer version exists in the storage), and then all the read requests. 
+The transaction generator continuously produces new transactions into the system until the system reaches the maximum permitted concurrency level. The processor multiplexes transactions as a transaction coordinator, receives transaction requests from the transaction generator, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction generator. It also restarts aborted transactions; thus, it only communicates commit decisions to the transaction generator. 
+The storage continuously processes read and write requests. When batching is enabled, it buffers a batch of requests. When it processes a batch, it executes the optimal strategy that we discussed in Section~\ref{sec:overview}: It first executes all the write requests in the batch (discarding a write if a newer version exists in the storage), and then all the read requests. 
 
-The validator performs backward validation. It receives the keys and versions of the reads and the keys of the writes in each transaction. It caches the write sets of committed transactions for future validations in a in-memory hash table, until these writes are overwritten by later committed transactions. 
-When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:validator_reordering} to determine a serialization order. Every transaction that passes validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in the storage.
-
-% Implementation of FVS algorithm.
-When a batch comes, a dependency graph is created as described in Section~\ref{subsec:validator_reordering:algorithm}. We have observed that once the dependency graph has become very dense, the reordering at the validator is not beneficial. This is because the reordering algorithm takes longer, while less transactions commit due to the inherent higher contention level. In practice, we heuristically set a loose limit on the size of the dependency graph. Once we detect that the number of edges hits the limit during the construction of the dependency graph, we discard the graph and validates the transactions directly in their arrival order in the batch without reordering.
+% validator
+The validator performs backward validation. It receives the keys and versions of the reads and the keys of the writes in each transaction. It caches the write keys of committed transactions for future validations in an in-memory hash table, until these writes are overwritten by later updates. 
+When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:validator_reordering} to determine a serialization order. Every transaction that passes validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in the storage. 
 
 % Validator
-We have further decoupled the validator component into four subcomponent as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and queues them for reordering. A transaction reordering worker takes a batch from the queue, pre-validates a batch against the latest snapshot of the database in the validator cache, reorders the transactions in a batch, and queues them for validation. A validation worker takes a batch from the queue, serializes the transactions, and validates the transactions against the current validator cache, and sends committed transactions to the cache update worker. The cache update worker finally applies updates to the validator cache based on the transaction serialization order. 
+We have further decoupled the validator component into four subcomponents as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and queues them for reordering. A transaction reordering worker takes a batch from the queue, pre-validates and filters the transactions in the batch against the validator cache, reorders the transactions, and queues the ordered transactions as a new batch for validation. A validation worker takes a batch from the queue, serializes the transactions, and validates the transactions against the current validator cache, and sends committed transactions to the cache update worker. The cache update worker finally applies updates to the validator cache based on the transaction serialization order. 
+
+% Details of validator implementation.
+By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. When a batch comes, a dependency graph is created as described in Section~\ref{subsec:validator_reordering:algorithm}. We have observed that once the dependency graph has become very dense, the reordering at the validator is not beneficial. This is because the reordering algorithm takes longer, while less transactions commit due to the inherent higher contention level. In practice, we heuristically set a loose limit on the size of the dependency graph. Once we detect that the number of edges hits the limit during the construction of the dependency graph, we discard the graph and validates the transactions directly in their arrival order in the batch without reordering. 
 
 % Parallelization.
-We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. Two transaction generators populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, and the writes are applied based on its data versioning as described in Section~\ref{sec:overview}. In the validator, we first introduced pipeline parallelism by processing different subcomponents concurrently. Since we observed that transaction reordering is heavier weight as compared to other subcomponents, we increased its capacity by multi-threading. We used four transaction reordering workers by default.
+We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction generators populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, and the writes are applied based on its data versioning as described in Section~\ref{sec:overview}. In the validator, we first introduced pipeline parallelism by processing different subcomponents concurrently. Since we observed that transaction reordering is heavier weight as compared to other subcomponents, we increased its capacity by multi-threading. We used four transaction reordering workers by default.
 
+% Hard ware and data population.
+Our system is implemented in Java. All the experiments run on a machine with Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the storage, which we implement as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects, with of the reads and one of the writes on the same object. The reads and writes are drawn from a Zipfian distribution, implemented based on the standard model by Gray et al.~\cite{gray1994quickly}. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator.
 
-Our system is implemented in Java. All the experiments run on a multicore machine, with Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the storage, which we implement as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects, with one object appearing in both the read and the write sets. The reads and writes are drawn from a Zipfian distribution, which is implemented based on the standard model by Gray et al.~\cite{gray1994quickly}. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator.
+% baseline
+The baseline configuration represents the system running with both storage and validator batching turned off. We add a batch mode to separate the effect of batching and reordering. In the batch mode, batching is enabled at both storage and validator, but no reordering is performed. The batch mode can benefit from better caching with tighter loops in the processing. 
 
 % other configuration
-The validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. The baseline configuration represents the system running with both storage and validator batching turned off.  All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down time. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report the good throughput (the number committed transactions per second), the average latency, and the percentile latency.
+\eat{The validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.} 
+
+% Misc
+All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down time. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report the good throughput (the number committed transactions per second), the average latency, and the percentile latency.
 
 
 % *******************
@@ -164,13 +168,13 @@ The validator uses the sort-based greedy algorithm with the \texttt{prod-degree}
 	\caption{Percentile latency under workloads of Zipfian distribution}
 	\label{fig:basic:p95}
 	\end{minipage}
-    \begin{minipage}[b]{0.32\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{./exp_fig/restart/tps}
-        \vspace{-2em}
-        \caption{Throughput with tail latency optimized policies}
-        \label{fig:restart:tps}
-    \end{minipage}
+   \begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.7_tps}}}
+	\vspace{-2em}
+	\caption{Throughput with micro benchmark (skew factor 0.7)}
+	\label{fig:load_z0.7:tps}
+	\end{minipage}
     \vspace{-1em}
 \end{figure*}
 
@@ -178,6 +182,13 @@ The validator uses the sort-based greedy algorithm with the \texttt{prod-degree}
 % hard transactions
 \begin{figure*}[t]
     \centering
+	\begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/restart/tps}
+	\vspace{-2em}
+	\caption{Throughput with tail latency optimized policies}
+	\label{fig:restart:tps}
+	\end{minipage}
     \begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/restart/latency}
@@ -199,14 +210,14 @@ The validator uses the sort-based greedy algorithm with the \texttt{prod-degree}
 %	\caption{Throughput with micro benchmark (skew factor 0.7)}
 %	\label{fig:load_z0.7:tps}
 %	\end{minipage}
-   \begin{minipage}[b]{0.32\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_tps}}}
-	\vspace{-2em}
-	\caption{Throughput with micro benchmark (skew factor 0.8)}
-	\label{fig:load_z0.8:tps}
-	\end{minipage}
-\vspace{-1em}
+%   \begin{minipage}[b]{0.32\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_tps}}}
+%	\vspace{-2em}
+%	\caption{Throughput with micro benchmark (skew factor 0.8)}
+%	\label{fig:load_z0.8:tps}
+%	\end{minipage}
+	\vspace{-1em}
 \end{figure*}
 
 
@@ -249,26 +260,33 @@ The validator uses the sort-based greedy algorithm with the \texttt{prod-degree}
 
 \begin{figure*}[t]
 	\centering
-	\begin{minipage}[b]{0.32\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
-	\vspace{-2em}
-	\caption{Average latency with micro benchmark (skew factor 0.8)}
-	\label{fig:load_z0.8:latency}
-\end{minipage}
+%	\begin{minipage}[b]{0.32\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+%	\vspace{-2em}
+%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+%	\label{fig:load_z0.8:latency}
+%\end{minipage}
 	 \begin{minipage}[b]{0.32\linewidth}
 	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.7_tps}}}
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/tps}}}
 	\vspace{-2em}
-	\caption{Throughput with Small Bank benchmark (skew factor 0.7)}
-	\label{fig:small_bank_z0.7:tps}
+	\caption{Throughput with Small Bank benchmark)}
+	\label{fig:small_bank:tps}
 	\end{minipage}
 	\begin{minipage}[b]{0.32\linewidth}
 	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.7_latency}}}
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/latency}}}
 	\vspace{-2em}
-	\caption{Average latency with Small Bank benchmark (skew factor 0.7)}
-	\label{fig:small_bank_z0.7:latency}
+	\caption{Average latency with Small Bank benchmark}
+	\label{fig:small_bank:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/percent95_latency}}}
+	\vspace{-2em}
+	\caption{Percentile latency with Small Bank benchmark}
+	\label{fig:small_bank:p95}
 	\end{minipage}
 %	 \begin{minipage}[b]{0.32\linewidth}
 %	\centering
@@ -298,21 +316,21 @@ The validator uses the sort-based greedy algorithm with the \texttt{prod-degree}
 \input{exp_benchmark} % include load and small bank experiments.
 
 \subsection{Experiment Summary}
-We have conducted a set of experiments to understand the effect of batching at storage and validator, the performance of different reordering algorithms and policies, parallelizing transaction reordering at the validator, and the impact of system configuration parameters.
+We have conducted a set of experiments to understand the effect of batching and reordering at storage and validator, the performance of different reordering algorithms and policies, parallelizing transaction reordering at the validator, and the impact of system configuration parameters.
 
 From the experiment results, we observed that 
-\vspace{-.5em}
-\begin{itemize}
+\vspace{-1em}
+\begin{enumerate}
 \item The simple sort-based greedy algorithm for finding the feedback vertex set strikes a balance between accuracy and time complexity, and leads to the best overall system performance. 
-\vspace{-.5em}
-\item There is a sweet spot for the batch size, where the system achieves its best performance for the throughput, average latency, and percentile latency. We empirically selected the best batch size for our configuration and workload based on the experiment results.
-\vspace{-.5em}
-\item As we increase the level of parallelism in validator reordering, the throughput, average latency, and percentile latency all improve, especially when the data contention is medium to high.
-\vspace{-.5em}
-\item It is always beneficial to enable storage batching. Validator batching consistently improves the percentile transaction latency, it can hurt the throughput and latency when the data contention is at extremes.
-\vspace{-.5em}
+\vspace{-.8em}
+\item There is a sweet spot for the batch size, where the system achieves its best performance for the throughput, the average latency, and the percentile latency. We empirically selected the best batch size for our configuration and workload based on the experiment results.
+\vspace{-.8em}
+\item As we increase the level of parallelism in validator reordering, the throughput, the average latency, and the percentile latency all improve, especially when the data contention is medium to high.
+\vspace{-.8em}
+\item Batching alone improves throughput significantly. Adding ordering on top of batching consistently improves throughput, and significantly reduces the average and the percentile latency. It is always beneficial to enable storage reordering. While validator reordering consistently improves the percentile transaction latency, it sometimes hurt the throughput and latency when the data contention is at extremes.
+\vspace{-.8em}
 \item For alternative reordering policies at the validator, privileging transactions with a metric that combines the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency.
-\vspace{-.5em}
-\item Finally, in both micro benchmark and Small Bank benchmark, reordering provides significantly better performance in the throughput, average latency, and percentile latency as compared to the baseline. 
-\vspace{-.5em}
-\end{itemize}  
+\vspace{-.8em}
+\item Finally, in Small Bank benchmark, batching and reordering provides significantly better performance in the throughput, the average latency, and the percentile latency as compared to the baseline. 
+\vspace{-.8em}
+\end{enumerate}  
