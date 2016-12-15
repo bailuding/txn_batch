@@ -5,7 +5,11 @@ We first investigate the performance of the feedback vertex set algorithms from 
 
 We test the SCC-based greedy algorithm with the \texttt{max-degree} ($greedy\_max$), \texttt{sum-degree} ($greedy\_sum$) and \texttt{prod-degree} policies ($greedy\_prod$). We also test the sort-based greedy algorithm $greedy\_sort$ (using the \texttt{prod-degree} policy for sorting and multi factor 2), and the hybrid algorithm $hybrid\_m$. The hybrid algorithm uses $greedy\_prod$ as a subroutine when the size of the SCC is larger than $m$, and switches to the brute force search otherwise. By increasing the threshold, we can progressively approximate the optimal solution. 
 
-We test these algorithms against several baselines: $search$ is an accurate, brute force search algorithm; $random$ is the SCC-based greedy algorithm which removes a vertex at random from each SCC to break the cycle. For each graph, $random\_3$ runs the $random$ for 3 times and returns the smallest FVS, mitigating the worst-case impact of bad random choices.
+We test these algorithms against several baselines: $search$ is an accurate,
+brute force search algorithm; $random$ is the SCC-based greedy algorithm which
+removes a vertex at random from each SCC to break the cycle. For each graph,
+$random\_3$ runs $random$ 3 times and returns the smallest FVS, mitigating the
+effect of bad random choices.
 
 
 Figure~\ref{fig:fvs:fvs} shows the average size of the feedback vertex set found by each algorithm. The brute force search algorithm is so slow that it cannot produce results once the skew factor increases beyond $0.7$ as the graphs become denser.

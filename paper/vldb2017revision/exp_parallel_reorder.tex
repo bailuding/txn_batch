@@ -1,10 +1,18 @@
 \subsection{Parallel Validator Reordering}
 In this experiment, we study the benefit of introducing parallelism into validator. Since we have observed that the reordering of the FVS is the most time consuming subcomponent in the validator, we increase the number of threads to parallelize batch reordering as described in Section~\ref{subsec:validator_reordering:parallel}. 
 
-Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the throughput and the average latency with the number of reordering workers from 1 to 4 ($rw-1$, $rw-2$, $rw-3$, $rw-4$). As we increased the number of threads in transaction reordering, both the throughput and latency improves significantly when the skew factor is medium to high.\eat{When the contention is fairly low, adding more reordering workers is not beneficial for the overhead it incurs.}
+Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the throughput
+and the average latency with the number of reordering workers from 1 to 4
+($rw-1$, $rw-2$, $rw-3$, $rw-4$). As we increased the number of threads used for
+transaction reordering, both the throughput and latency improves significantly when the skew factor is medium to high.\eat{When the contention is fairly low, adding more reordering workers is not beneficial for the overhead it incurs.}
 
 Figure~\ref{fig:reorder:p95} shows the percentile transaction latency. With more reordering workers, more transactions are reordered concurrently, and the queuing time for each transaction at validator has reduced. Thus, the tail latency of a transaction has greatly improved. 
 
-Yet we didn't expect linear scalability in throughput or linear reduction in latency since the bottleneck of the system may well be shifted to other components as we increase the capacity of the transaction reordering subcomponent. The system can further scale up once we increase the concurrency of other components and carefully engineer the scaling parameters of each part, which is out of the scope of this paper.
+Yet we didn't expect linear scalability in throughput or linear reduction in
+latency since the bottleneck of the system may well shift to other
+components as we increase the capacity of the transaction reordering
+component. The system can further scale up once we increase the concurrency
+of other components and carefully engineer the scaling parameters of each part,
+but this is out of scope for this paper.
 \eat{
 In summary, parallel reordering reduces the queuing time for transactions, which leads to better throughput, average latency, and percentile latencies. Since 3 reordering workers have provided most of the benefit of parallel reordering in our configuration, we set the number of reordering workers to 3 in the reminder of our experiments.}

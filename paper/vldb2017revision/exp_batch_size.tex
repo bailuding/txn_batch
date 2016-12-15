@@ -1,5 +1,5 @@
 \subsection{Batch Size}
-In this experiment, we explore how the batch size affects system performance. 
+In this experiment, we explore the impact of batch size on system performance. 
 Smaller batch sizes should give lower latency but they offer fewer opportunities for reordering, leading to more aborts. 
 We configure the system to perform both storage and validator batching with batch sizes from $40$ to $240$.\eat{, using the same batch size at storage and validator. As before, $baseline$ is the system with both types of batching turned off. }
 Figure~\ref{fig:bsize:tps} and~\ref{fig:bsize:latency} shows the throughput and the average latency of the system with different batch sizes as data skew increases. The throughput first rises as we increase the size of the batch, and then degrades when the batch becomes too large. Batch size 40 gives the best throughput and the latency. The percentile latency displays a similar pattern, as shown in Figure~\ref{fig:bsize:p95}. \eat{Again the best batch size is 40. However, using batching always gives higher throughput and a better latency profile than the baseline.Given the above results, a batch size of 40 appears optimal for our configuration; we use this batch size in the remainder of our experiments. }

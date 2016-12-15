@@ -29,7 +29,12 @@ The validator processes each batch by running IBVR to identify $B'$ and $\prec$,
 
 %Given $B$, the goal of IBVR is to find a $B' \subseteq B$ of transactions that must abort due to intra-batch aborts, and a commit order $Q$ for the remaining transactions that respects all read-write dependencies. The validator processes each batch by running IBVR to identify $B'$ and $Q$, aborting all the transactions in $B'$ and committing remaining transactions in the order of $Q$.
 
-There is always a trivial solution to any IBVR instance: aborting every transaction but one. Such solutions are not useful; therefore, every instance of IBVR is associated with an \emph{objective function} on $B'$, and the goal is to find a $B'$ that maximizes the objective function. An example objective function could be the size of $B'$ (smaller is better), or a more complex function that takes into account transaction priorities.
+There is always a trivial solution to any IBVR instance: aborting every
+transaction but one. Such solutions are not useful; therefore, every instance of
+IBVR is associated with an \emph{objective function} on $B'$, and the goal is to
+find a $B'$ that maximizes the objective function. A simple objective function
+is the size of $B'$ (smaller is better); a more complex one can take into
+account transaction priorities, etc.
 
 
 
