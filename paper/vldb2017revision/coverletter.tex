@@ -141,7 +141,7 @@ The search algorithm in the Figure is exactly the brute-force approach that show
 
 \emph{While the paper claims that OCC validation is done sequentially in most of the literature, I don't believe this is the case in practice. Real systems typically use some form of short term locking during validation, so unrelated transactions can be validated concurrently. Even OCC algorithms need to deal with 2PC in any real database, and hence any implementation has to deal with blocked transactions. A nice description of validation for OCC algorithms can be found in the Hekaton concurrency control paper from VLDB 2011. }
 
-We have enhanced our system with a parallelized validator design (Section 4.4). We agree with you that in practice, OCC is less popular in real systems and rarely implemented in a pure OCC fashion, i.e., without locking. Hekaton uses a latch-free versioned storage and concurrently updates the commit dependencies. However, cascading aborts are possible if there are conflicts. The performance could potentially degrade significantly when the data contention is high.
+We have enhanced our system with a parallelized validator design (Section 4.4). We agree with the reviewer that in practice, OCC is rarely implemented in a pure OCC fashion, i.e., without locking. Hekaton uses a latch-free versioned storage and concurrently updates the commit dependencies. However, cascading aborts are possible if there are conflicts. The performance could potentially degrade significantly when the data contention is high. We added a citation to Hekaton in Section 1.
 
 \emph{The footnote in Page 3 says the extension of the techniques to snapshot isolation is straightforward. I'm not so convinced. In particular, SI has to deal with W-W conflicts, which are a non-issue for OCC. No reordering will help with a W-W conflict.
 }
@@ -150,7 +150,7 @@ Under snapshot isolation, each transaction has a start timestamp and a commit ti
 
 At the validator, two transactions in the same batch conflict with each other if they write to the same object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the protocol stay the same. Consider the case where $T_1$, $T_2$, and $T_3$ are in the same batch, where $T_1$ writes to $X$, $T_2$ writes to $Y$, and $T_3$ writes to $X$ and $Y$. Committing $T_3$ will lead to the aborts of $T_1$ and $T_2$. But if we choose to abort $T_3$, $T_1$ and $T_2$ can both commit.
 
-If we only look at any pair of conflicting transactions in the same batch, as you point out, one of them has to abort. But we can still minimize the total number of aborts of the full batch using the reordering algorithm in the similar way as for the serial case.
+If we only look at any pair of conflicting transactions in the same batch, as the review points out, one of them has to abort. But we can still minimize the total number of aborts of the full batch using the reordering algorithm in the similar way as for the serial case.
 
 \emph{Section 4.1: I don't think your complexity analysis is correct. What if half the transactions read an item, and the other half write it? Then the graph itself is of size $B^2$, contradicting your claim of $O(B+R+W)$ for graph construction.}
 
@@ -161,12 +161,12 @@ In your example, if half the transactions read an item, and the other half write
 
 \emph{Your main workload has 5 reads and 5 writes, randomly generated (with skew). As far as I can tell they are on different objects. In the real world transactions typically read any object that they write and no reordering would help, unlike your artificial workload. The only experiment where reads and writes appear to be on the same object is the small bank benchmark. Here the skew is set to .9, which makes it unrealistic. }
 
-We have made changes as described in our response to M6. In addition, we have implemented multi-threaded transaction generators to enable faster transaction generation for the Small Bank benchmark, to compensate for the less system load due to its shorter transactions. In Section 5.7, we have demonstrated the performance with additional skew factors, i.e., 0.7, 0.8, and 0.9.
+We have made changes as described in our response to M6. In addition, we have implemented multi-threaded transaction generators to enable faster transaction generation for the Small Bank benchmark, to compensate for the lower system load due to its shorter transactions. In Section 5.7, we have demonstrated the performance with additional skew factors, i.e., 0.7, 0.8, and 0.9.
 
 \subsection{Reviewer 3}
 
 \emph{One imagines that the optimal batch size will differ from workload to workload based on (among other things) temporal and spatial locality of accesses. Is the simple synthetic workload used really sufficient to determine the right batch size? Or do the authors recommend "conditioning" a system with a collection of workloads to choose batch sizes?}
 
-We agree that it is important to intelligently choose the best batch size for a given configuration and workload; exploring automated solutions for this is future work.
+We agree that it is important to tune the best batch size for a given configuration and workload; exploring automated solutions for this is future work.
 
 \end{document}

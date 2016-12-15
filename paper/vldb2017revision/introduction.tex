@@ -11,7 +11,7 @@ We propose an OLTP system design that embraces batching as a core design
 principle throughout transaction execution.  In particular, we explore the
 benefits of incorporating reordering into batching in optimistic concurrency control (OCC) to reduce conflicts~\cite{kung81tods}. OCC is a popular concurrency control protocol due to its low overhead in low-contention
 settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr,
-bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi}. However, it
+bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi,larson2011high}. However, it
 wastes resources when conflicts are frequent~\cite{agrawal1987concurrency}. We
 show batching and reordering reduce the number of conflicts, improve
 throughput and latency, and allow us to use OCC with higher-contention workloads.
