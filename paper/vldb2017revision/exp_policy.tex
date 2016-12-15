@@ -1,21 +1,21 @@
 
-\subsection{More Policies for Validator Reordering: Reducing Tail Latency}
-
+\subsection{Reduce Tail Latency}
 We explore validator reordering with a more complicated policy presented in Section~\ref{subsec:validator_reordering:policy}; specifically, we look at policies that aim to reduce the transaction tail latency.
 
-We explore the possibility of reducing transaction tail latency with latency-specific policies. Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as the $baseline$ with no batching. 
+We explore the possibility of reducing transaction tail latency with latency-specific policies. Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as $baseline$ and $batch$. 
 
-Our first tail-latency aware policy ($rst\hbox{-}cnt$) favors transactions that have already been aborted and restarted. When choosing a node to include in the feedback vertex set, it chooses the one with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
+Our first tail-latency aware policy ($rst\hbox{-}cnt$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the one with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
 
-The second latency-aware policy considers both the number of restarts and a degree-based measurement of a transaction. It computes the weight of a node as the product of in-degree and out-degree over the exponential of the number of restarts with base 2. When choosing a node to include in the feedback vertex set, the nodes are sorted in descending order by their weights. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
+The second latency-aware policy considers both the number of restarts and a degree-based measurement of a transaction. It computes the weight of a node as the product of in-degree and out-degree over the exponential of the number of restarts with base 2. When choosing a node to include in the FVS, it chooses the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
 
-Figure~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the transaction throughput and average latency. As expected, the impact of tail-latency aware policies on overall transaction throughput and average latency are negligible as compared towhen we maximize the number of commits ($max\hbox{-}c$).
+Figure~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the throughput and the average latency. The impact of tail-latency aware policies on overall transaction throughput and average latency are negligible as compared to when we maximize the number of commits ($max\hbox{-}c$).
 
-Figure~\ref{fig:restart:p100} shows the tail latency from 90\% to 100\%, i.e., the latency threshold for from up to 90\% to up to 100\% of the transactions. While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline when the skew factor is high. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects. Our first latency-aware policy $rst\hbox{-}cnt$ performs similar as $max-c$.
- 
-In contrast, while our first latency-aware policy $rst\hbox{-}cnt$ performs similar to $max-c$, the more sophisticated policy $rst\hbox{-}cnt$ consistently performs significantly better than all the others, especially for tail latency from 99.9\% to 100\%.  \eat{, although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}
+Figure~\ref{fig:restart:p100} shows the tail latency from 90\% to 100\%, i.e., the latency threshold for from up to 90\% to up to 100\% of the transactions. \eat{While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline when the skew factor is high. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects. Our first latency-aware policy $rst\hbox{-}cnt$ performs similar as $max\hbox{-}c$.
 
-In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, the latency-ware policy that combines the graph degree and the number of restarts together performs significantly better as compared to the others.
+In contrast, }%eat
+While our first latency-aware policy $rst\hbox{-}cnt$ performs similar to $max\hbox{-}c$, the more sophisticated policy $rst\hbox{-}cnt$ consistently performs significantly better than all the others.\eat{, especially for tail latency from 99.9\% to 100\%.  , although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}
+
+\eat{In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, the latency-ware policy that combines the graph degree and the number of restarts together performs significantly better as compared to the others.}
 
 \eat{
 \subsubsection{Helping hard transactions commit}

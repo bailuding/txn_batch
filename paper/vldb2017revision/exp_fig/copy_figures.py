@@ -12,7 +12,12 @@ def copy_helper(src_dir, dst_dir, exp_name, figure_type, metrics):
           if re.match('.*' + m + '\.pdf', file):
             # copy and rename the file
             srcfile = src_dir + '/' + subdir + '/' + file
-            dstfile = dst_dir + '/' + m + '.pdf'
+            # if the file has Z in its name, extract the Z parameter.
+            param = ''
+            if re.match('.*Z.*', file):
+              pos = file.find('Z')
+              param = file[pos: pos + 4] + '_'
+            dstfile = dst_dir + '/' + param + m + '.pdf'
             print('copy ' + srcfile + ' to ' + dstfile)
             shutil.copy(srcfile, dstfile)
             break
@@ -29,7 +34,7 @@ def copy_hist(src_dir, dst_dir, exp_name):
 
 src_dir = '0_pdf_snapshot'
 # Copy figures for greedy, bsize, reorder, basic, and restart.
-exp_names = ['greedy', 'bsize', 'reorder', 'basic', 'restart', 'small_bank']
+exp_names = ['greedy', 'bsize', 'reorder', 'basic', 'restart', 'small_bank', 'load']
 for exp_name in exp_names:
   dst_dir = exp_name
   copy_lp(src_dir, dst_dir, exp_name)

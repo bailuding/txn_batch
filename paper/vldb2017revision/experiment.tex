@@ -35,7 +35,7 @@ We have parallelized the transaction generation, the storage, and the transactio
 Our system is implemented in Java. All the experiments run on a machine with Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the storage, which we implement as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects, with of the reads and one of the writes on the same object. The reads and writes are drawn from a Zipfian distribution, implemented based on the standard model by Gray et al.~\cite{gray1994quickly}. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator.
 
 % baseline
-The baseline configuration represents the system running with both storage and validator batching turned off. We add a batch mode to separate the effect of batching and reordering. In the batch mode, batching is enabled at both storage and validator, but no reordering is performed. The batch mode can benefit from better caching with tighter loops in the processing. 
+The baseline configuration ($baseline$) represents the system running with both storage and validator batching turned off. We add a batch mode ($batch$) to separate the effect of batching and reordering. In the batch mode, batching is enabled at both storage and validator, but no reordering is performed. The batch mode can benefit from better caching with tighter loops in the processing. 
 
 % other configuration
 \eat{The validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.} 
@@ -90,32 +90,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
         \label{fig:greedy:p95}
     \end{minipage}
     \begin{minipage}[b]{0.32\linewidth}
-            \centering
-            \includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
-            \vspace{-2em}
-            \caption{Throughput with various batch sizes}
-            \label{fig:bsize:tps}
-    \end{minipage}    
-    \vspace{-1em}
-\end{figure*}
-
-\begin{figure*}[t]
-    \centering
-    \begin{minipage}[b]{0.32\linewidth}
-    	\centering
-    	\includegraphics[width=\textwidth]{./exp_fig/bsize/latency}
-    	\vspace{-2em}
-    	\caption{Average latency with various batch sizes}
-    	\label{fig:bsize:latency}
-    \end{minipage}
-    \begin{minipage}[b]{0.32\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/bsize/percent95_latency}
-	\vspace{-2em}
-	\caption{Percentile latency with various batch sizes}
-	\label{fig:bsize:p95}
-	\end{minipage}
-    \begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/reorder/tps}
 	\vspace{-2em}
@@ -126,7 +100,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \end{figure*}
 
 \begin{figure*}[t]
-    \centering
 	\begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/reorder/latency}
@@ -134,13 +107,40 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	\caption{Average latency with different number of reorder workers}
 	\label{fig:reorder:latency}
 	\end{minipage}    
-    \begin{minipage}[b]{0.32\linewidth}
+	\begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/reorder/percent95_latency}
 	\vspace{-2em}
 	\caption{Percentile latency with different number of reorder workers}
 	\label{fig:reorder:p95}
 	\end{minipage}    
+    \centering
+    \begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
+	\vspace{-2em}
+	\caption{Throughput with various batch sizes}
+	\label{fig:bsize:tps}
+	\end{minipage}    
+    \vspace{-1em}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/bsize/latency}
+	\vspace{-2em}
+	\caption{Average latency with various batch sizes}
+	\label{fig:bsize:latency}
+	\end{minipage}
+    \begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/bsize/percent95_latency}
+	\vspace{-2em}
+	\caption{Percentile latency with various batch sizes}
+	\label{fig:bsize:p95}
+	\end{minipage}
 	\begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/basic/tps}
@@ -193,7 +193,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	\includegraphics[width=\textwidth]{./exp_fig/restart/latency}
 	\vspace{-2em}
 	\caption{Average latency with tail latency optimized policies}
-	\label{fig:restart:abort}
+	\label{fig:restart:latency}
 	\end{minipage}
     \begin{minipage}[b]{0.32\linewidth}
 	\centering
@@ -317,7 +317,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \subsection{Experiment Summary}
 
 We now summarize the results of our evaluation.
-
+\vspace{-.5em}
 \begin{enumerate}
 \item The simple sort-based FVS greedy algorithm strikes a balance between accuracy and time complexity, and leads to the best overall system performance. 
 \vspace{-.8em}
