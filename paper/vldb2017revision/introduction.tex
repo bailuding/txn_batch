@@ -10,7 +10,7 @@ Batching can improve system performance for several reasons. First, it increases
 We propose an OLTP system design that embraces batching as a core design principle at multiple stages of a transaction's execution. In particular, we explore the benefits of incorporating reordering into batching in optimistic concurrency control (OCC) to reduce conflicts~\cite{kung81tods}, and thus improve both system-wide and individual transaction performance. OCC is a popular concurrency control protocol due to its low overhead in low-contention settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr, bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi}. However, it wastes resources when conflicts are frequent~\cite{agrawal1987concurrency}. We show how batching and reordering reduce the number of conflicts and allow us to use OCC with higher-contention workloads.
 
 
-Figure~\ref{fig:occ_arch} shows a distributed OCC-based transaction processing system with centralized validation. The system consists of three components: processors, storage nodes, and a single validator. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
+Figure~\ref{fig:occ_arch} shows a loosely coupled OCC-based transaction processing system with centralized validation. The system consists of three components: processors, storage nodes, and a single validator. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
 
 The transaction now enters the \emph{validation} phase. In OCC with \emph{backward validation}, the validator checks whether the transaction conflicts with any previously committed transactions, and makes a ``success'' or ``failure'' validation decision. 
 %jg01: We need a citation after ``decision.''
@@ -35,10 +35,10 @@ Third, the system can perform batching at the storage level. This affects alread
 
 \begin{figure}[t]
  \centering
- \includegraphics[width=0.9\columnwidth]{figures/OCCArchitecture.pdf}
+ \includegraphics[width=0.9\columnwidth]{figures/arch.pdf}
  \vspace{-.5em}
- \caption{OCC System Architecture}
-% \vspace{-1.5em}
+ \caption{OCC system architecture}
+ \vspace{-1em}
  \label{fig:occ_arch}
 \end{figure}
 
