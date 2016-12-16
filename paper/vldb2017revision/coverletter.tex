@@ -42,7 +42,7 @@ We withdrew the claim and clarified in Section 1 that our serial validation is b
 \item[(M2)] \emph{Describe in more detail how the proposed algorithms can work in a concurrent validation setting. }
 \end{itemize}
 \vspace{-1em}
-We have described how to parallelize reordering and validation in Section 4.4; parallelization is achieved with a four-stage pipeline, where the stages are batch preparation, transaction reordering, transaction validation, and cache update. Each of these subcomponents can be further parallelized to allow concurrent processing. We have also added experiments on parallel reordering in Section 5.3. Overall, parallel reordering improves the throughput by up to 2.6x and reduces the average latency by up to 41\%.
+We have described how to parallelize reordering and validation in Section 4.4; parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these subcomponents can be further parallelized to allow concurrent processing. We have also added experiments on parallel reordering in Section 5.3. Overall, parallel reordering improves the throughput by up to 2.6x and reduces the average latency by up to 41\%.
 
 \begin{itemize}
 \item[(M3)]  \emph{Connect your contribution with an open-source OTLP kernel from recent prior work to show whether the graph-based validation procedure would be the bottleneck.}
@@ -96,7 +96,7 @@ We have increased the font size and made the lines bolder in the figures as much
 
 \section{Changes based on individual reviewer comments}
 
-In this section we explain how we addressed individual reviewer comments which are not directly subsumed by a metareviewer comment. We omit similar comments that can be addressed by previous responses.
+In this section we explain how we addressed individual reviewer comments which are not directly subsumed by a metareviewer comment. We have addressed comments on clarifications of the writing, and omitted similar comments that can be addressed by previous responses.
 
 \subsection{Reviewer 1}
 

@@ -17,7 +17,7 @@ show batching and reordering reduce the number of conflicts, improve
 throughput and latency, and allow us to use OCC with higher-contention workloads.
 
 
-Figure~\ref{fig:occ_arch} shows a loosely coupled OCC-based transaction processing system with centralized validation. The system consists of three components: processors, storage nodes, and a single validator. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
+Figure~\ref{fig:occ_arch} shows a loosely coupled OCC-based transaction processing system with centralized validation. The system consists of three components: the processor, the storage, and the validator. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
 
 The transaction now enters the \emph{validation} phase. In OCC with \emph{backward validation}, the validator checks if a particular transaction conflicts with any previously committed ones. \eat{, and makes a``success'' or ``failure'' validation decision.}
 %jg01: We need a citation after ``decision.''
@@ -50,7 +50,7 @@ still in their read phase. The storage can buffer read and write requests into
 batches as they arrive. If a batch contains multiple read and write requests for
 the same object, the system can apply all the writes first, in the serialization
 order. Next, it can process the reads. Prioritizing writes over reads is always
-optimal as this reduces the number of aborts as much as possible. This is
+optimal as this reduces the number of aborts later in the validator as much as possible. This is
 because OCC reads come from uncommitted transactions, while writes come from
 validated transactions that will commit soon. Thus, if the storage schedules a
 pending read before a pending write on the same object, the reading transaction will see a stale value and is guaranteed to fail validation. 
@@ -91,13 +91,13 @@ As mentioned before, the overhead of validator reordering increases transaction 
 }
 
 % contribution 3: parallel validation
-Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a four-stage pipeline, where the stages are batch preparation, transaction reordering, transaction validation, and cache update. Each of these stages can be further parallelized to allow concurrent processing. 
+Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing. 
 
 % contribution 4: experiment
-Our final contribution is a detailed experimental study of the impact of storage and validator batching in a prototype system. Our results show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. This is because batching and reordering reduces the chance of conflicts and the number of transaction restarts, thus improving the end-to-end transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up to a factor of 3.1x and can reduce the average transaction latency by up to 68\% for both a micro benchmark and the Small Bank Benchmark~\cite{alomari2008icde}.
+Our final contribution is a detailed experimental study of the impact of storage and validator batching in a prototype system. Our results show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. This is because batching and reordering reduces the chance of conflicts and the number of transaction restarts, thus improving the end-to-end transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up to a factor of 3.1x and can reduce the average transaction latency by up to 82\% for a micro benchmark and the Small Bank Benchmark~\cite{alomari2008icde}.
 
 %\eat{
 % paper organization
-The remainder of the paper is organized as follows. In Section~\ref{sec:background}  we review OCC with backward validation. In Section~\ref{sec:overview} we discuss challenges, opportunities and techniques for storage and validator batching. In Section~\ref{sec:validator_reordering}, we introduce our algorithms for intra-batch transaction reordering at the validator. In Section~\ref{sec:experiments}, we present an extensive experimental study of batching in our system. We discuss related work in Section~\ref{sec:relwork} and conclude in Section~\ref{sec:conclusion}.
+The remainder of the paper is organized as follows. In Section~\ref{sec:background}  we review OCC with backward validation. In Section~\ref{sec:overview} we discuss challenges, opportunities and techniques for storage and validator batching. In Section~\ref{sec:validator_reordering}, we introduce our algorithms for transaction reordering as well as parallelization at the validator. In Section~\ref{sec:experiments}, we present an extensive evaluation of our system. We discuss related work in Section~\ref{sec:relwork} and conclude in Section~\ref{sec:conclusion}.
 %}
 
