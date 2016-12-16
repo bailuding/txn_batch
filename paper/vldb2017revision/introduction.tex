@@ -91,7 +91,7 @@ As mentioned before, the overhead of validator reordering increases transaction 
 }
 
 % contribution 3: parallel validation
-Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a four-stage pipeline, where the stages are batch preparation, transaction reordering, transaction validation, and cache update. Each of these stages can be further parallelized to allow concurrent processing. 
+Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing. 
 
 % contribution 4: experiment
 Our final contribution is a detailed experimental study of the impact of storage and validator batching in a prototype system. Our results show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. This is because batching and reordering reduces the chance of conflicts and the number of transaction restarts, thus improving the end-to-end transaction latency. For workloads with high data contention, batching and reordering can improve the throughput by up to a factor of 3.1x and can reduce the average transaction latency by up to 82\% for a micro benchmark and the Small Bank Benchmark~\cite{alomari2008icde}.
