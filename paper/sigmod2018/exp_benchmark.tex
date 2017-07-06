@@ -1,0 +1,22 @@
+\subsection{Small Bank Benchmarks}
+\label{subsec:experiment:end2end}
+\eat{In our final experiment, we explore the end-to-end performance of batching in a realistic setting where batch size is fixed. We use two workloads: a micro benchmark and the Small Bank benchmark~\cite{alomari2008icde}. In our micro benchmark,  we generate the transactions as described in Section~\ref{subsec:experiment:implementation}. \eat{We introduce skewed accesses to the data where each object is drawn from Zipfian distribution.} }
+
+The Small Bank benchmark contains transactions with a realistic and diverse
+combination of read and write conflicts. The transactions come from the
+financial domain: compute the balance of a customer's checking and savings
+accounts, deposit money to a checking account, transfer money from a checking
+account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, i.e., 100K checking and 100K savings accounts.
+
+\eat{We use a batch size of 10 transactions and we vary the system concurrency level from 20 to 140 transactions. We simulate high data contention by introducing Zipfian skew factor (0.5-0.9 for the micro benchmark and 0.7-0.9 for the Small Bank benchmark, which has shorter transactions).
+\eat{, i.e., the limit of active transactions in the system}}%eat
+% Overall performance.
+\eat{Overall, in the micro benchmark, batching has improved the throughput up to 2.4x, while reduced up to 58\% of the average latency. In Small Bank benchmark, batching has improved the throughput up to 3.1x, while reduced up to 68\% of the average latency.}%eat
+Figure~\ref{fig:small_bank:tps},~\ref{fig:small_bank:latency},~\ref{fig:small_bank:p95} show the throughput, the average latency, and the percentile latency of transactions. Overall, batching and reordering has improved the throughput up to 3.1x, while reduced by up to 68\% for the average latency, by up to 62\% for the tail latency, comparing to $baseline$. Storage and validator reordering always improve the throughput and reduce the latency on top of batching, confirming our findings in Section~\ref{subsec:experiment:batching}.
+
+\eat{On the micro benchmark, Figure~\ref{fig:load_z0.7:tps} shows the throughput with skew factor 0.7. Overall, batching has improved the throughput 
+Using batching doubles the throughput as compared to the baseline, both for a given load and when considering the peak throughput over different loads. When the load is moderate, storage batching by itself performs best. As the load increases and the transactions become more conflict-prone, the benefit of validator batching outweighs its cost. }
+
+\eat{Figure~\ref{fig:load_z0.7:latency} shows the average transaction latency with skew factor 0.7. Both storage and validator batching reduce the latency as compared to the baseline. Validator batching gives the lowest latency when the data is extremely skewed. In addition, validator batching always reduces latency regardless of whether storage batching is enabled, again confirming our findings in Section~\ref{subsec:experiment:batching}. The performance impacts of batching are similar to those on the micro benchmark. 
+
+The experiments with additional parameters show similar performance impact with batching. We omit the figures due to the space limit.}%eat

@@ -1,0 +1,26 @@
+\subsection{Validator Reordering Algorithms}
+We first investigate the performance of the feedback vertex set algorithms from Section~\ref{subsec:validator_reordering:algorithm} with a comparison of the raw performance of the algorithms, i.e., their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{sec:ibvr}, using our micro benchmarks. 
+
+\eat{We first test the algorithms offline on the dependency graphs constructed at validator when running the system. Each dependency graph is constructed from a batch of transactions at validator, excluding non-viable transactions, i.e., we only use transactions that don't have inter-batch conflicts. We compare the averages of the size of the feedback vertex set and the running time per dependency graph.}
+
+We test the SCC-based greedy algorithm with the \texttt{max-degree} ($greedy\_max$), \texttt{sum-degree} ($greedy\_sum$) and \texttt{prod-degree} policies ($greedy\_prod$). We also test the sort-based greedy algorithm $greedy\_sort$ (using the \texttt{prod-degree} policy for sorting and multi factor 2), and the hybrid algorithm $hybrid\_m$. The hybrid algorithm uses $greedy\_prod$ as a subroutine when the size of the SCC is larger than $m$, and switches to the brute force search otherwise. By increasing the threshold, we can progressively approximate the optimal solution. 
+
+We test these algorithms against several baselines: $search$ is an accurate,
+brute force search algorithm; $random$ is the SCC-based greedy algorithm which
+removes a vertex at random from each SCC to break the cycle. For each graph,
+$random\_3$ runs $random$ 3 times and returns the smallest FVS, mitigating the
+effect of bad random choices.
+
+
+Figure~\ref{fig:fvs:fvs} shows the average size of the feedback vertex set found by each algorithm. The brute force search algorithm is so slow that it cannot produce results once the skew factor increases beyond $0.7$ as the graphs become denser.
+The $random$ baseline computes a FVS whose size is almost twice as large as the greedy and the hybrid algorithms. Running the random algorithm multiple times produces similar results. This confirms the theoretical results which show that finding a good FVS is hard. The greedy algorithms, on the other hand, produce very accurate results. The average size of the FVS is almost identical to that of the brute force search when the skew factor is no larger than $0.7$, and is very close to the best hybrid algorithm ($hybrid\_20$, i.e., one that uses the brute force search when the size of the SCC is no larger than 20). Among the greedy algorithms, $greedy\_prod$ is consistently the best, although the difference is small.
+
+Figure~\ref{fig:fvs:latency} shows the running time of the algorithms. The running time of the hybrid algorithm depends on the threshold for switching to brute force search. Thus, $hybrid\_20$ and $hybrid\_15$ have a longer running time than other algorithms, while the running time of $hybrid\_10$ is comparable to the SCC-based algorithms. Each of the SCC-based algorithms ($greedy\_max$, $greedy\_sum$, $greedy\_prod$, $random$) has a similar running time. The random algorithm takes slightly longer than the greedy algorithms because it removes more nodes and thus requires more computation. The running time of $random\_3$ is three times that of $random$, since it runs the random algorithm three times. The sort-based greedy algorithm ($greedy\_sort$), while slightly less accurate than the SCC-based greedy algorithms, reduces the running time of these algorithms by 74\%. 
+
+We compare the end-to-end performance of the best SCC-based algorithm ($greedy\_prod$) against the sort-based greedy algorithm. Figure~\ref{fig:greedy:tps} and~\ref{fig:greedy:latency} show the  throughput and the average latency of the system with $greedy\_prod$ ($srvc\hbox{-}g$) and $greedy\_sort$ ($srvc\hbox{-}gs$). In both cases, storage batching is enabled.\eat{, and the greedy algorithm policy is set to minimizing the number of conflicts, i.e., the size of the FVS.} The $baseline$ line shows the throughput with both storage and validator batching disabled. 
+
+The two greedy algorithms have similar throughput when the skew is very low. However, $greedy\_prod$ degrades significantly when data skew increases. This is because while $greedy\_prod$ is slightly more accurate, it takes much longer to run. This increases transaction latency and leads to more conflicts, especially when the data contention is high. $greedy\_sort$ consistently gives the highest throughput over all the workloads for its high accuracy and low running time. 
+
+Figure~\ref{fig:greedy:p95} shows transaction latency by percentile, i.e., the latency threshold for up to 95\% of the transactions. The tail latency of $greedy\_sort$ is much lower than that of the other two, which is consistent with the throughput data.
+
+\eat{In summary, the sort-based greedy algorithm is much faster than the ``smarter'' algorithms and only slightly worse in terms of accuracy, resulting in the best end-to-end system performance. For this reason, all subsequent experiments use the sort-based greedy algorithm with a \texttt{prod-degree} policy unless otherwise specified.}

@@ -1,0 +1,110 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{booktabs} % For formal tables
+
+
+\usepackage{graphicx}
+\usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
+
+\usepackage[linesnumbered]{algorithm2e}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup[subfigure]{labelformat = parens, labelsep = space, font = small}
+\usepackage{enumitem}
+
+%\usepackage{algorithm}
+%\usepackage{algpseudocode}
+
+% To get colored comments
+\usepackage{color}  
+\newcommand{\johannes}[1]{{\color{blue} Johannes: [{#1}]}}
+\newcommand{\lucja}[1]{{\color{red} Lucja: [{#1}]}}
+\newcommand{\bailu}[1]{{\color{cyan} Bailu: [{#1}]}}
+\newcommand{\magda}[1]{{\color{magenta} Magda: [{#1}]}}
+
+\newcommand{\eat}[1]{} % comment out blocks of text
+
+% Copyright
+%\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+
+% DOI
+%\acmDOI{10.475/123_4}
+
+% ISBN
+%\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+%\acmConference[WOODSTOCK'97]{ACM Woodstock conference}{July 1997}{El
+%	Paso, Texas USA} 
+%\acmYear{1997}
+%\copyrightyear{2016}
+
+%\acmPrice{15.00}
+
+\begin{document}
+
+% ****************** TITLE ****************************************
+
+\title{Improving OCC Performance Through Transaction Batching and Operation Reordering}
+
+
+%\numberofauthors{4}
+
+%\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+% 1st. author
+%\alignauthor Bailu Ding \\
+%	\affaddr{Cornell University, Microsoft Research}\\
+%    \email{badin@microsoft.com}
+% 2nd. author
+%\alignauthor Lucja Kot \\
+%	\affaddr{Cornell University}\\
+%    \email{lucja@cs.cornell.edu}
+% 3rd. author
+%\alignauthor Magdalena Balazinska\\
+%	\affaddr{University of Washington}\\
+%	\affaddr{Seattle, Washington, USA}\\
+%    \email{magda@cs.washington.edu}
+%\and
+%\alignauthor Johannes Gehrke\\
+%	\affaddr{Microsoft Corporation}\\
+%    \email{johannes@microsoft.com}
+%}
+
+\maketitle
+
+\begin{abstract}
+OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. Batching has been used for optimizations such as message packing and group commits; however, there is little research on the benefits of a holistic approach to batching across a transaction's entire life cycle. 
+
+In this paper, we present an OLTP system based on OCC that incorporates batching at multiple stages of transaction execution. Storage batching enables reordering of transaction reads and writes at the storage layer, and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies to solve this problem. We explain how validation can be parallelized for better performance. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show that our techniques can significantly increase throughput and reduce latency. We show how different batching algorithms perform, how parallelism in validator reordering helps, how storage and validator batching interact with each other, and how they improve system-wide and individual transaction performance.
+\end{abstract}
+
+\input{introduction}
+\input{background}
+\input{overview}
+\input{reorder}
+\input{experiment}
+\input{related}
+\input{conclusion}
+
+\bibliographystyle{abbrv}
+\bibliography{reference}
+
+\end{document}

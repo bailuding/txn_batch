@@ -1,0 +1,34 @@
+\section{Background}\label{sec:background}
+
+% backward occ
+We use the term optimistic concurrency control (OCC) to refer to the backward validation based OCC protocol introduced by Kung~\cite{kung81tods} in a loosely coupled architecture.
+% with read, write, and validation phases.
+As explained in the introduction, every transaction goes through three phases. First comes a \emph{read} phase, where the transaction reads data from the storage and executes while making writes to a private ``scratch workspace''. Then the transaction enters a \emph{validation} phase. If validation is successful, the transaction enters the \emph{write} phase, when its writes are installed in the storage. 
+% details for validation
+The validator assigns each transaction a timestamp $i$, and it examines the transaction's \emph{read set} $RS(i)$ and its \emph{write set} $WS(i)$, and it compares them to the writes of previously committed transactions. 
+%For a given transaction, we call the set of objects . When a transaction enters validation, its read set and write set are known, as are write sets of all previously committed transactions. 
+%For a transaction with timestamp $i$, we denote its read set by $RS(i)$ and its write set by $WS(i)$.
+%%OCC validation enforces serializability; we only allow a transaction to pass validation if it can be serialized after all transactions that have already committed. and ensures that transactions are serialized in timestamp order.
+% the scope of validation
+When validating a transaction $T(j)$ with timestamp $j$, the validator needs to check for conflicts with all transactions $T(i)$ with timestamp $i<j$ that have already committed and that overlapped temporally with $T(j)$, i.e., $T(i)$ had not committed when $T(j)$ started. 
+% criterion for conflicts
+$T(j)$ can be serialized after such a transaction $T(i)$ if one of the following conditions holds:
+\begin{itemize}[leftmargin=*]
+%\vspace{-.8em}
+\item $T(i)$ completed its write phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$, or
+%\vspace{-.8em}
+\item $T(i)$ completed its read phase before $T(j)$ started its write phase, and $WS(i) \cap RS(j) = \emptyset$ and $WS(i) \cap WS(j) = \emptyset$
+%\vspace{-.5em}
+\end{itemize}
+If $T(i)$ and $T(j)$ overlap temporally, and $WS(i) \cap RS(j) \neq \emptyset$, we say there is a \emph{read-write dependency} from $T(j)$ to $T(i)$. Intuitively, if there is such a dependency, $T(j)$ cannot be serialized after $T(i)$. In addition, we must ensure the writes of the two transactions are installed in the correct order to maintain consistency in the storage. If they write to the same object, the updates must be applied in their serialization order. The original OCC algorithms achieve this by putting the validation and write phases in a critical section~\cite{kung81tods}, but there has been much progress on OCC over the last decades that allows system designers to relax most of these assumptions. 
+%The batching techniques we study in this paper are applicable to most OCC systems; however, to simplify the presentation, 
+%for simplicity and concreteness of our experimental setup, we make certain assumptions about the implementation of OCC validation. 
+The above discussion implies that validation only needs to check, for every transaction $T(j)$ and all transactions $T(i)$ overlapping temporally with $T(j)$, where $i<j$, that $WS(i) \cap RS(j) = \emptyset$. Data versioning provides an easy way to determine whether $T(j)$ overlapped temporally with $T(i)$; every time a transaction performs a read, we tag the read with the version of the object that was read. If $T(j)$'s read set contains an object $X$ and the read saw version $k$, the validator only needs to check the write sets of all $T(i)$ with $k < i < j$ to see whether they contain $X$~\cite{ding2015centiman}.
+%. This use of versioning in validation is identical to the one described by Ding et al.
+%Like most other work in the literature, we assume that 
+%Given that our architecture (Figure~\ref{fig:occ_arch}) has a single validator, we assume 
+%the validation phase is sequential, but 
+%We do not require the write phase to be in a critical section; this means that 
+%write requests may arrive at the storage out of order.
+For now, we assume the validation phase is sequential for ease of understanding. We will extend it to a parallelized design in Section~\ref{subsec:validator_reordering:parallel}. We handle out-of-order write requests with a \emph{versioned} datastore, where every object in the datastore is versioned and every write request is tagged with a version number equal to the updating transaction's timestamp. If the datastore receives a write request with version (timestamp) $i$ and a higher-numbered version $j > i$ already exists for the object, the write request is ignored.\footnote{In case the system also provides snapshot isolation, which is easy to support with OCC, such earlier versions are written to storage. Techniques described in this paper can also be extended to snapshot isolation.} 
+
