@@ -248,7 +248,6 @@ In practice, this algorithm is faster but less accurate than the SCC-based greed
 %\subsubsection{Hybrid algorithm} 
 We can combine the SCC-based greedy algorithm and the precise brute-force FVS search into a \emph{hybrid algorithm}. The algorithm is similar to the SCC-based greedy algorithm but runs a precise, brute-force FVS search whenever it can afford to. Thus instead of processing all SCCs via the $GreedyComponent$ subroutine (lines 5-7 of Algorithm~\ref{alg:scc}), it runs the precise search when processing SCCs that are smaller than a certain \emph{threshold}, and the greedy subroutine $GreedyComponent$ on SCCs that are larger than the threshold. Adjusting the threshold allows us to trade off precision versus runtime.
 
-
 \subsection{An Example}\label{subsec:alg_example}
 
 We will illustrate how the two algorithms behave on a simple example. Figures \ref{fig:scc} and \ref{fig:simple} show executions of the two greedy algorithms on the same graph. Both algorithms use a policy where the ranking of a node is the product of its in-degree and its out-degree; we call this policy \texttt{prod-degree}.
@@ -256,7 +255,6 @@ We will illustrate how the two algorithms behave on a simple example. Figures \r
 Figure~\ref{fig:scc} shows the SCC-based greedy algorithm. The graph cannot be trimmed, so we partition it into SCCs. We remove all SCCs of size 1 --  Nodes 0, 7, 10, 11, and 12 (Figure~\ref{fig:scc:g1}). There are three remaining SCCs. We first look at the component containing Nodes 3 and 4. Since Nodes 3 and 4 have the same product of in-degree and out-degree, we can add either one of them to the FVS. We choose Node 3. Now Node 4 has neither incoming nor outgoing edges, so it is trimmed (Figure~\ref{fig:scc:g3}). We repeat the process with the other components. For the SCC containing Nodes 2, 5, and 6, we add Node 6 to the FVS, as it has the largest product of in-degree and out-degree among the three nodes in this SCC. We now trim Nodes 2 and 5 (Figure~\ref{fig:scc:g5}). Finally, we remove Node 8 from the last component, and trim Nodes 1 and 9 (Figure~\ref{fig:scc:g7}). This leaves us with a final FVS consisting of Nodes 3, 6, and 8.
 
 Figure~\ref{fig:simple} shows the same example using the sort-based greedy algorithm, with $k = 1$. After the first sort, we add Node 5 to the FVS since it has the highest product of in-degree and out-degree. After eliminating Node 5, Nodes 10 and 12 have only incoming edges, and get trimmed (Figure~\ref{fig:simple:g2}). We sort the remaining nodes. This time, we add Node 8 to the FVS, and trim Nodes 0, 1, 9, 11 (Figure~\ref{fig:simple:g4}). We repeat this process with the remaining nodes until the graph is empty. This yields a FVS consisting of Nodes 3, 5, 6, and 8 (Figure~\ref{fig:simple:g8}), which contains one more vertex than the FVS we obtained with the SCC-based algorithm.
-
 
 \subsection{Incorporating Policies}
 \label{subsec:validator_reordering:policy}
@@ -306,3 +304,14 @@ Figure~\ref{fig:reorder:validator} shows the architecture of our parallel valida
 
 Alternatively, the transaction validation can use partitioned parallelism. The idea is to partition the key space and break a transaction into smaller pieces, and one thread is assigned to validate transaction pieces on one partition. More discussion on this design can be found in our previous Centiman system~\cite{ding2015centiman}.
 
+\subsection{Extension to Snapshot Isolation}
+
+Reordering can also be extended to snapshot isolation. Under snapshot isolation, each transaction has a start timestamp and a commit timestamp. In our loosely coupled architecture based on ~\cite{ding2015centiman}, the storage does not offer a consistent snapshot of the database. So transactions
+can abort due to reading data from an invalid snapshot of database. In this case, the storage can reorder the request with the same
+protocol. If the storage is multi-versioned and offers a consistent snapshot to reads, no reordering is needed.
+At the validator, two transactions in the same batch conflict with each other if they write to the same
+object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the
+protocol stay the same.
+Consider the case where $T_1$, $T_2$, and $T_3$ are in the same batch, where $T_1$ writes to
+$X$, $T_2$ writes to $Y$, and $T_3$ writes to $X$ and $Y$. Committing $T_3$ will lead to the aborts of $T_1$ and $T_2$. But if
+we choose to abort $T_3$, $T_1$ and $T_2$ can both commit.

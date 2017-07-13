@@ -1,6 +1,9 @@
 \section{Evaluation}\label{sec:experiments}
-In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. In particular, we asked the following questions:
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. We first compare how our techniques adapt to high data contention with other systems. Then we drill down to the impact of specific optimizations and parameters of our techniques.
+
+In particular, we asked the following questions:
 \begin{enumerate}[leftmargin=*]
+\item How well do our techniques adapt to data contention comparing to other systems?
 \item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
 \item What's the impact of batch size on performance? 
 \item How does parallel reordering affect performance?
@@ -311,6 +314,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 % *******************
 % * Experiments
 % *******************
+\input{exp_compare}
 \input{exp_greedy}
 \input{exp_parallel_reorder}
 \input{exp_batch_size}

@@ -65,9 +65,6 @@ The goal of batching is to reduce the number of conflicts,
 %by reordering the operations in each batch, 
 thus decreasing abort rate, increasing throughput and lowering atency. As explained in Section~\ref{sec:background}, aborts happen due to read-write dependencies involving a committed transaction $T(i)$ that wrote to some object, and a later transaction $T(j)$ that read the same object but did not see $T(i)$'s update. 
 
-
-
-
 In this paper, we propose two types of batching
 
 The server components -- the storage and the validator -- aim to reduce both intra-batch and inter-batch aborts. The storage batches the read and write requests, and the validator batches the validation requests.
