@@ -2,7 +2,6 @@
 
 \usepackage{booktabs} % For formal tables
 
-
 \usepackage{graphicx}
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
 
@@ -11,6 +10,7 @@
 \usepackage{subcaption}
 \captionsetup[subfigure]{labelformat = parens, labelsep = space, font = small}
 \usepackage{enumitem}
+
 
 %\usepackage{algorithm}
 %\usepackage{algpseudocode}
@@ -42,10 +42,9 @@
 %\acmISBN{123-4567-24-567/08/06}
 
 %Conference
-%\acmConference[WOODSTOCK'97]{ACM Woodstock conference}{July 1997}{El
-%	Paso, Texas USA} 
-%\acmYear{1997}
-%\copyrightyear{2016}
+\acmConference[SIGMOD'18]{ACM SIGMOD International Conference on Management of Data}{June 2018}{Houston, Texas, USA} 
+\acmYear{2018}
+\copyrightyear{2018}
 
 %\acmPrice{15.00}
 
@@ -54,9 +53,6 @@
 % ****************** TITLE ****************************************
 
 \title{Improving OCC Performance Through Transaction Batching and Operation Reordering}
-
-
-%\numberofauthors{4}
 
 %\author{
 % You can go ahead and credit any number of authors here,
@@ -88,18 +84,19 @@
 %    \email{johannes@microsoft.com}
 %}
 
-\maketitle
-
 \begin{abstract}
-OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. Batching has been used for optimizations such as message packing and group commits; however, there is little research on the benefits of a holistic approach to batching across a transaction's entire life cycle. 
-
-In this paper, we present an OLTP system based on OCC that incorporates batching at multiple stages of transaction execution. Storage batching enables reordering of transaction reads and writes at the storage layer, and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies to solve this problem. We explain how validation can be parallelized for better performance. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show that our techniques can significantly increase throughput and reduce latency. We show how different batching algorithms perform, how parallelism in validator reordering helps, how storage and validator batching interact with each other, and how they improve system-wide and individual transaction performance.
+	OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. This batching has been used for optimizations such as message packing and group commits; however, there is little research on the benefits of a holistic approach to batching across a transaction's entire life cycle. 
+	
+	In this paper, we present an OLTP system based on optimistic concurrency control that incorporates batching at multiple stages of transaction execution. Batching enables reordering operations to improve performance and reduce conflicts: Storage batching enables reordering of transaction reads and writes at the storage layer, and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies customizing for various goals. We further explain how to parallelize validation for better performance. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show that our techniques can significantly increase throughput and reduce latency. We show how different batching algorithms perform, how parallelism in validator reordering helps, how storage and validator batching interact with each other, and how they improve system-wide and individual transaction performance.
 \end{abstract}
+
+\maketitle
 
 \input{introduction}
 \input{background}
-\input{overview}
-\input{reorder}
+%\input{overview}
+%\input{reorder}
+\input{method}
 \input{experiment}
 \input{related}
 \input{conclusion}

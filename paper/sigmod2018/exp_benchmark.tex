@@ -2,13 +2,13 @@
 \label{subsec:experiment:end2end}
 \eat{In our final experiment, we explore the end-to-end performance of batching in a realistic setting where batch size is fixed. We use two workloads: a micro benchmark and the Small Bank benchmark~\cite{alomari2008icde}. In our micro benchmark,  we generate the transactions as described in Section~\ref{subsec:experiment:implementation}. \eat{We introduce skewed accesses to the data where each object is drawn from Zipfian distribution.} }
 
-In our final experiment, we explore the end-to-end performance of batching in a realistic setting. We choose the same Small Bank benchmark as in Section~\ref{subsec:experiment:compare}.
+In this experiment, we explore the end-to-end performance of batching in a realistic setting. We choose the same Small Bank benchmark as in Section~\ref{subsec:experiment:compare}.
 
-\eat{The Small Bank benchmark contains transactions with a realistic and diverse
+The Small Bank benchmark contains transactions with a realistic and diverse
 combination of read and write conflicts. The transactions come from the
 financial domain: compute the balance of a customer's checking and savings
 accounts, deposit money to a checking account, transfer money from a checking
-account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, i.e., 100K checking and 100K savings accounts.}
+account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, i.e., 100K checking and 100K savings accounts.
 
 \eat{We use a batch size of 10 transactions and we vary the system concurrency level from 20 to 140 transactions. We simulate high data contention by introducing Zipfian skew factor (0.5-0.9 for the micro benchmark and 0.7-0.9 for the Small Bank benchmark, which has shorter transactions).
 \eat{, i.e., the limit of active transactions in the system}}%eat

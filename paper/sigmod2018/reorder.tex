@@ -303,15 +303,3 @@ Figure~\ref{fig:reorder:validator} shows the architecture of our parallel valida
 \end{figure}
 
 Alternatively, the transaction validation can use partitioned parallelism. The idea is to partition the key space and break a transaction into smaller pieces, and one thread is assigned to validate transaction pieces on one partition. More discussion on this design can be found in our previous Centiman system~\cite{ding2015centiman}.
-
-\subsection{Extension to Snapshot Isolation}
-
-Reordering can also be extended to snapshot isolation. Under snapshot isolation, each transaction has a start timestamp and a commit timestamp. In our loosely coupled architecture based on ~\cite{ding2015centiman}, the storage does not offer a consistent snapshot of the database. So transactions
-can abort due to reading data from an invalid snapshot of database. In this case, the storage can reorder the request with the same
-protocol. If the storage is multi-versioned and offers a consistent snapshot to reads, no reordering is needed.
-At the validator, two transactions in the same batch conflict with each other if they write to the same
-object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the
-protocol stay the same.
-Consider the case where $T_1$, $T_2$, and $T_3$ are in the same batch, where $T_1$ writes to
-$X$, $T_2$ writes to $Y$, and $T_3$ writes to $X$ and $Y$. Committing $T_3$ will lead to the aborts of $T_1$ and $T_2$. But if
-we choose to abort $T_3$, $T_1$ and $T_2$ can both commit.

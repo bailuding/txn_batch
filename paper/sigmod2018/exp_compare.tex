@@ -1,18 +1,8 @@
 \subsection{Degradation Under Data Contention}
 \label{subsec:experiment:compare}
 
-We start off by comparing how the system performance degrades under data contention with other systems. We compare our implementation with two start-of-the-art systems: DBMS-X and Silo~\cite{tu2013speedy}. DBMS-X is a commercial database which offers a high performance, in-memory OLTP engine. Silo is a high-performance OLTP engine optimized for multi-core processors. Each engine uses a different variation of optimistic concurrency control as its concurrency control protocol. We choose the two engines because they are among the state-of-the-art general purpose OLTP engines with optimistic concurrency control.
+In our final experiment, we compare our implementation with Silo~\cite{tu2013speedy}. Silo is a high-performance OLTP engine optimized for multi-core processors using a variation of optimistic concurrency control as its concurrency control protocol. We choose Silo because it is among the state-of-the-art general purpose OLTP engines with optimistic concurrency control. In our implementation, we enable reordering at storage and validator ($srvr$) and with the policy to minimize the tail latencies ($srvr-rst$).
 
-We choose Small Bank benchmark~\cite{alomari2008icde} as the workload for comparison. 
-The Small Bank benchmark contains transactions with a realistic and diverse
-combination of read and write conflicts. The transactions come from the
-financial domain: compute the balance of a customer's checking and savings
-accounts, deposit money to a checking account, transfer money from a checking
-account to a savings account, move funds from one customer to another, and withdraw money from a customer's account.
+We focus on how the performance changes under data contention. Since we are interested in degradation of performance under high data contention, we show the relative trend of changes instead of absolute numbers. In fact, because the architecture and the implementation of the two systems differs dramatically -- C++ implementation with low-level optimization vs. Java implementation, comparing the raw numbers does not offer much insight. Throughput-wise, Silo is 4-30 times higher than our implementation.
 
-The Small Bank benchmark allows a fine-grained control of data contention. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, i.e., 100K checking and 100K savings accounts.
-
-We tune the performance of DBMS-X with the following optimizations: turning off logging to avoid disk IOs, batch executing transactions to reduce communication round-trips, and issuing transactions as stored procedures to reduce client-side overhead. We connect to the database with 10 clients, because our processor has 10 physical cores and it is the optimal number based on our empirical evaluation.
-
-In this experiment, we focus on how the performance changes under data contention. Since we are interested in degradation of performance under high data contention, we show the relative trend of changes instead of absolute numbers. In fact, because the implementation of the three systems differs dramatically -- full-fledged commercial database, C++ implementation with low-level architectural optimization and Java implementation, it is also inappropriate to compare the raw numbers.
-
+Figure~\ref{fig:compare:z0.5_p100}, ~\ref{fig:compare:z0.7_p100}, and ~\ref{fig:compare:z0.9_p100} show the growth rate of the percentile latencies with various skew factors. We set the 50\% latency  and the abort rate with skew factor 0.5 as the baselines for computing the growth rate. As shown in the figure, the tail latency with our techniques grow much more elegantly as the data contention increases.

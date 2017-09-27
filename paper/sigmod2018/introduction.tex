@@ -69,8 +69,8 @@ pending read before a pending write on the same object, the reading transaction 
 
 
 % contribution
-{\bf Contributions of this Paper.}
-In this paper, we explore in-depth the benefits of transaction batching and operation reordering in OCC with backward validation, with a focus on storage and validator batching. Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. Our previous work on the Centiman system\cite{ding2015centiman} proposed a loosely coupled architecture for OCC on top of key-value stores. The system we present here follows Centiman's architecture and enhances its design with batching and reordering.
+{\bf Contributions.}
+In this paper, we explore in-depth the benefits of transaction batching and operation reordering in OCC with backward validation, with a focus on storage and validator batching. Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. Previous work on the Centiman system\cite{ding2015centiman} proposed a loosely coupled architecture for OCC on top of key-value stores. The system we present here follows Centiman's architecture and enhances its design with batching and reordering.
 
 % contribution 1: system design
 Our first contribution is an enhanced OCC system architecture that utilizes batching and reordering at the storage and the validator levels. We analyze the reasons for conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce these aborts through batching.

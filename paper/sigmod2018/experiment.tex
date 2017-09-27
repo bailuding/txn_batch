@@ -1,9 +1,6 @@
 \section{Evaluation}\label{sec:experiments}
-In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. We first compare how our techniques adapt to high data contention with other systems. Then we drill down to the impact of specific optimizations and parameters of our techniques.
-
-In particular, we asked the following questions:
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. In particular, we asked the following questions:
 \begin{enumerate}[leftmargin=*]
-\item How well do our techniques adapt to data contention comparing to other systems?
 \item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
 \item What's the impact of batch size on performance? 
 \item How does parallel reordering affect performance?
@@ -11,6 +8,7 @@ In particular, we asked the following questions:
   affect system performance?
 \item How well do the different policies from Section~\ref{subsec:validator_reordering:policy} work?
 \item How does batching and reordering perform on real workloads?
+\item How well do our techniques adapt to data contention comparing to other systems?
 \end{enumerate}
 
 \subsection{Implementation and Experimental Setup}
@@ -311,16 +309,70 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 %    \vspace{-1em}
 \end{figure*}
 
+\begin{figure*}[t]
+	\centering
+	%	\begin{minipage}[b]{0.32\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+	%	\label{fig:load_z0.8:latency}
+	%\end{minipage}
+	\begin{minipage}[b]{0.32\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.5_rst_latency100}}}
+		\vspace{-2em}
+		\caption{Percentile latency with micro benchmark (skew factor 0.5)}
+		\label{fig:compare:z0.5_p100}
+	\end{minipage}
+	\begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.7_rst_latency100}}}
+	\vspace{-2em}
+	\caption{Percentile latency with micro benchmark (skew factor 0.7)}
+	\label{fig:compare:z0.7_p100}
+	\end{minipage}
+	\begin{minipage}[b]{0.32\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.9_rst_latency100}}}
+	\vspace{-2em}
+	\caption{Percentile latency with micro benchmark (skew factor 0.9)}
+	\label{fig:compare:z0.9_p100}
+	\end{minipage}
+%	\begin{minipage}[b]{0.32\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/compare/abort}}}
+%	\vspace{-2em}
+%	\caption{Abort rate with micro benchmark}
+%	\label{fig:compare:abort}
+%	\end{minipage}
+	%	 \begin{minipage}[b]{0.32\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
+	%	\vspace{-2em}
+	%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:tps}
+	%	\end{minipage}
+	%	\begin{minipage}[b]{0.32\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:latency}
+	%	\end{minipage}
+	%    \vspace{-1em}
+\end{figure*}
+
 % *******************
 % * Experiments
 % *******************
-\input{exp_compare}
 \input{exp_greedy}
 \input{exp_parallel_reorder}
 \input{exp_batch_size}
 \input{exp_basic}
 \input{exp_policy}
 \input{exp_benchmark} % include load and small bank experiments.
+\input{exp_compare}
 
 \subsection{Experiment Summary}
 
@@ -337,6 +389,7 @@ We now summarize the results of our evaluation:
 %\vspace{-.5em}
 \item For alternative reordering policies at the validator, privileging transactions with a metric that combines the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency by up to 82\% as compared to other policies, without sacrificing the throughput nor the average latency.
 %\vspace{-.5em}
-\item Finally, in the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and reduces the average and the percentile latency by up to 68\% and 62\% as compared to the baseline.
+\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and reduces the average and the percentile latency by up to 68\% and 62\% as compared to the baseline.
+\item Finally, our techniques help the system performance degrade elegantly under data contention comparing to other systems.
 %\vspace{-.5em}
 \end{enumerate}  
