@@ -318,23 +318,21 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
 	%	\label{fig:load_z0.8:latency}
 	%\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
+	\begin{minipage}[b]{0.32\linewidth}
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_tps}
 		\vspace{-2em}
 		\caption{Good throughput of DBMS-X with SmallBank benchmark}
 		\label{fig:hekaton:tps}
 	\end{minipage}
-\quad
-	\begin{minipage}[b]{0.31\linewidth}
+	\begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_latency}
 	\vspace{-2em}
 	\caption{Average latency of DBMS-X with SmallBank benchmark}
 	\label{fig:hekaton:latency}
 	\end{minipage}
-\quad
-	\begin{minipage}[b]{0.31\linewidth}
+	\begin{minipage}[b]{0.32\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_abort}
 	\vspace{-2em}
@@ -392,6 +390,6 @@ We now summarize the results of our evaluation:
 \item For alternative reordering policies at the validator, privileging transactions with a combination of the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency by up to 82\% as compared to other policies, without sacrificing the throughput nor the latency.
 %\vspace{-.5em}
 \item In Small Bank benchmark, batching and reordering improve the throughput by up to 3.1x and reduces the average and percentile latency by up to 68\% and 62\% as compared to the baseline.
-\item Finally, we implement the transaction reordering idea on the client side of a commercial database system DBMS-X. Our experiment on Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x and reduces the average latency by up to 66\%.
+\item Finally, we implement the transaction reordering idea on top of a commercial database system DBMS-X. Our experiment on Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x and reduces the average latency by up to 66\%.
 %\vspace{-.5em}
 \end{enumerate}  
