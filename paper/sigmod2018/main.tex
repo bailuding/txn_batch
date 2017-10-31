@@ -85,9 +85,13 @@
 %}
 
 \begin{abstract}
-	OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. This batching has been used for optimizations such as message packing and group commits; however, there is little research on the benefits of a holistic approach to batching across a transaction's entire life cycle. 
+	OLTP systems can often improve throughput by \emph{batching} transactions and processing them as a group. Batching has been used for optimizations such as message packing and group commits; however, there is little research on the benefits of a holistic approach to batching across a transaction's entire life cycle.
 	
-	In this paper, we present an OLTP system based on optimistic concurrency control that incorporates batching at multiple stages of transaction execution. Batching enables reordering operations to improve performance and reduce conflicts: Storage batching enables reordering of transaction reads and writes at the storage layer, and validator batching enables reordering of transactions before validation. We formalize the problem of validator transaction reordering, and we propose several algorithms and policies customizing for various goals. We further explain how to parallelize validation for better performance. We carry out an in-depth experimental evaluation of the impact of storage and validator batching, and we show that our techniques can significantly increase throughput and reduce latency. We show how different batching algorithms perform, how parallelism in validator reordering helps, how storage and validator batching interact with each other, and how they improve system-wide and individual transaction performance.
+In this paper, we present an OLTP system based on optimistic concurrency control that incorporates batching at multiple stages of transaction execution. 
+%Execution batching enables enables reordering of operations to improve performance and reduce conflicts: 
+Storage batching enables reordering of transaction reads and writes at the storage layer, reducing same object conflicts. Validator batching enables reordering of transactions before validation, reducing inter-transaction conflicts. Dependencies between transactions make transaction reordering a non-trivial problems, and we propose several several efficient and practical algorithms that can be customized to various transaction precedence policies such as starvation avoidance. We also show how to parallelize validator batching for better performance. 
+
+In an in-depth experimental evaluation in an experimental and in a real system, we perform an in-depth evaluation of the impact of storage and validator batching, and we show that our techniques can significantly increase system throughput and reduce latency, including tail latencies.
 \end{abstract}
 
 \maketitle
