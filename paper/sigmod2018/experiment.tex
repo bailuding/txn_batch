@@ -25,7 +25,7 @@ The storage continuously processes read and write requests. When storage batchin
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates. When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:validator_reordering} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 
 % Validator
-We have further decoupled the validator component into three subcomponents as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates and filters the transactions in a batch against the validator cache, reorders the transactions, and sends the batch of the ordered transactions to the validation workers. A validation worker validates the transactions against the current validator cache, and applies updates from committed transactions to the cache based on the transaction serialization order. 
+We have further decoupled the validator component into three subcomponents as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates and filters the transactions in a batch against the validator cache, reorders the transactions, and sends the batch of ordered transactions to the validation workers. A validation worker validates transactions against the current validator cache, and applies updates from committed transactions to the cache based on the transaction serialization order. 
 
 % Details of validator implementation.
 By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. To process a batch, we create a dependency graph as described in Section~\ref{subsec:validator_reordering:algorithm}. We have empirically determined that validator reordering is not beneficial if the dependency graph is very dense, as there are fewer opportunities for conflict reduction. Therefore, we heuristically set a limit on the size of the dependency graph. Once we detect that the number of edges has hit this limit during the construction of the dependency graph, we discard the graph and validate the transactions without reordering. 
@@ -318,26 +318,28 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
 	%	\label{fig:load_z0.8:latency}
 	%\end{minipage}
-	\begin{minipage}[b]{0.32\linewidth}
+	\begin{minipage}[b]{0.31\linewidth}
 		\centering
-		\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.5_rst_latency100}}}
+		\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_tps}
 		\vspace{-2em}
-		\caption{Percentile latency with micro benchmark (skew factor 0.5)}
-		\label{fig:compare:z0.5_p100}
+		\caption{Good throughput of DBMS-X with SmallBank benchmark}
+		\label{fig:hekaton:tps}
 	\end{minipage}
-	\begin{minipage}[b]{0.32\linewidth}
+\quad
+	\begin{minipage}[b]{0.31\linewidth}
 	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.7_rst_latency100}}}
+	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_latency}
 	\vspace{-2em}
-	\caption{Percentile latency with micro benchmark (skew factor 0.7)}
-	\label{fig:compare:z0.7_p100}
+	\caption{Average latency of DBMS-X with SmallBank benchmark}
+	\label{fig:hekaton:latency}
 	\end{minipage}
-	\begin{minipage}[b]{0.32\linewidth}
+\quad
+	\begin{minipage}[b]{0.31\linewidth}
 	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/compare/z0.9_rst_latency100}}}
+	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_abort}
 	\vspace{-2em}
-	\caption{Percentile latency with micro benchmark (skew factor 0.9)}
-	\label{fig:compare:z0.9_p100}
+	\caption{Abort rate of DBMS-X with SmallBank benchmark}
+	\label{fig:hekaton:abort}
 	\end{minipage}
 %	\begin{minipage}[b]{0.32\linewidth}
 %	\centering
@@ -377,19 +379,19 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \subsection{Experiment Summary}
 
 We now summarize the results of our evaluation:
-%\vspace{-.5em}
+\vspace{-.5em}
 \begin{enumerate}[leftmargin=*]
-\item The simple sort-based FVS greedy algorithm is highly accurate, and reduces the running time of the SCC-based greedy algorithms by 74\%, which leads to the best overall system performance. 
+\item The simple sort-based FVS greedy algorithm is highly accurate, and reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
 %\vspace{-.5em}
 \item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-.5em}
-\item As we increase the level of parallelism in validator reordering, the throughput, the latency, and the percentile latency all improve, especially when the data contention is medium to high.
+\item As we increase the level of parallelism in validator reordering, the throughput, latency, and percentile latency all improve, especially when the data contention is medium to high.
 %\vspace{-.5em}
 \item Batching and reordering increase the throughput by up to 2.7x, and reduce the average and the percentile latency by up to 67\% and 82\% respectively, as compared to the baseline. Batching by itself improves throughput significantly. Adding reordering on top of batching consistently improves throughput by up to 1.3x, and significantly reduces the average and the percentile latency by up to 25\% and 70\% respectively. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt the throughput and latency when the data contention is at the extremes.
 %\vspace{-.5em}
-\item For alternative reordering policies at the validator, privileging transactions with a metric that combines the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency by up to 82\% as compared to other policies, without sacrificing the throughput nor the average latency.
+\item For alternative reordering policies at the validator, privileging transactions with a combination of the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency by up to 82\% as compared to other policies, without sacrificing the throughput nor the latency.
 %\vspace{-.5em}
-\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and reduces the average and the percentile latency by up to 68\% and 62\% as compared to the baseline.
-\item Finally, our techniques help the system performance degrade elegantly under data contention comparing to other systems.
+\item In Small Bank benchmark, batching and reordering improve the throughput by up to 3.1x and reduces the average and percentile latency by up to 68\% and 62\% as compared to the baseline.
+\item Finally, we implement the transaction reordering idea on the client side of a commercial database system DBMS-X. Our experiment on Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x and reduces the average latency by up to 66\%.
 %\vspace{-.5em}
 \end{enumerate}  
