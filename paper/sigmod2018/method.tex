@@ -1,4 +1,4 @@
-\section{Batching and Reordering}\label{sec:overview}
+\section{Batching and Reordering: Concepts}\label{sec:overview}
 
 %In this section, we introduce our novel ideas of batching at the storage and the validator in an OCC system, and we formulate the resulting algorithmic problems. 
 
@@ -29,33 +29,36 @@ Thus, applying updates at the storage layer as early as possible can
 reduce the chance of aborts for incoming transactions.
 
 We implement this idea as follows. We buffer a number of read and write requests from transactions into batches. 
-As a batch of requests arrives at the storage layer, for each object, we apply the highest-version write request on that object. It is safe to discard all other writes on that object as explained in Section~\ref{sec:background}. Next, we handle all the read requests for the same object. This strategy is optimal for reducing intra-batch aborts, as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. 
+As a batch of requests arrives at the storage layer, for each object, we apply the highest-version write request on that object. It is safe to discard all other writes on that object as explained in Section~\ref{sec:background}.\footnote{Recall that we assume full serializability; this may be different for snapshot isolation.} 
+Next, we handle all the read requests for the same object. This strategy works very well for reducing intra-batch aborts, 
+as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. 
 
-\subsection{Validator}\label{subsec:validator_reordering}
+\subsection{Reordering at the Validator}\label{subsec:validator_reordering}
 
-In validator batching, we buffer transaction validation requests at the validator as they arrive. Once a batch is collected, the validator can reduce intra-batch aborts by choosing a good validation (and thus resulting serialization) order.
-Such intra-batch transaction reordering can be done with several goals in mind. We can simply minimize intra-batch aborts, i.e. we maximize the number of transactions in each batch that commit. Alternatively, we may also want to prioritize certain transactions to have a greater chance of committing. For example, if we want to reduce the transactions' tail latency, we can increase a transaction's priority every time it has to abort and restart. Priorities could also be related to external factors, e.g., a transaction's monetary value or an external, application-defined transaction priority. 
+In validator batching, we buffer transaction validation requests at the validator as they arrive. Once a batch has been collected, the validator can reduce intra-batch aborts by selectively aborting transactions while choosing a good validation (and thus resulting serialization) order.
+Such intra-batch transaction reordering can be done with several goals in mind. We can simply minimize intra-batch transaction aborts, i.e., we maximize the number of transactions in each batch that commit. Alternatively, we may also want to prioritize certain transactions to have a greater chance of committing. For example, if we want to reduce the transactions' tail latency, we can increase a transaction's priority every time it has to abort and restart. Priorities could also be related to external factors, e.g., a transaction's monetary value or an external, application-defined transaction priority. 
 %These choices suggest a range of possible policies; we explore them in the next section.
 
-\subsection{Intra-Batch Validator Reordering (IBVR)}\label{sec:ibvr}
-\label{subsec:validator_reordering:algorithm}
-
-We now define the problem of {\em intra-batch validator reordering of transactions (IBVR)} more formally. A \emph{batch} $B$ is a set of transactions to be validated. We assume all transactions $t \in B$ are \emph{viable}, that is, no $t \in B$ conflicts with a committed transaction. If there are non-viable transactions in $B$, they can be removed in preprocessing, as they must always abort.
-Given $B$, the goal of IBVR is to find a $B' \subseteq B$ of transactions that must abort due to intra-batch aborts. IBVR must also find a 
+%\subsection{Intra-Batch Validator Reordering (IBVR)}\label{sec:ibvr}
+%\label{subsec:validator_reordering:algorithm}
+We define the problem of intra-batch validator reordering (IBVR) more formally. A \emph{batch} $B$ is a set of transactions to be validated. We assume all transactions $t \in B$ are \emph{viable}, that is, no $t \in B$ conflicts with a previously committed transaction. If there are non-viable transactions in $B$, they can be removed in preprocessing, as they must always abort.
+Given $B$, the goal of IBVR is to find a subset $B' \subseteq B$ of transactions to abort such that there is a serialization order $\prec$ for the 
+the remaining transactions $B \setminus B'$ such that all of the transactions in $B \setminus B'$ commit when validated in this order.
+%that must abort due to intra-batch aborts. IBVR must also find a 
 %strict (i.e. asymmetric) 
-total order $\prec$ on $B \setminus B'$ that \emph{respects all read-write dependencies}; that is, for $t,t'\in B \setminus B'$, if $t \prec t'$, then there is no read-write dependency from $t'$ to $t$.
-The validator processes each batch by running IBVR to identify $B'$ and $\prec$, aborting all the transactions in $B'$  and validating the transaction in $B \setminus B'$  in the order $\prec$. By the constraint we gave on $\prec$ above, and from the discussion in Section~\ref{sec:background}, $\prec$ is guaranteed to be a valid serialization order that allows all transactions in $B \setminus B'$  to commit.
-
+%total order $\prec$ on $B \setminus B'$ that \emph{respects all read-write dependencies}; that is, for $t,t'\in B \setminus B'$, if $t \prec t'$, then there is no read-write dependency from $t'$ to $t$.
+We then processes each batch by running IBVR to identify $B'$ and $\prec$, aborting all the transactions in $B'$  and validating the transaction in $B \setminus B'$  
+in the order $\prec$. 
+%By the constraint we gave on $\prec$ above, and from the discussion in Section~\ref{sec:background}, $\prec$ is guaranteed to be a valid serialization order that allows all transactions in $B \setminus B'$  to commit.
 %Note that there is always a trivial solution to any IBVR instance: we can choose $B'$ to be all the elements of $B$ except one, so that $B \setminus B'$ has cardinality one. Such solutions are not useful; therefore, every instance of IBVR is associated with an \emph{objective function} on $B'$, and the goal is to find a $B'$ that maximizes the objective function. An example objective function could be the size of $B'$ (smaller is better), or a more complex function that takes into account transaction weights (e.g. priorities).
-
 %Given $B$, the goal of IBVR is to find a $B' \subseteq B$ of transactions that must abort due to intra-batch aborts, and a commit order $Q$ for the remaining transactions that respects all read-write dependencies. The validator processes each batch by running IBVR to identify $B'$ and $Q$, aborting all the transactions in $B'$ and committing remaining transactions in the order of $Q$.
-
-There is always a trivial solution to any IBVR instance: aborting every
-transaction but one. Such solutions are not useful; therefore, every instance of
+Note that there is always a trivial solution to any IBVR instance, namely to abort all transactions but one. 
+Such solutions are not useful; therefore, every instance of
 IBVR is associated with an \emph{objective function} on $B'$, and the goal is to
 find a $B'$ that maximizes the objective function. A simple objective function
-is the size of $B'$ (smaller is better); a more complex one can take into
-account transaction priorities, etc. We call the objective function a \emph{policy} $P$.
+is the size of $B'$ (the fewer transactions to abort the better), however more complex functions can take transaction priorities
+or non-starvation of transactions into
+account. We call this objective function a \emph{policy} $P$.
 
 \begin{figure}[t]
 	\centering
@@ -68,19 +71,27 @@ account transaction priorities, etc. We call the objective function a \emph{poli
 
 % dependency graph
 %Our algorithms for IBVR are based on a graph representation of the transaction batches. 
-Every batch $B$ of viable transactions induces a \emph{dependency graph} $G$; this is a directed graph whose nodes are the transactions in $B$ and whose edges are read-write dependencies.
+How do we compute $B'$? We observe that every batch $B$ of viable transactions 
+has an associated \emph{dependency graph} $G$, a directed graph whose nodes are the transactions in $B$ and whose edges are read-write dependencies.
+If $G$ is acyclic, then there exists a commit order $Q$ on $G$ that respects all read-write dependencies. We can construct $Q$ by repeatedly committing a transaction whose corresponding node in $G$ has no outgoing edge using topological sort. 
 
-If $G$ is acyclic, then there exists a commit order $Q$ on $G$ that respects all read-write dependencies. We can construct $Q$ by repeatedly committing a transaction whose corresponding node in $G$ has no outgoing edge using topological sort. If $G$ is not acyclic, we can show that the problem is NP-hard by reducing the NP-hard problem of finding a directed feedback vertex set to it~\cite{karp1972reducibility}. 
-
+If $G$ is not acyclic, we can model this problem as an instance of the feedback vertex set problem. 
+%show that the of finding a minimal $B'$ is NP-hard by reducing the NP-hard directed feedback vertex set problem 
+%to the selection of a minimal $B'$~\cite{karp1972reducibility}. 
 A feedback vertex set (FVS) of a directed graph is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges. Finding a minimal-size $B'$ for IBVR is exactly the problem of finding the minimal (smallest-size) feedback vertex set on $G$. If we have a more complex objective function for IBVR, we can assign weights to the nodes to represent the desired transaction priorities, and look for a minimum-weight FVS. 
 Once we find the FVS $B'$, removing the nodes in $B'$ from $G$ yields an acyclic graph that determines the desired commit order $Q$.
-
-The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
-We propose two greedy algorithms for finding feedback vertex sets -- one based
+Unfortunately, the directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
+We thus take a practical approach, and in the next section, we propose two greedy algorithms for finding $B'$ -- one based
 on the graph's strongly connected components (SCCs) and the other based on sort.
-We also introduce a hybrid algorithm that makes strategic use of brute-force search; this is slower but more precise.
+We also introduce a hybrid algorithm that makes strategic use of brute-force search; this algorithm is somewhat slower but results in higher-quality solutions.
 
-\subsection{Greedy Algorithms for IBVR}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%  NEW SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Validator Batching}
+\section{sec:valbatching}
 All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.
 Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. This can be implemented by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the time complexity to probe the hash table for a single write is $O(|B|)$, where $|B|$ is the size of the batch. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
 
@@ -88,6 +99,8 @@ We now process $G$ to find a feedback vertex set. Both before and during the
 execution of our FVS algorithms, we \emph{trim} the graph to remove all the nodes
 that have no incoming edges and/or no outgoing edges; such nodes cannot
 participate in any cycles and are thus extraneous for any FVS.
+
+\subsection{Greedy Algorithms}
 
 \begin{algorithm}[t]
 	\SetAlgoLined\DontPrintSemicolon
@@ -274,9 +287,17 @@ More sophisticated policies are possible if the system is optimizing a metric be
 
 In business applications, the monetary value of different transactions varies. Optimizing for \emph{maximal monetary value}, we can design policies that favor more valuable transactions. For example, we can customize the policy to always add a transaction with the lowest value to the FVS until the resulting dependency graph is acyclic.
 
-\subsection{Parallel Reordering and Validation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%  NEW SECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Parallel Reordering and Validation}
+\label{sec:parallel}
 \label{subsec:validator_reordering:parallel}
-Since reordering occurs online in transaction execution, it can increase the latency of a transaction, resulting in a higher chance of conflicts. We explain how parallelization can alleviate this problem by reducing the amortized overhead of reordering.
+Since reordering occurs online in transaction execution, it can increase the overall latency 
+%of a transaction, 
+resulting in a higher chance of conflicts. We explain how parallelization can alleviate this problem by reducing the amortized overhead of reordering.
 
 In centralized reordering, the validator prepares a batch of transactions, reorders them,  validates them and caches the updates of transactions that commit. Each of these steps corresponds to a subcomponent in the validator; we explain how we can parallelize execution across components through the use of pipelining, as well as within each component. 
 
