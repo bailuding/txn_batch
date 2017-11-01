@@ -383,13 +383,13 @@ We now summarize the results of our evaluation:
 %\vspace{-.5em}
 \item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-.5em}
-\item As we increase the level of parallelism in validator reordering, the throughput, latency, and percentile latency all improve, especially when the data contention is medium to high.
+\item As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and percentile latency, especially when data contention is medium to high.
 %\vspace{-.5em}
-\item Batching and reordering increase the throughput by up to 2.7x, and reduce the average and the percentile latency by up to 67\% and 82\% respectively, as compared to the baseline. Batching by itself improves throughput significantly. Adding reordering on top of batching consistently improves throughput by up to 1.3x, and significantly reduces the average and the percentile latency by up to 25\% and 70\% respectively. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt the throughput and latency when the data contention is at the extremes.
+\item Batching and reordering increases throughput by up to 2.7x, and reduces average and percentile latency by up to 67\% and 82\%, respectively\eat{, as compared to the baseline}. Batching by itself improves throughput significantly. Adding reordering on top of batching consistently improves throughput by up to 1.3x, and significantly reduces average latency and percentile latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves tail latency but can hurt throughput and latency when  data contention is at the extremes.
 %\vspace{-.5em}
-\item For alternative reordering policies at the validator, privileging transactions with a combination of the degree of the transaction in the dependency graph and its restart time significantly reduces the tail latency by up to 82\% as compared to other policies, without sacrificing the throughput nor the latency.
+\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of the transaction in the dependency graph and its restart time significantly reduces tail latency by up to 82\%, without sacrificing throughput or average latency.
 %\vspace{-.5em}
-\item In Small Bank benchmark, batching and reordering improve the throughput by up to 3.1x and reduces the average and percentile latency by up to 68\% and 62\% as compared to the baseline.
+\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x and reduces the average and percentile latency by up to 68\% and 62\%\eat{ as compared to the baseline}.
 \item Finally, we implement the transaction reordering idea on top of a commercial database system DBMS-X. Our experiment on Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x and reduces the average latency by up to 66\%.
 %\vspace{-.5em}
 \end{enumerate}  
