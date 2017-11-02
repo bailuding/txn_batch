@@ -1,5 +1,5 @@
 \subsection{Validator Reordering Algorithms}
-We first investigate the performance of the feedback vertex set algorithms from Section~\ref{subsec:validator_reordering:algorithm} with a comparison of the raw performance of the algorithms, i.e., their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{sec:ibvr}, using our micro benchmarks. 
+We first investigate the performance of the feedback vertex set algorithms from Section~\ref{sec:valbatching} with a comparison of the raw performance of the algorithms, i.e., their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{subsec:validator_reordering}, using our micro benchmarks. 
 
 \eat{We first test the algorithms offline on the dependency graphs constructed at validator when running the system. Each dependency graph is constructed from a batch of transactions at validator, excluding non-viable transactions, i.e., we only use transactions that don't have inter-batch conflicts. We compare the averages of the size of the feedback vertex set and the running time per dependency graph.}
 
@@ -7,7 +7,7 @@ We test the SCC-based greedy algorithm with the \texttt{max-degree} ($greedy\_ma
 
 We test these algorithms against several baselines: $search$ is an accurate,
 brute force search algorithm; $random$ is the SCC-based greedy algorithm which
-removes a vertex at random from each SCC to break the cycle. For each graph,
+removes a vertex at random from each SCC to break the cycle. For each graph constructed from a batch of transactions,
 $random\_3$ runs $random$ 3 times and returns the smallest FVS, mitigating the
 effect of bad random choices.
 

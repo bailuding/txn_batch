@@ -4,8 +4,7 @@ We explore validator reordering with more complicated policies as discussed in S
 
 Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as $baseline$ and $batch$. 
 Our first tail-latency aware policy ($rst\hbox{-}cnt$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the one with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
-The second latency-aware policy considers both the number of restarts and a
-degree-based measurement of a transaction. It computes the weight of a node as
+The second latency-aware policy combines the number of restarts and the incoming/outgoing degrees of a transaction into a weight. It computes the weight of a node as
 the product of in-degree and out-degree over the exponential of the number of
 restarts with base 2. When choosing a node to include in the FVS, it picks the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
 
