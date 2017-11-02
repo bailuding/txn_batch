@@ -11,7 +11,7 @@ We first make a conceptual distinction between two types of transaction aborts: 
 In this work, we focus on managing intra-batch aborts by strategically reordering the batched requests at storage and validator. 
 Reducing inter-batch aborts is complementary to our effort. 
 
-Our approach is agnostic to isolation levels as long as the reordering respects the corresponding definition of conflicts for 
+Our approach is agnostic to isolation levels as long as the reordering respects the corresponding definitions of conflicts for 
 write-read, write-write, and read-write dependencies. In the remainder of this paper, we describe 
 how to batch and reorder for serializability, but our techniques can be adapted accordingly to other isolation levels, 
 such as snapshot isolation.
@@ -53,7 +53,7 @@ in the order $\prec$.
 %Note that there is always a trivial solution to any IBVR instance: we can choose $B'$ to be all the elements of $B$ except one, so that $B \setminus B'$ has cardinality one. Such solutions are not useful; therefore, every instance of IBVR is associated with an \emph{objective function} on $B'$, and the goal is to find a $B'$ that maximizes the objective function. An example objective function could be the size of $B'$ (smaller is better), or a more complex function that takes into account transaction weights (e.g. priorities).
 %Given $B$, the goal of IBVR is to find a $B' \subseteq B$ of transactions that must abort due to intra-batch aborts, and a commit order $Q$ for the remaining transactions that respects all read-write dependencies. The validator processes each batch by running IBVR to identify $B'$ and $Q$, aborting all the transactions in $B'$ and committing remaining transactions in the order of $Q$.
 Note that there is always a trivial solution to any IBVR instance, namely to abort all transactions but one. 
-Such solutions are not useful; therefore, every instance of
+This solution is not useful; therefore, every instance of
 IBVR is associated with an \emph{objective function} on $B'$, and the goal is to
 find a $B'$ that maximizes the objective function. A simple objective function
 is the size of $B'$ (the fewer transactions to abort the better), however more complex functions can take transaction priorities
@@ -305,6 +305,8 @@ resulting in a higher chance of conflicts.
 In centralized reordering, the validator prepares a batch of transactions, reorders them,  validates them and caches the updates of transactions that commit. Each of these steps corresponds to a subcomponent in the validator. Parallelism across these components seems difficult since there are strict sequential dependencies across batches. In this section, we explain how we can parallelize execution within each component and then even across components.
 % Figure
 
+ Make the point that we validate twice and that this is a valluable optimization because the cost of the reordering is so high.
+
 Figure~\ref{fig:reorder:validator} shows the architecture of our parallel validator. The validator has three components: 
 %through the use of pipelining, as well as within each component. 
 The batch preparation omponent receives requests from the processor, packages transaction into batches, and sends a reordering request to the transaction reordering component. The transaction reordering subcomponent first pre-validates a batch of transactions based on the latest database snapshot available, it then reorders the remaining transactions using one of our algorithms from Section \ref{sec:valbatching}, and then sends a validation request consisting of the remaining transactions to the transaction validation component. 
@@ -332,7 +334,16 @@ transactions that pass pre-validation can only conflict with transactions within
 
 In pipelined processing through the components, however, batch peparation is not against the latest state of the database since the previous batch is still being reordered and the batch before that is currently being validated. Thus we have to be more careful during transaction validation where we cannot simply validate all transactions in parallel without assuming any further conflicts. However, we can use partitioned parallelism within the transaction validation component. The idea is to partition the key space and break a transaction into smaller pieces, and one thread is assigned to validate transaction pieces on one partition. This is analogous to the design by Ding et al.~\cite{ding2015centiman}.
 
+\eat{
+For the single threaded centralized validator, a batch of transactions is
+pre-validated against the current snapshot of the database. Thus, the
+transactions that pass pre-validation can only conflict with transactions within the batch, and will not conflict with previous committed transactions. So after reordering, the remaining transactions all commit.
 
+With the pipelined reordering design, the validation is decoupled into two phases. We denote a database snapshot as $S_k$, where transactions whose timestamps are less or equal to $k$ have been committed as of this snapshot. In the reordering subcomponent, a batch of transactions $B$ is validated against the latest database snapshot $S_m$. The remaining transactions after pre-filtering are reordered as a batch $B'$ and sent to the validation\eat{ subcomponent}. $B'$ is again validated against the current database snapshot $S_n$. Since the validation subcomponent can be validating uncommitted transactions while $B$ is being processed at the reordering subcomponent, when $B'$ arrives at the validation subcomponent, we may have $n\geq m$. Thus, transactions in $B'$ can still abort due to conflicts with previously committed transactions in $S_n$.
+
+% Parallelism in each subcomponent.
+%We can further introduce parallelism into each of the subcomponents. In batch preparation, multiple threads can package transactions into batches. We can either assign each processor to send its validation request to a specific batch preparation thread, or we can create a consumer-producer queue to connect the processors and the batch preparation threads. In transaction reordering, multiple threads can consume reordering requests from the batch preparation threads, and reorder batches of transactions concurrently. Since the transactions are not serialized yet in the reordering stage, the threads can send the processed batches to the validation subcomponent in any order. At the validation subcomponent, transactions are serialized and validated against all previously committed transactions. We cannot simply validate each individual transaction on a different thread since transactions  from different batches can conflict with each other. However, within an ordered batch, since the only source of conflicts is from all the transactions committed prior the batch, the validation of each transaction within a batch can be processed in parallel. Since conflicts can happen across batch boundaries, processing a new batch should only start after all the transactions in the previous batch have been processed. Within a batch, the transactions are serialized by the ordering produced from the reorder subcomponent. The updates from committed transactions in a batch are applied to the validator cache at the end of a batch. 
+}%% end \eat
 
 
 %. We denote a database snapshot as $S_k$, where transactions whose timestamps are less or equal to $k$ have been committed as of this snapshot. In the reordering subcomponent, a batch of transactions $B$ is validated against the latest database snapshot $S_m$. The remaining transactions after pre-filtering are reordered as a batch $B'$ and sent to the validation\eat{ subcomponent}. $B'$ is again validated against the current database snapshot $S_n$. Since the validation subcomponent can be validating uncommitted transactions while $B$ is being processed at the reordering subcomponent, when $B'$ arrives at the validation\eat{ subcomponent},  we may have $n\geq m$. Thus, transactions in $B'$ can still abort due to conflicts with previously committed transactions in $S_n$.
@@ -348,3 +359,4 @@ In pipelined processing through the components, however, batch peparation is not
 	\label{fig:reorder:validator}
 \end{figure}
 
+%Alternatively, the transaction validation can use partitioned parallelism. The idea is to partition the key space and break a transaction into smaller pieces, and one thread is assigned to validate transaction pieces on one partition~\cite{ding2015centiman}. \eat{More discussion on this design can be found in our previous Centiman system~\cite{ding2015centiman}.}
