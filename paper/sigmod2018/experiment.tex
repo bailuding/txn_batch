@@ -405,20 +405,24 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 \subsection{Experiment Summary}
 
-We now summarize the results of our evaluation:
+In summary, our evaluation shows the following:
 \vspace{-.5em}
 \begin{enumerate}[leftmargin=*]
-\item The simple sort-based FVS greedy algorithm is highly accurate and reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
+\item The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
 %\vspace{-.5em}
 \item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-.5em}
-\item As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and percentile latency, especially when data contention is medium to high.
+\item As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and tail latency, especially when data contention is medium to high.
 %\vspace{-.5em}
-\item Batching and reordering increase throughput by up to 2.7x, and reduce average and percentile latency by up to 67\% and 82\%, respectively\eat{, as compared to the baseline}. Batching by itself improves throughput significantly. Adding reordering on top of batching consistently improves throughput by up to 1.3x, and significantly reduces average latency and percentile latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves tail latency but can hurt throughput and average latency when data contention is at two extremes.
+\item Batching and reordering increase throughput by up to a factor of 2.7, and reduce average and percentile latency by up to 67\% and 82\%, respectively.
+%\eat{, as compared to the baseline}. 
+Batching by itself already improves throughput significantly. But then adding reordering on top of batching consistently improves throughput by a factor of up to 1.3, and it significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is very high.
+%at two extremes.
 %\vspace{-.5em}
-\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of the transaction in the dependency graph and its restart time significantly reduces tail latency by up to 82\%, without sacrificing throughput or average latency.
+\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of the transaction in the dependency graph and their restart time significantly reduces tail latency by up to 82\%, without sacrificing throughput or average latency.
 %\vspace{-.5em}
-\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x and reduces the average and percentile latency by up to 68\% and 62\%\eat{ as compared to the baseline}.
-\item Finally, we implement the transaction reordering idea on top of a commercial database system DBMS-X. Our experiment on Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x and reduces the average latency by up to 66\%.
+\item In the Small Bank benchmark, batching and reordering improves the throughput by up to a factor of 3.1, and it reduces the average and percentile latency by up to 68\% and 62\%.
+%\eat{ as compared to the baseline}.
+\item Transaction reordering idea on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even in commercial systems.
 %\vspace{-.5em}
 \end{enumerate}  
