@@ -1,7 +1,7 @@
 \subsection{Validator Reordering Algorithms}
 We first investigate the performance of the feedback vertex set algorithms from Section~\ref{sec:valbatching} 
 %with a comparison of the raw performance of the algorithms, i.e., 
-for their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{subsec:validator_reordering}, using our micro benchmarks. 
+for their accuracy and running time. We run the algorithms on graphs constructed as described in Section~\ref{sec:valbatching}, using our micro benchmarks. 
 %\eat{We first test the algorithms offline on the dependency graphs constructed at validator when running the system. Each dependency graph is constructed from a batch of transactions at validator, excluding non-viable transactions, i.e., we only use transactions that don't have inter-batch conflicts. We compare the averages of the size of the feedback vertex set and the running time per dependency graph.}
 We test the SCC-based greedy algorithm with the \texttt{max-degree} ($greedy\_max$), \texttt{sum-degree} ($greedy\_sum$) and \texttt{prod-degree} policies ($greedy\_prod$). We also test the sort-based greedy algorithm $greedy\_sort$ (using the \texttt{prod-degree} policy for sorting and multi factor 2), and the hybrid algorithm $hybrid\_m$. The hybrid algorithm uses $greedy\_prod$ as a subroutine when the size of the SCC is larger than $m$, and switches to the brute force search otherwise. By increasing the threshold, we can progressively approximate the optimal solution. 
 We test these algorithms against several baselines: $search$ is an accurate,

@@ -43,7 +43,7 @@ Such intra-batch transaction reordering can be done with several goals in mind. 
 %\label{subsec:validator_reordering:algorithm}
 We define the problem of intra-batch validator reordering (IBVR) more formally. A \emph{batch} $B$ is a set of transactions to be validated. We assume all transactions $t \in B$ are \emph{viable}, that is, no $t \in B$ conflicts with a previously committed transaction. If there are non-viable transactions in $B$, they can be removed in preprocessing, as they must always abort.
 Given $B$, the goal of IBVR is to find a subset $B' \subseteq B$ of transactions to abort such that there is a serialization order $\prec$ for the 
-the remaining transactions $B \setminus B'$ such that all of the transactions in $B \setminus B'$ commit when validated in this order.
+the remaining transactions $B \setminus B'$, and all of the transactions in $B \setminus B'$ commit when validated in this order.
 %that must abort due to intra-batch aborts. IBVR must also find a 
 %strict (i.e. asymmetric) 
 %total order $\prec$ on $B \setminus B'$ that \emph{respects all read-write dependencies}; that is, for $t,t'\in B \setminus B'$, if $t \prec t'$, then there is no read-write dependency from $t'$ to $t$.
@@ -92,8 +92,8 @@ We also introduce a hybrid algorithm that makes strategic use of brute-force sea
 
 \section{Validator Batching}
 \label{sec:valbatching}
-All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.
-Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. This can be implemented by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the time complexity to probe the hash table for a single write is $O(|B|)$, where $|B|$ is the size of the batch. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
+All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator as $B$. \eat{and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.}%end of eat
+Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. This can be implemented by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the time complexity to construct dependencies for $t$ is $O(|B|)$, where $|B|$ is the size of the batch. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
 
 We now process $G$ to find a feedback vertex set. Both before and during the
 execution of our FVS algorithms, we \emph{trim} the graph to remove all the nodes
@@ -167,7 +167,7 @@ Nodes in SCCs of size one cannot belong to any cycle. For a SCC that contains
 more than one node, we choose a vertex to remove according to some \emph{policy}. The policy is a ranking function over vertices, and we greedily choose the top-ranked vertex to remove. We then recurse on the remaining graph. Algorithm~\ref{alg:scc} shows the details of this procedure. We begin by trimming and partitioning the graph into SCCs  (lines 3-4). We process each SCC $S$ using $GreedyComponent(S, P)$ (lines 5-7). This subroutine starts by eliminating SCCs of size one (lines 10-12). Next, it chooses the top-ranked vertex $v$ from $S$ under Policy $P$ (line 13). It removes $v$ from $S$ and recursively calls $GreedySccGraph$ on the remaining graph $S'$ (line 14 - 15). Finally, it returns the union of all the FVSs obtained in processing $S$ (line 15). When the top-level procedure $GreedySccGraph(G, P)$ has processed all the SCCs of $G$, it returns the union of the FVSs obtained (line 8).
 
 % Time complexity analysis
-$trim$ and updating the graph after removing a node takes $O(|V| + |E|)$ per
+Trimming and updating the graph after removing a node take $O(|V| + |E|)$ per
 graph in total, since each node / edge can be removed only once. In the worst case, e.g., in a fully connected graph, we may only remove one node per iteration. Since SCC takes $O(|V|+|E|)$ per iteration, the time complexity of this algorithm is $O(|V|(|V|+|E|))$.
 
 The policy $P$ is at the heart of the algorithm, and it ranks vertices which are likely to be in a desirable FVS highly. We discuss possible policies in Section \ref{subsec:validator_reordering:policy}.
