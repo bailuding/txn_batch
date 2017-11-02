@@ -20,6 +20,7 @@ The dynamic timestamp assignment technique assigns each transaction a timestamp 
 Transaction scheduling has also been studied in real-time databases, where urgent or high value transactions are prioritized~\cite{haritsa1993value}.
 OCC with forward validation enables the validator to choose what to abort or defer a transaction if it would cause live transactions with higher priority to abort~\cite{haritsa1990dynamic, lam1995real,lee1993using}. There are also systems that use locking and preemption~\cite{abbott1992scheduling}, as well as hybrid optimistic/pessimistic methods~\cite{huang1991experimental, lin1990concurrency}. These approaches can be viewed as a simplified version of our validator reordering; moreover, none of the systems uses batching. 
 Transactions can be batched and serialized before execution~\cite{thomson2012calvin, mu2014extracting, faleiro2014rethinking}. These are complementary to our work. Our approach is more flexible as it allows reordering at multiple stages in transaction execution.
+
 \eat{Calvin uses a deterministic locking-based approach, which fixes a partial order for transactions prior to execution~\cite{thomson2012calvin}. ROCOCO proposes a variation of Calvin with distributed scheduler~\cite{mu2014extracting}. \cite{faleiro2014rethinking} extended Calvin to multi-version concurrency control. These are complementary to our work. Our approach is more flexible as it allows reordering at multiple stages in a transaction's life cycle. }
 
 
@@ -32,7 +33,7 @@ Our work has different goals and uses different techniques from all the above sy
 %\vspace{-1em}
 %\paragraph{Batching}
 {\bf Batching.}
-Batching to amortize costs and condense work is a common optimization technique. One application is to pack networking and logging messages~\cite{castro2002practical,ding2015centiman,friedman1997packing,glendenning2011scalable}. Batching is also widely applied to application requests to improve performance, including group commits~\cite{debrabant2013anti,hagmann1987reimplementing}, condensing IO requests~\cite{debrabant2013anti, faleiro2014lazy}, and Paxos~\cite{santos2012tuning}.
+Batching to amortize costs and condense work is a common optimization technique. One application is to pack networking and logging messages~\cite{castro2002practical,ding2015centiman,friedman1997packing,glendenning2011scalable}. Batching is also widely applied to aggregate application requests to improve performance, including group commits~\cite{debrabant2013anti,hagmann1987reimplementing}, condensing IO requests~\cite{debrabant2013anti, faleiro2014lazy}, and Paxos~\cite{santos2012tuning}.
 Since batching is often associated with a throughput/latency tradeoff, there is work on adaptive batching~\cite{friedman2006adaptive, nagle1984congestion}.
 Those uses of batching are low-level and are not aware of the overall system infrastructure or the application semantics. Our work embraces batching as a core design principle at multiple stages of transaction execution. In addition, unlike previous work, we focus on the use of batching for reordering.
 
