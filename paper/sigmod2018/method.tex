@@ -91,7 +91,7 @@ We also introduce a hybrid algorithm that makes strategic use of brute-force sea
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Validator Batching}
-\section{sec:valbatching}
+\label{sec:valbatching}
 All our IBVR algorithms begin by constructing the dependency graph $G$. We start with a set of transactions that have been batched at the validator and construct $B$ by discarding all non-viable transactions. We can identify such transactions by validating each transaction against all the updates prior to this batch.
 Next, we create one node per transaction, and one edge per read-write dependency. To determine whether a read-write dependency holds from transaction $t'$ to $t$, we check whether $WS(t) \cap RS(t') \neq \emptyset$. If so, we add an edge from $t'$ to $t$. This can be implemented by creating a hash table from the write sets and probing it with the read sets. Since a write in $t$ can potentially conflict with all the other transactions in the batch, the time complexity to probe the hash table for a single write is $O(|B|)$, where $|B|$ is the size of the batch. The time complexity of building $G$ is $O(|B|^2+|R|+|W|)$, where $|R|$ is the total number of reads, and $|W|$ is the total number of writes. 
 
