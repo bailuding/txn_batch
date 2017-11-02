@@ -1,5 +1,5 @@
+\subsection{Reducing Tail Latency}
 
-\subsection{Reduce Tail Latency}
 We explore validator reordering with more complicated policies as discussed in Section~\ref{subsec:validator_reordering:policy}\eat{; specifically, we look at policies that aim to reduce the transaction tail latency}. Specifically, we explore the possibility of reducing transaction tail latency with latency-specific policies.
 
 Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as $baseline$ and $batch$. 
@@ -11,8 +11,8 @@ restarts with base 2. When choosing a node to include in the FVS, it picks the n
 Figure~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the throughput
 and the average latency. The impact of tail-latency aware policies on transaction throughput and average latency are negligible as compared to when we maximize the number of commits ($max\hbox{-}c$).
 Figure~\ref{fig:restart:p100} shows the tail latency from 90\% to 100\%, i.e., the latency threshold for from up to 90\% to up to 100\% of the transactions. \eat{While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline when the skew factor is high. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects. Our first latency-aware policy $rst\hbox{-}cnt$ performs similar as $max\hbox{-}c$.
-
 In contrast, }%eat
+
 While our first latency-aware policy $rst\hbox{-}cnt$ performs similar to $max\hbox{-}c$, the more sophisticated policy $rst\hbox{-}cnt$ consistently performs significantly better than all the others, and reduces the tail latency by up to 86\%\eat{ as compared to other policies}.\eat{, especially for tail latency from 99.9\% to 100\%.  , although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}%eat
 
 \eat{In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, the latency-ware policy that combines the graph degree and the number of restarts together performs significantly better as compared to the others.}
