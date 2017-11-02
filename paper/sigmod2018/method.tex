@@ -57,7 +57,7 @@ This solution is not useful; therefore, every instance of
 IBVR is associated with an \emph{objective function} on $B'$, and the goal is to
 find a $B'$ that maximizes the objective function. A simple objective function
 is the size of $B'$ (the fewer transactions to abort the better), however more complex functions can take transaction priorities
-or non-starvation of transactions into
+or the tail latency of transactions into
 account. We call this objective function a \emph{policy} $P$.
 
 \begin{figure}[t]
@@ -80,7 +80,7 @@ If $G$ is not acyclic, we can model this problem as an instance of the feedback 
 %to the selection of a minimal $B'$~\cite{karp1972reducibility}. 
 A feedback vertex set (FVS) of a directed graph is a subset of vertices whose removal makes the graph acyclic. For example, consider the graph in Figure~\ref{fig:fvs}. The vertex 1 forms a FVS since the graph becomes acyclic after removing vertex 1 and its incoming and outgoing edges. Finding a minimal-size $B'$ for IBVR is exactly the problem of finding the minimal (smallest-size) feedback vertex set on $G$. If we have a more complex objective function for IBVR, we can assign weights to the nodes to represent the desired transaction priorities, and look for a minimum-weight FVS. 
 Once we find the FVS $B'$, removing the nodes in $B'$ from $G$ yields an acyclic graph that determines the desired commit order $Q$.
-Unfortunately, the directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. It is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
+The directed graph FVS (DFVS) problem is well-studied as it has many applications, including deadlock detection, program verification, and Bayesian inference. Unfortunately, it is NP-hard and APX-hard~\cite{kann1992approximability, karp1972reducibility}, and it is still an open problem whether there exists any constant-factor approximation.
 We thus take a practical approach, and in the next section, we propose two greedy algorithms for finding $B'$ -- one based
 on the graph's strongly connected components (SCCs) and the other based on sort.
 We also introduce a hybrid algorithm that makes strategic use of brute-force search; this algorithm is somewhat slower but results in higher-quality solutions.
