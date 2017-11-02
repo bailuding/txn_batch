@@ -1,8 +1,20 @@
 \section{Evaluation}\label{sec:experiments}
-In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at validator as well as configuration parameters. In particular, we asked the following questions:
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at the validator.
+% as well as configuration parameters. In particular, 
+We wanted to answer the following questions:
+(1) How well do our validator reordering algorithms from Section~\ref{sec:valbatching} perform? How does batching and reordering at the validator using these algorithms affect the end-to-end system performance?
+(2) What is the impact of batch size on performance? 
+(3) How does parallel reordering affect performance?
+(4) How does storage and validator batching and reordering
+  affect system performance?
+(5) How well do the different policies from Section~\ref{subsec:validator_reordering:policy} work?
+(6) How does batching and reordering perform on real workloads?
+(7) How well do our techniques adapt to data contention on top of a commercial DBMS?
+
+\eat{
 \begin{enumerate}[leftmargin=*]
-\item How well do our validator reordering algorithms from Section~\ref{sec:valbatching} perform? How does batching and reordering at validator using these algorithms affect the end-to-end system performance?
-\item What's the impact of batch size on performance? 
+\item How well do our validator reordering algorithms from Section~\ref{sec:valbatching} perform? How does batching and reordering at the validator using these algorithms affect the end-to-end system performance?
+\item What is the impact of batch size on performance? 
 \item How does parallel reordering affect performance?
 \item How does storage and validator batching and reordering
   affect system performance?
@@ -10,28 +22,30 @@ In our evaluation, we wanted to understand the effect of batching and reordering
 \item How does batching and reordering perform on real workloads?
 \item How well do our techniques adapt to data contention on top of a commercial DBMS?
 \end{enumerate}
+}%% end \eat
 
 \subsection{Implementation and Experimental Setup}
 \label{subsec:experiment:implementation}
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-Our system architecture has four components: transaction client, processor, storage, and validator. The components communicate through consumer-producer queues.
-
-The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor multiplexes transactions as a transaction coordinator, receives transaction requests from the transaction client, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions; thus, it only communicates commit decisions to the transaction client. 
-The storage continuously processes read and write requests. When storage batching is enabled, it buffers requests into batches, and uses the optimal strategy described in Section~\ref{sec:overview}: It first executes all the write requests in the batch \eat{(discarding a write if a newer version exists in the storage),} and then all the read requests. 
+Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues.
+The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor multiplexes transactions as a transaction coordinator, receives transaction requests from the transaction client, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions, and it only communicates commit decisions to the transaction client. 
+The storage continuously processes read and write requests. When storage batching is enabled, the storage buffers requests into batches, and uses the strategy described in Section~\ref{sec:overview} to first executes all the write requests in the batch and then all the read requests in the batch.
 
 % validator
-The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates. When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:valbatching} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
+We have decoupled the validator  into three components as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker picks a batch of transations up one at a time, and it validates its transactions against the current validator cache, and it applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{sec:valbatching} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 
-% Validator
-We have further decoupled the validator component into three subcomponents as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates and filters transactions in a batch against the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker validates transactions against the current validator cache, and applies updates from committed transactions to the cache based on the transaction serialization order. 
+
 
 % Details of validator implementation.
 By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2. To process a batch, we create a dependency graph as described in Section~\ref{subsec:validator_reordering}. We have empirically determined that validator reordering is not beneficial if the dependency graph is very dense, as there are fewer opportunities for conflict reduction. Therefore, we heuristically set a limit on the size of the dependency graph. Once we detect that the number of edges has hit this limit during the construction of the dependency graph, we discard the graph and validate the transactions without reordering. 
 
 % Parallelization.
-We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, and the writes are applied based on its data versioning as described in Section~\ref{sec:overview}. In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that transaction reordering consumes more time than the other subcomponents, we use multi-threading and four transaction reordering workers by default.
+We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, 
+and the writes are applied based on its data versioning as described in Section~\ref{sec:overview}. 
+In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.
 
 % Hard ware and data population.
 Our system is implemented in Java. All the experiments run on a machine with
