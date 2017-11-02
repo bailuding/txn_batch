@@ -5,7 +5,7 @@ Transaction processing is a fundamental aspect of database functionality, and im
 Batching can improve system performance for several reasons. First, at the networking layer, it increases the communication efficiency by packing messages~\cite{ding2015centiman,friedman1997packing}. Second, it amortizes the cost of system calls by condensing multiple requests into a single one, as in group commit~\cite{debrabant2013anti,hagmann1987reimplementing}. Third, it reduces the number of requests by discarding duplicate or stale requests, such as writes to the same record~\cite{faleiro2014lazy}. All of those are optimizations based on low-level techniques, and they do not take the semantics of the system into account.
 
 % our proposal at a high level: batching at higher level for OCC 
-We propose to embrace semantic batching as a core design principle throughout transaction execution for OLTP systems with optimistic concurrency control (OCC)~\cite{kung81tods}. .
+We propose to embrace semantic batching as a core design principle throughout transaction execution for OLTP systems with optimistic concurrency control (OCC)~\cite{kung81tods}.
 OCC is a popular concurrency control protocol due to its low overhead in low-contention
 settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr,
 bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi,larson2011high}. However, it has been shown that OCC
