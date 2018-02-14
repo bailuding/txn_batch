@@ -1,0 +1,22 @@
+\subsection{Storage and Validator Batching}
+\label{subsec:experiment:batching}
+
+Next, we perform a detailed analysis on the effects of storage and validator batching. We configure the system in several different modes: no batching ($baseline$), batching without reordering ($batch$), storage only batching with reordering ($sr$), validator only batching with reordering
+%\eat{with the \texttt{prod-degree} policy that maximizes the number of commits }
+($vc$), and both storage and validator batching with reordering ($srvc$).
+
+
+\eat{As explained in Section~\ref{sec:overview}, batching and reordering affect the abort rate by reducing inter-batch and intra-batch aborts. The number of inter-batch aborts is affected by system-wide transaction latency, the freshness of the transactions' reads, and their access patterns. Validator reordering reduces the number of intra-batch aborts; however, storage reordering can increase the number of such aborts because it reduces inter-batch aborts (and thus more viable transactions end up in validator batches rather than aborting due to inter-batch conflicts). The overall throughput of the system is affected by both the transaction latency and the abort rate. }%end of \eat
+
+
+Figures~\ref{fig:basic:tps},~\ref{fig:basic:latency}, and~\ref{fig:basic:p95} show the throughput, the average latency, and the percentile latency of different system modes under a variety of data skew parameters. Overall, using batching with reordering at the storage and/or the validator consistently leads to significant improvements in throughput by up to a factor of 2.7x. In addition, storage and validator reordering consistently improve the throughput to up to 1.3x as compared to $batch$. Moreover, validator reordering significantly reduces the average latency by up to 67\% and the tail latencies by up to 82\% as compared to $baseline$, and by up to 25\% and 70\% as compared to $batch$.
+
+%\eat{When batching is enabled ($sr$ and $srvc$), the throughput is 2.1x-2.4x that of the baseline ($baseline$). In addition, using validator batching always gives a better latency profile (Figure~\ref{fig:basic:p95}).}
+%\eat{When the data contention is very low, the abort rate is low. Thus, the storage-batching-only mode ($sr$) gives similar throughput compared with $srvc$.  As the data skew increases, so does the number of intra-batch conflicts and aborts; the overhead of validator batching starts to pay off. In a medium-contention setting, using both validator and storage batching ($srvc$) gives the best throughput.}
+When the data contention is extremely high, the number of intra-batch conflicts
+that cannot be resolved by validator reordering increases. Validator reordering
+is slower due to denser graphs, while bringing less benefit. Thus, the best throughput in this case is achieved by using storage only batching with reordering ($sr$). 
+We conducted additional experiments to evaluate the performance with a fixed workload and varying load. Figure~\ref{fig:load_z0.7:tps} shows the throughput of the system with skew factor 0.7. The configuration that enables both storage and validator batching with reordering consistently outperforms the others. The throughput increases by up to 2.5x, and the average latency is reduced by up to 63\% as compared to $baseline$. More figures on additional metrics and parameters are omitted due space limits.
+
+\eat{
+To summarize, it is always beneficial to enable storage batching since this technique reduces inter-batch aborts at a minimal cost. While validator batching consistently gives a percentile latency, it is most effective in mid-contention settings, when the reduction of intra-batch conflicts that it brings is sufficient to justify its cost. }

@@ -28,8 +28,12 @@ We wanted to answer the following questions:
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues.
-The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor multiplexes transactions as a transaction coordinator, receives transaction requests from the transaction client, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions, and it only communicates commit decisions to the transaction client. 
+Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
+The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions, and it only communicates commit decisions to the transaction client.
+
+The processor is \emph{non-blocking}: it continuously processes the requests from its consume-producer queue without waiting for the response of the request. For example, When it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel.
+
+
 The storage continuously processes read and write requests. When storage batching is enabled, the storage buffers requests into batches, and uses the strategy described in Section~\ref{subsec:storage_reordering} to first execute all the write requests and then all the read requests in the batch.
 
 % validator
@@ -67,14 +71,14 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 \begin{figure*}[t]
     \centering
-    \begin{minipage}[b]{0.45\linewidth}
+    \begin{minipage}[b]{0.31\linewidth}
         \centering
         \includegraphics[width=\textwidth]{./exp_fig/fvs/fvs}
         \vspace{-2em}
         \caption{Size of FVS per graph with different algorithms}
         \label{fig:fvs:fvs}
     \end{minipage}
-    \begin{minipage}[b]{0.45\linewidth}
+    \begin{minipage}[b]{0.31\linewidth}
         \centering
         \includegraphics[width=\textwidth]{./exp_fig/fvs/latency}
         \vspace{-2em}
