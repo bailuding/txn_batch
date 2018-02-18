@@ -3,9 +3,9 @@
 
 In our final experiment, we implemented the idea of transaction batching and reordering on top of a commercial DBMS-X. DBMS-X is a high performance OLTP engine using optimistic concurrency control. Upon receiving transactions, it processes transactions concurrently with a first-come-first-served order.
 
-We implement transaction batching and reordering at the client side of DBMS-X as a proof-of-concept.
 In many applications and services, clients submit transactions to databases via a middle-layer, such as a web server. This server consolidates requests from many clients, processes the requests, reroutes the requests to different database servers, and responds to the clients. The web server often batches transactions from different clients to improve throughput and resource efficiency. 
 
+We incorporate the idea of transaction batching and reordering to DBMS-X at the client side.
 We implemented validator reordering for the transactions batched at the middle-layer -- before submitting the batched transactions to the database server. Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions, and then we maximize the number of transaction commits with our reordering algorithm, using a policy considering both how many dependencies a transaction involves and how long it has been waiting. The transactions excluded from the batch, together with future incoming transactions, will be included in the next batch for reordering.
 
 We use SmallBank benchmark of Zipfian skew 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{BatchReorder}) with two baselines: no batching (\emph{NoBatch}) and batch without reordering (\emph{Batch}). In \emph{NoBatch}, we submit transactions to DBMS-X one at a time. In \emph{Batch} and \emph{BatchReorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50, which gives reasonable throughput for this workload.

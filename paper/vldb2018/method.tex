@@ -63,9 +63,9 @@ account. We call this objective function a \emph{policy} $P$.
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.3\columnwidth]{./alg_fig/fvs-eg}
-	\vspace{-1em}
+	%\vspace{-1em}
 	\caption{An example of a directed graph; node 1 forms a feedback vertex set.}
-	\vspace{-1em}
+	%\vspace{-1em}
 	\label{fig:fvs}
 \end{figure}
 
@@ -204,9 +204,9 @@ The policy $P$ is at the heart of the algorithm, and it ranks vertices which are
 		{\includegraphics[width=\textwidth]{./alg_fig/scc-g7}}
 		%     \vspace{-2em}
 	\end{minipage}  
-	\vspace{-1em}             
+	%\vspace{-1em}             
 	\caption{An example of the SCC-based greedy algorithm using \texttt{prod-degree} policy. Blue nodes are trimmed during the algorithm, and yellow nodes form the FVS.}
-	\vspace{-1em}
+	%\vspace{-1em}
 	\label{fig:scc}
 \end{figure*}
 
@@ -257,10 +257,10 @@ This algorithm has smaller time complexity than the SCC-based greedy algorithm, 
 		{\includegraphics[width=\textwidth]{./alg_fig/simple-g8}}
 		%     \vspace{-2em}
 	\end{minipage}
-	\vspace{-1em}             
+	%\vspace{-1em}             
 	\caption{An example of the sort-based greedy algorithm using \texttt{prod-degree} policy and multi factor 1. Blue nodes are trimmed during the algorithm, and yellow nodes form the FVS.}
 	\label{fig:simple}               
-	\vspace{-1em}    	
+	%\vspace{-1em}    	
 \end{figure*}
 
 {\bf Example (Continued).} Figure~\ref{fig:simple} shows the same example using the sort-based greedy algorithm, with $k = 1$. After the first sort, we add Node 5 to the FVS since it has the highest product of in-degree and out-degree. After eliminating Node 5, Nodes 10 and 12 have only incoming edges, and get trimmed (Figure~\ref{fig:simple:g2}). We sort the remaining nodes. This time, we add Node 8 to the FVS, and trim Nodes 0, 1, 9, 11 (Figure~\ref{fig:simple:g4}). We repeat this process with the remaining nodes until the graph is empty. This yields a FVS consisting of Nodes 3, 5, 6, and 8 (Figure~\ref{fig:simple:g8}), which contains one more vertex than the FVS we obtained with the SCC-based algorithm.

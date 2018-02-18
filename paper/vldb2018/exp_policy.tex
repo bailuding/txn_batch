@@ -1,30 +1,17 @@
 \subsection{Reducing Tail Latency}
 
-In this section, we explore validator reordering with more sophisticated policies as discussed in Section~\ref{subsec:validator_reordering:policy}.
+In this experiment, we explore validator reordering with more sophisticated policies as discussed in Section~\ref{subsec:validator_reordering:policy}.
 %\eat{; specifically, we look at policies that aim to reduce the transaction tail latency}. Specifically, we explore the possibility of reducing transaction tail latency with latency-specific policies.
-Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($max\hbox{-}c$) as well as $baseline$ and $batch$. 
-Our first tail-latency aware policy ($rst\hbox{-}cnt$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the node with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
-Our second latency-aware policy combines the number of restarts and the incoming/outgoing degrees of a transaction into a weight. It computes the weight of a node as
+Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($mc$) as well as no batching ($base$) and batching without reordering ($bch$). 
+Our first tail-latency aware policy ($rct$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the node with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
+Our second latency-aware policy ($rdeg$) combines the number of restarts and the incoming/outgoing degrees of a transaction into a weight. It computes the weight of a node as
 the product of in-degree and out-degree over the exponential of the number of
 restarts with base 2. When choosing a node to include in the FVS, it picks the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
 Figures~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the throughput
-and the average latency. The impact of tail-latency aware policies on transaction throughput and average latency are negligible as compared to when we maximize the number of commits ($max\hbox{-}c$).
+and the average latency. The impact of tail-latency aware policies on transaction throughput and average latency are negligible as compared to when we maximize the number of commits ($mc$).
 Figure~\ref{fig:restart:p100} shows the 
-%tail latency from 90\% to 100\%, i.e., 
 tail latencies above 90\%. 
-\eat{While maximizing the number of commits, the \texttt{prod-degree} policy can produce worse tail latency than the baseline when the skew factor is high. This is because it is unaware of the restart times of transactions, and it can discriminate against transactions that are inherently hard to commit, e.g., because they access many hot objects. Our first latency-aware policy $rst\hbox{-}cnt$ performs similar as $max\hbox{-}c$.
-In contrast, }%eat
-While our first latency-aware policy $rst\hbox{-}cnt$ performs similar to $max\hbox{-}c$, the more sophisticated policy $rst\hbox{-}cnt$ consistently performs significantly better than all the others, and it reduces the tail latency by up to 86\%
-%\eat{ as compared to other policies}.\eat{, especially for tail latency from 99.9\% to 100\%.  , although $rst\hbox{-}deg$ consistently performs slightly better than $rst\hbox{-}cnt$.}%eat
-%\eat{In summary, the latency-aware policies decrease tail latency significantly while maintaining a comparable overall performance to the policy that maximizes the number of commits. Moreover, the latency-ware policy that combines the graph degree and the number of restarts together performs significantly better as compared to the others.}
+While our first latency-aware policy $rct$ performs similar to $mc$, the more sophisticated policy $rdeg$ consistently performs significantly better than all the others, and it reduces the tail latency by up to 86\%.
 
+Thus, with latency-aware policies, we effectively reduce transaction tail latencies without sacrificing either the throughput or the average latency.
 
-\eat{
-%\subsubsection
-{\bf Helping hard transactions commit.} We use a ``hard'' workload by including 80\% of normal transactions with 5 reads and 5 writes, and 20\% of ``hard'' transactions with 10 reads and 10 writes. All the data accesses are drawn from the same Zipfian distribution. The larger transactions are more likely to conflict with others and less likely to commit; thus, we assign them higher priorities in the validator reordering. We compare the system performance with unweighted ($srvc$) validator reordering and a weighted ($srvs$) validator reordering policy that prioritizes the larger transactions, and we enable storage batching 
-%is enabled. 
-As before, the $baseline$ configuration uses no batching.
-Figures~\ref{fig:weighted:tps} and~\ref{fig:weighted:p95} show the overall throughput and the percentile latency. Since the ratio of large transactions is small, the overall performance under weighted and unweighted reordering policies is similar.
-Figures~\ref{fig:weighted:tps1},~\ref{fig:weighted:abort1}, and~\ref{fig:weighted:p951} show the throughput, the abort rate, and the percentile latency of the larger transactions alone. While the throughput of unweighted and weighted validator reordering is still similar, weighted validator reordering gives a much better transaction profile as far as the abort rate and the percentile latency are concerned.
-
-}

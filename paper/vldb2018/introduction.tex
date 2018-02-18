@@ -66,9 +66,9 @@ will see a stale value and is guaranteed to fail validation.
 \begin{figure}[t]
  \centering
  \includegraphics[width=0.9\columnwidth]{figures/arch.pdf}
- \vspace{-.5em}
+ %\vspace{-.5em}
  \caption{OCC system architecture}
- \vspace{-1em}
+% \vspace{-1em}
  \label{fig:occ_arch}
 \end{figure}
 
@@ -83,7 +83,7 @@ We explore the benefits of transaction batching and operation reordering in OCC 
 %\begin{itemize}
 %\item 
 
-$\bullet$ Our first contribution is to show how to utilize batching and reordering throughout the lifetime of a transaction to enhance OCC-based protocols. We analyze the reasons for conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce these aborts through semantic batching.
+$\bullet$ Our first contribution is to show how to integrate batching and reordering throughout the lifetime of a transaction to enhance OCC-based protocols. We analyze the reasons for conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce these aborts through semantic batching.
 We introduce intra-batch storage reordering and
 intra-batch validator reordering, and we show that selecting the
 optimal transaction ordering at the validator batch is NP-hard.
