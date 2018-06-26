@@ -1,0 +1,394 @@
+\section{Evaluation}\label{sec:experiments}
+
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at the validator.
+% as well as configuration parameters. In particular, 
+We wanted to answer the following questions:
+\begin{enumerate}[leftmargin=*]
+\item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does these algorithms affect the end-to-end system performance?
+\vspace{-0.5em}
+%(2) What is the impact of batch size on performance? 
+\item How does storage and validator batching and reordering
+  affect system performance?
+\vspace{-0.5em}
+\item How well do the different policies from Section~\ref{subsec:validator_reordering:policy} work?
+\vspace{-0.5em}
+\item How does parallel reordering affect performance?
+\vspace{-0.5em}
+\item How do we incorporate our techniques on top of a commercial DBMS, and how do our techniques improve its performance under data contention?
+\end{enumerate}
+
+\subsection{Implementation and Experimental Setup}
+\label{subsec:experiment:implementation}
+
+%Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
+
+Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
+The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
+
+The processor is \emph{non-blocking}: it continuously processes the requests from its consume-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel to improve its throughput.
+
+
+The storage continuously processes read and write requests. When storage batching is enabled, the storage buffers requests into batches, and uses the strategy described in Section~\ref{subsec:storage_reordering} to first execute all the write requests and then all the read requests in the batch.
+
+% validator
+The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
+We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of transations one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+% Details of validator implementation.
+By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.
+
+
+% Parallelization.
+We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, 
+and the writes are applied based on its data versioning as described in Section~\ref{subsec:storage_reordering}. 
+In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.
+
+% Hard ware and data population.
+We implemented our prototype in Java. All the experiments run on a machine with
+Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the
+storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
+
+% baseline
+The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($bch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
+
+% Misc
+All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \emph{good throughput} (number of committed transactions per second), average latency, and percentile latency.
+
+% *******************
+% * Figures
+% *******************
+
+\begin{figure*}[t]
+    \centering
+    \begin{minipage}[b]{0.47\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{./exp_fig/fvs/fvs}
+        %\vspace{-2em}
+        \caption{Size of FVS per graph}
+        \label{fig:fvs:fvs}
+    \end{minipage}
+\quad
+    \begin{minipage}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{./exp_fig/fvs/latency}
+        %\vspace{-2em}
+        \caption{Running time of finding FVS}
+        \label{fig:fvs:latency}
+    \end{minipage}
+\end{figure*}
+
+
+\begin{figure*}[t]
+	\centering
+    \begin{minipage}[b]{0.31\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{./exp_fig/greedy/tps}
+        %\vspace{-2em}
+        \caption{Throughput with SCC-based and sort-based greedy algorithms}
+        \label{fig:greedy:tps}
+    \end{minipage}
+    \begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/greedy/latency}
+	%\vspace{-2em}
+	\caption{Average latency for greedy algorithms}
+	\label{fig:greedy:latency}
+	\end{minipage}
+    \begin{minipage}[b]{0.31\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{./exp_fig/greedy/percent95_latency}
+     %   \vspace{-2em}
+        \caption{Percentile latency for greedy algorithms}
+        \label{fig:greedy:p95}
+    \end{minipage}
+\end{figure*}
+
+
+\begin{figure*}[t]
+	\centering
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/basic/tps}
+	%vspace{-2em}
+	\caption{Throughput under workloads of Zipfian distribution}
+	\label{fig:basic:tps}
+	\end{minipage}    
+    \begin{minipage}[b]{0.31\linewidth}
+    	\centering
+    	\includegraphics[width=\textwidth]{./exp_fig/basic/latency}
+    %	\vspace{-2em}
+    	\caption{Average latency under workloads of Zipfian distribution}
+    	\label{fig:basic:latency}
+    \end{minipage}
+    \begin{minipage}[b]{0.31\linewidth}
+    	\centering
+    	\includegraphics[width=\textwidth]{./exp_fig/basic/percent95_latency}
+    %	\vspace{-2em}
+    	\caption{Percentile latency under workloads of Zipfian distribution}
+    	\label{fig:basic:p95}
+    \end{minipage}
+\end{figure*}
+
+
+\begin{figure*}[t]
+	\centering
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/restart/tps}
+%	\vspace{-2em}
+	\caption{Throughput with tail latency optimized policies}
+	\label{fig:restart:tps}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/restart/latency}
+%		\vspace{-2em}
+		\caption{Average latency with tail latency optimized policies}
+		\label{fig:restart:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/restart/percent100_latency}
+%	\vspace{-2em}
+	\caption{Percentile latency with tail latency optimized policies}
+	\label{fig:restart:p100}
+	\end{minipage}
+\end{figure*}
+
+\begin{figure*}[t]
+	\centering
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/reorder/tps}
+%	\vspace{-2em}
+	\caption{Throughput with different number of reordering workers}
+	\label{fig:reorder:tps}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/reorder/latency}
+%	\vspace{-2em}
+	\caption{Average latency with different number of reordering workers}
+	\label{fig:reorder:latency}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/reorder/percent95_latency}
+%	\vspace{-2em}
+	\caption{Percentile latency with different number of reordering workers}
+	\label{fig:reorder:p95}
+	\end{minipage}    
+%    \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
+%	\vspace{-2em}
+%	\caption{Throughput with various batch sizes}
+%	\label{fig:bsize:tps}
+%	\end{minipage}    
+%    \vspace{-1em}
+\end{figure*}
+
+%\begin{figure*}[t]
+%    \centering
+%    \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{./exp_fig/bsize/latency}
+%	\vspace{-2em}
+%	\caption{Average latency with various batch sizes}
+%	\label{fig:bsize:latency}
+%	\end{minipage}
+ %   \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{./exp_fig/bsize/percent95_latency}
+%	\vspace{-2em}
+%	\caption{Percentile latency with various batch sizes}
+%	\label{fig:bsize:p95}
+%	\end{minipage}
+
+%    \vspace{-1em}
+%\end{figure*}
+
+%\begin{figure*}[t]
+%    \centering
+    
+%   \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.7_tps}}}
+%	\vspace{-2em}
+%	\caption{Throughput with fixed workload (skew factor 0.7)}
+%	\label{fig:load_z0.7:tps}
+%	\end{minipage}
+%    \vspace{-1em}
+%\end{figure*}
+
+
+
+%\begin{figure*}[t]
+%    \centering
+%    \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.7_latency}}}
+%	\vspace{-2em}
+%	\caption{Average latency with micro benchmark (skew factor 0.7)}
+%	\label{fig:load_z0.7:latency}
+%	\end{minipage}
+%\end{figure*}
+
+%\begin{figure*}[t]
+%    \centering
+%    \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.7_tps}}}
+%	\vspace{-2em}
+%	\caption{Throughput with Small Bank benchmark (skew factor 0.7)}
+%	\label{fig:small_bank_z0.7:tps}
+%	\end{minipage}
+%   \begin{minipage}[b]{0.31\linewidth}
+%       \centering
+%        \includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.7_latency}}}
+%        \vspace{-2em}
+%        \caption{Average latency with Small Bank benchmark (skew factor 0.7)}
+%        \label{fig:small_bank_z0.7:latency}
+%    \end{minipage}
+%	 \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.8_tps}}}
+%	\vspace{-2em}
+%	\caption{Throughput with Small Bank benchmark (skew factor 0.8)}
+%	\label{fig:small_bank_z0.8:tps}
+%	\end{minipage}
+%    \vspace{-1em}
+%\end{figure*}
+
+\begin{figure*}[t]
+	\centering
+%	\begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+%	\vspace{-2em}
+%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+%	\label{fig:load_z0.8:latency}
+%\end{minipage}
+	 \begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/tps}}}
+%	\vspace{-2em}
+	\caption{Throughput with Small Bank benchmark}
+	\label{fig:small_bank:tps}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/latency}}}
+%	\vspace{-2em}
+	\caption{Average latency with Small Bank benchmark}
+	\label{fig:small_bank:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/percent95_latency}}}
+%	\vspace{-2em}
+	\caption{Percentile latency with Small Bank benchmark}
+	\label{fig:small_bank:p95}
+	\end{minipage}
+%	 \begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
+%	\vspace{-2em}
+%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
+%	\label{fig:small_bank_z0.9:tps}
+%	\end{minipage}
+%	\begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
+%	\vspace{-2em}
+%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
+%	\label{fig:small_bank_z0.9:latency}
+%	\end{minipage}
+%    \vspace{-1em}
+\end{figure*}
+
+\begin{figure*}[t]
+	\centering
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+	%	\label{fig:load_z0.8:latency}
+	%\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_tps}
+%		\vspace{-2em}
+		\caption{Throughput of DBMS-X with SmallBank benchmark}
+		\label{fig:hekaton:tps}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_latency}
+%	\vspace{-2em}
+	\caption{Average latency of DBMS-X with SmallBank benchmark}
+	\label{fig:hekaton:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+	\centering
+	\includegraphics[width=\textwidth]{./exp_fig/hekaton/hekaton_abort}
+%	\vspace{-2em}
+	\caption{Abort rate of DBMS-X with SmallBank benchmark}
+	\label{fig:hekaton:abort}
+	\end{minipage}
+%	\begin{minipage}[b]{0.31\linewidth}
+%	\centering
+%	\includegraphics[width=\textwidth]{{{./exp_fig/compare/abort}}}
+%	\vspace{-2em}
+%	\caption{Abort rate with micro benchmark}
+%	\label{fig:compare:abort}
+%	\end{minipage}
+	%	 \begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
+	%	\vspace{-2em}
+	%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:tps}
+	%	\end{minipage}
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:latency}
+	%	\end{minipage}
+	%    \vspace{-1em}
+\end{figure*}
+
+
+
+% *******************
+% * Experiments
+% *******************
+\input{exp_greedy}
+%\input{exp_batch_size}
+\input{exp_basic}
+\input{exp_policy}
+\input{exp_parallel_reorder}
+\input{exp_benchmark} % include load and small bank experiments.
+\input{exp_compare}
+
+\subsection{Summary}
+
+The main practical takeaways from our experimental study are as follows:
+\vspace{-.5em}
+\begin{enumerate}[leftmargin=*]
+\item The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
+%\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
+\vspace{-0.5em}
+\item Batching and reordering increase throughput by up to a factor of 2.7, and reduce average and percentile latency by up to 67\% and 82\% respectively.
+Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by a factor of up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
+\vspace{-0.5em}
+\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts significantly reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
+\vspace{-0.5em}
+\item As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and tail latency, especially when data contention is medium to high.
+\vspace{-0.5em}
+\item In the Small Bank benchmark, batching and reordering improves the throughput by up to a factor of 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+\vspace{-0.5em}
+\item Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
+\end{enumerate}  
