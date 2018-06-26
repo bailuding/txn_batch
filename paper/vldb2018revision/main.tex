@@ -3,8 +3,76 @@
 % Modified by  Gerald Weber <gerald@cs.auckland.ac.nz>
 % Removed the requirement to include *bbl file in here. (AhmetSacan, Sep2012)
 % Fixed the equation on page 3 to prevent line overflow. (AhmetSacan, Sep2012)
+%\newcommand{\sigmod} %% Uncomment this line to enable formatting for SIGMOD
+\newcommand{\vldb} %% Uncomment this line to enable formatting for VLDB.
 
+%\newcommand{\cameraready} %% Uncomment this line to enable formatting for camera-ready version.
+
+\ifdefined\sigmod
+\documentclass[sigconf]{acmart}
+% Copyright
+%\setcopyright{none}
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+
+% DOI
+\acmDOI{10.475/123_4}
+
+% ISBN
+\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+\acmConference[SIGMOD'18]{ACM SIGMOD conference}{June 2018}{Houston, Texas USA}
+\acmYear{2018}
+\copyrightyear{2016}
+
+
+\acmArticle{4}
+\acmPrice{15.00}
+
+\else
 \documentclass{vldb}
+\fi
+%\documentclass{sig-alternate}
+
+%\newcommand{\submit} %% Uncomment this command before the final submission for review.
+
+%\newcommand{\anonymized} %% Uncomment this command if submitting to a double-bling conference.
+
+%\newcommand{\cameraready} %% Uncomment this command before final camera ready submission.
+
+\ifdefined\sigmod
+\unless\ifdefined\cameraready
+\newcommand{\anonymized}
+\fi
+\fi
+
+\ifdefined\cameraready
+\ifdefined\anonymized
+\let\anonymized\undefined
+\fi
+\unless\ifdefined\submit
+\newcommand{\submit}
+\fi
+\fi
+
+\ifdefined\submit
+\newcommand{\todo}[1]{}
+\newcommand{\changed}[1]{#1}
+\long\def\tocut#1{}
+\else
+\newcommand{\todo}[1]{\textcolor{red}{\bf [TODO!: #1]}}
+\newcommand{\changed}[1]{{\color{blue}#1}}
+\newcommand{\tocut}[1]{\textcolor{red}{\it\st{#1}}}
+\fi
+
+
 \usepackage{graphicx}
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
 
@@ -22,9 +90,9 @@
 \newcommand{\johannes}[1]{{\color{blue} Johannes: [{#1}]}}
 \newcommand{\lucja}[1]{{\color{red} Lucja: [{#1}]}}
 \newcommand{\bailu}[1]{{\color{red} Bailu: [{#1}]}}
-\newcommand{\magda}[1]{{\color{magenta} Magda: [{#1}]}}
 
 \newcommand{\eat}[1]{} % comment out blocks of text
+\newcommand{\cut}[1]{} % comment out blocks of text
 
 
 \begin{document}

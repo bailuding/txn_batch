@@ -1,0 +1,181 @@
+\documentclass{article}
+
+\usepackage{algorithm}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{colonequals}
+\usepackage[in]{fullpage}
+\usepackage{latexsym}
+\usepackage{mathrsfs}
+\usepackage{subcaption}
+%\usepackage{stmaryrd}
+\usepackage{indentfirst}
+\usepackage{xcolor}
+
+\newcommand{\eat}[1]{}
+\newcommand{\eval}[1]{[\![#1]\!]~}
+\newcommand{\tuple}[1]{\langle #1 \rangle}
+\newcommand{\nil}{\texttt{nil}}
+\newcommand{\concat}{\mathrel{\hbox{\scriptsize+}\!\hbox{\scriptsize+}}}
+
+\newcommand{\authorcomment}[2]{{\color{red} !#1: #2}}
+\newcommand{\bailu}{\authorcomment{Bailu}}
+
+\long\def\cut#1{{}}
+
+\ifdefined\submit
+\newcommand{\todo}[1]{}
+\newcommand{\changed}[1]{#1}
+\long\def\tocut#1{}
+\else
+\newcommand{\todo}[1]{\textcolor{red}{\bf [TODO!: #1]}}
+\newcommand{\changed}[1]{{\color{blue}#1}}
+\newcommand{\tocut}[1]{\textcolor{red}{\it \st{#1}}}
+\fi
+
+\begin{document}
+\title{Response to Reviews for ``\emph{Improving OCC Performance Through Transaction Batching and Operation Reordering}''}
+\author{Bailu Ding, Lucja Kot, Johannes Gehrke}
+\date{}
+\maketitle
+
+We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. We have fixed typos and omit such comments in the response. Changes are marked in blue in both the response and the revised submission.
+
+\section{Changes based on meta-reviewer comments}
+
+We first summarize and address the major comments from the reviews.
+
+\begin{itemize}
+	\item[(R1)] \emph{Expand the experimental evaluation to include a comparison with other high-performance OLTP engines that use OCC.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+	\item[(R2)] \emph{Fix typos, unclear parts, and expand discussion per the reviewers requests.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\section{Changes based on individual reviewer comments}
+
+In this section we explain how we addressed individual reviewer comments which are not directly subsumed by a metareviewer comment. We have addressed comments on clarifications of the writing, and omitted similar comments that can be addressed by previous responses.
+
+\subsection{Reviewer 1}
+
+\begin{itemize}
+\item[(R1.1)] \emph{Add an experiment to show the performance of the proposed techniques in systems where the clients do not send their next transaction until their previous one is finished.}
+\end{itemize}
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R1.2)] \emph{Add a more detailed description regarding the DBMS-X experiment.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R1.3)] \emph{Improve the legends of the figures.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R1.4)] \emph{Add an experiment to demonstrate to generality of the sort-based algorithm by using more policies or benchmarks.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\subsection{Reviewer 2}
+
+\begin{itemize}
+\item[(R2.1)] \emph{Add a discussion which explains what constraints on the system make the system best suited for integration with an in-memory versioned key-value store and what would need to change to be integrated with other stores.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R2.2)] \emph{There are many moving parts in the experiments so it is difficult to picture the tradeoffs holistically. I suggest that either the results are represented in a formula or represented in a table showing the tradeoffs.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\subsection{Reviewer 3}
+
+\begin{itemize}
+\item[(R3.1)] \emph{The papers contains a bag of ideas/optimizations, arguably unrelated,
+	based on known techniques, so the overall contributions and novelty is
+	limited.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R3.2)] \emph{Although the evaluation is comprehensive and detailed, but the authors
+	only presented a micro benchmark, a self-comparison without considering
+	other state-of-the-art approaches. Here are few important related CCs
+	(related work discussion can also take into these approaches as well)}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R3.3)] \emph{The authors provide a black box comparison of their approach in DB-X,
+	but the basis of the comparison is unclear (also not sure what does
+	"Good Throughput/Transaction" mean). Although the effort is appreciated,
+	it would be much better to compare with relevant, disclosed existing
+	algorithm, or at the very least, the concurrency of the model of DB-X is
+	carefully explained. A black box graph adds no value.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+
+\begin{itemize}
+\item[(R3.4)] \emph{It is unclear why the authors choose to have 300 active transactions,
+	which would imply the need for having 300 physical threads. I further
+	suppose, the authors considering in-memory implementation given all OLTP
+	DB can fit entirely in memory today. If in fact, the number of active
+	transactions is larger than threads, then there will be many context switches,
+	and frankly, the whole setting would be questionable, which could also
+	explain why the overall throughput is never exceeded half-million
+	transactions/second.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\begin{itemize}
+\item[(R3.5)] \emph{In some graphs, x-axis label is cut off.}
+\end{itemize}
+
+\changed{
+	TODO
+}
+
+\end{document}
