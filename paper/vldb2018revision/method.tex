@@ -288,6 +288,11 @@ In business applications, the monetary value of different transactions varies. O
 
 \section{Parallelism}
 \label{sec:parallel}
+
+\changed{
+\subsection{Parallel Reordering at Validation}
+}
+
 \label{subsec:validator_reordering:parallel}
 Since batching and reordering occur as part of the transaction execution, it can increase the overall transaction latency, 
 resulting in a higher chance of conflicts. Thus, we introduce parallelism into validation wherever possible to reduce latency.
@@ -329,3 +334,15 @@ We illustrate this design in Figure \ref{fig:reorder:validator}. The bottom row 
 	\vspace{-1em}
 	\label{fig:reorder:validator}
 \end{figure}
+
+\changed{
+\subsection{Synchronous Multi-Threaded Architecture}
+\label{subsec:reorder_thread}
+Many recent OLTP kernels use a decentralized architecture~\cite{lim2017cicada, tu2013speedy}, where there is no centralized thread for validation or storage access. Each transaction is scheduled to a dedicated thread and processed by this thread synchronously for its entire life time. Since a transaction is executed synchronously, a transaction can only conflict with transactions executed by other threads. 
+
+In such architectures, while batching operations across transactions does not apply, we can reorder the transactions to reduce inter-thread conflicts with better data caching as a side-effect.
+
+Intuitively, for a batch of incoming transactions, we schedule the transactions with conflicts to execute on the same thread to reduce conflicts among different threads. Because conflicting transactions access the same data, reordering also improves caching.
+
+We adapt our reordering algorithm for synchronous multi-threaded architectures with a thread-aware policy to schedule transactions thread by thread. We initialize the weight of the transaction to be the number of read-write conflicts it has among a batch of incoming transactions. For each thread, we first pick the transaction with the most conflicts from the remaining transactions. Iteratively, the policy updates the weight of each remaining transaction to the number of transactions it conflicts with in this thread and picks the next transaction with the highest weight, breaking ties by the number of objects a transaction shares with the transactions already scheduled to this thread.
+}

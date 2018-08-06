@@ -1,3 +1,17 @@
+\changed{
+\subsection{Compare with Other OLTP Kernels}
+We implemented the idea of transaction batching and reordering on top of an open source OLTP kernels Cicada~\cite{lim2017cicada}. In Cicada, every thread executes the transactions independently, and there is no centralized thread for transaction validation and storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step as described in Section~\ref{subsec:reorder_thread}.
+
+
+We compare our strategy with the original Cicada following the YCSB benchmark configuration used in~\cite{lim2017cicada}, where each transaction consists of 16 keys, with 0.95 read ratio and 0.99 Zipfian distribution, varying the number of threads from 8 to 56.
+
+
+Figure~\ref{fig:oltp_kernel:tps},~\ref{fig:oltp_kernel:abort},~\ref{fig:oltp_kernel:latency} show the throughput, abort rate and percentile latency of YCSB benchmark.
+}
+\todo{Align the figures}
+\changed{
+As the number of threads increases, reordering outperforms other kernels with higher throughput, lower abort rate, and shorter percentile latencies. With 56 threads, reordering achieves 1.8x throughput, reduces abort rate to 1/3 and reduces 99.9\% latency to 1/8.}
+
 \subsection{Implementation on DBMS-X}
 \label{subsec:experiment:compare}
 
