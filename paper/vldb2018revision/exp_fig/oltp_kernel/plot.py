@@ -26,7 +26,7 @@ def draw(plotout, pdfout):
     sys.stdout.flush()
 
 #figure_name = 'abort'
-figure_names = ['abort', 'latency', 'tps']
+figure_names = ['latency_r0.5_t28', 'tps_r0.5_t28', 'tps_r0.5_z0.99']
 dir = os.getcwd()
 
 for figure_name in figure_names:
