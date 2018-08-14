@@ -41,7 +41,7 @@
 \date{}
 \maketitle
 
-We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. We have fixed typos and omit such comments in the response. Changes are marked in blue in both the response and the revised submission.
+We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and the revised submission.
 
 \section{Changes based on meta-reviewer comments}
 
@@ -52,9 +52,9 @@ We first summarize and address the major comments from the reviews.
 \end{itemize}
 
 \changed{
-We integrated our techniques into the Cicada open-source OLTP System, and we compared its performance with state-of-the-art in-memory database designs such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by at least a factor of two on the write-intensive YCSB benchmark compared with these state-of-the-art OLTP kernels.
+We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by at least a factor of two on the write-intensive YCSB benchmark compared with these systems.
 
-We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 6.7.
+We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 5.6.
 }
 
 \begin{itemize}
@@ -62,7 +62,7 @@ We would also like to note that we used exactly the same parameter settings and 
 \end{itemize}
 
 \changed{
-	We fixed all the typos mentioned by the reviewers. (TODO)
+	We fixed all the typos mentioned by the reviewers.
 }
 
 \section{Changes based on individual reviewer comments}
@@ -79,13 +79,13 @@ In this section we explain how we addressed individual reviewer comments which a
 }
 
 \begin{itemize}
-\item[(R1.2)] \emph{DBMS-X Add a more detailed description regarding the DBMS-X experiment.}
+\item[(R1.2)] \emph{Add a more detailed description regarding the DBMS-X experiment.}
 \end{itemize}
 
 \changed{
 	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrent level of DBMS-X as it receives more active transactions.
 	
-	We added a more detailed description of why batching helps DBMS-X in Section 6.7.
+	We added a more detailed description of why batching helps DBMS-X in Section 5.7.
 }
 
 \begin{itemize}
@@ -93,7 +93,7 @@ In this section we explain how we addressed individual reviewer comments which a
 \end{itemize}
 
 \changed{
-	We updated the legend to replace unnecessary abbreviations, e.g., bch -> batch.
+	We updated the legends to replace unnecessary abbreviations, e.g., $bch \to batch$.
 }
 
 \begin{itemize}
@@ -103,9 +103,9 @@ In this section we explain how we addressed individual reviewer comments which a
 \changed{
 We agree that the policies should be customized based on the objective of transaction processing system and its architecture.
 
-We further extended our sort-based framework to incorporate a thread-aware policy for an important class of multi-threaded OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread.
+We extended our sort-based framework to incorporate a thread-aware policy for an important class of multi-threaded OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread.
 
-We implemented the policy on top of Cicada and please see Section 6.7 for the evaluation details.
+We implemented the policy on top of Cicada and please see Section 5.6 for the evaluation details.
 }
 
 \subsection{Reviewer 2}
@@ -164,11 +164,11 @@ We implemented the policy on top of Cicada and please see Section 6.7 for the ev
 \end{itemize}
 
 \changed{
-	"Good Throughput" means the number of committed transactions per second, since some literature refers "Throughput" as the number of transactions processed per second, regardless either they commit or abort. We changed to term to "throughput" and clarified its semantics here in Section 6.1.
+	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 6.1.
 	
 	We added an experiment to compare with other state-of-the-art OLTP kernels. Please see R1 for details.
 	
-	DBMS-X is Hekaton in Microsoft SQL Server. Due to confidentiality, we could not disclose the name of the system or too much details of the system to make it identifiable. 
+	DBMS-X is Hekaton in Microsoft SQL Server, and it uses a very specific OCC protocols. Our techniques are not customized for its protocol specifications, as long as it uses optimistic concurrency control. Due to confidentiality, we can not disclose the name of the system or too much details of the system to make it identifiable. 
 }
 
 
@@ -184,9 +184,9 @@ We implemented the policy on top of Cicada and please see Section 6.7 for the ev
 \end{itemize}
 
 \changed{
-	As described in Section 6.1, our prototype for micro benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
+	As described in Section 6.1, our prototype for micro benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
-	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In our integration with Cicada, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second with highly skewed, write-intensive workload, which is at least 2x the throughput of the state-of-the-art OLTP kernels.  
+	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In the integrated system, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is at least 2x the throughput compared with the state-of-the-art OLTP kernels.  
 }
 
 \begin{itemize}
