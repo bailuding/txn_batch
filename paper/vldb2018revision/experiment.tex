@@ -12,11 +12,9 @@ We wanted to answer the following questions:
 \item How does storage and validator batching and reordering
   affect system performance? (Section~\ref{subsec:experiment:batching})
 \vspace{-0.5em}
-\item What is the impact of the different policies from Section~\ref{subsec:validator_reordering:policy}?
+\item What is the impact of different policies for alternative performance goals? (Section~\ref{subsec:validator_reordering:policy})
 \vspace{-0.5em}
-\item How do we incorporate our techniques on top of a commercial DBMS and what is the resulting performance?
-\vspace{-0.5em}
-\item  and how do our techniques improve its performance under data contention?
+\item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial DBMS, and what is the resulting performance? (Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
 Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix \ref{sec:experiments:parallel} evaluates the parallelization of our algorithms.
 % Appendix~\ref{sec:parallel}.
