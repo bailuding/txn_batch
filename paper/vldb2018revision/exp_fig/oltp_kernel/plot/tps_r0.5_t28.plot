@@ -1,4 +1,4 @@
-set xlabel 'Zipfian Theta'
+set xlabel 'Skew Parameter of Zipfian Distribution'
 set ylabel 'Throughput (M) / Second'
 # set styles
 set style line 1 lc rgb "#00FFFF" lw 2.5 lt 1 pt 1 ps 2
