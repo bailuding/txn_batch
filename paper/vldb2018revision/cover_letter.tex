@@ -41,7 +41,7 @@
 \date{}
 \maketitle
 
-We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and in the revised submission.
+We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. We hope that we addressed all the issues that were pointed out. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and in the revised submission.
 
 \section{Changes based on meta-reviewer comments}
 
@@ -122,9 +122,9 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \item[(R2.2)] \emph{There are many moving parts in the experiments so it is difficult to picture the tradeoffs holistically. I suggest that either the results are represented in a formula or represented in a table showing the tradeoffs.}
 \end{itemize}
 
-\todo{Add to appendix}
+%\todo{Add to appendix}
 \changed{
-	We added a table to summarize the trade-off of different parameters and policies in Table 1.
+	We added a table to summarize the trade-off of different parameters and policies in Table 1, and we added some associated explanation. In addition, our experiments both on DB-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems, and that that resulting performance improvements appear for all systems rather.
 }
 
 \subsection{Reviewer 3}
@@ -135,9 +135,9 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 	limited.}
 \end{itemize}
 
-\todo{Better wording needed}
+%\todo{Better wording needed}
 \changed{
-	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based policy can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that this combination is novel and will have practical impact.
+	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based policy can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that our contributions are novel, and that they will have practical impact.
 }
 
 \begin{itemize}
@@ -148,7 +148,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	 We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. Please see Comment R1 for more details.
+	 We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. We believe that this comparison -- including all the different kernels that are included in Cicada -- is quite comprehensive and provides a fair comparison to the current state-of-the-art. Please see Comment R1 for more details.
 }
 
 \begin{itemize}
@@ -191,7 +191,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	We fixed the truncated labels and ticks.
+	Thank you for seeing this. We fixed the truncated labels and ticks.
 }
 
 \end{document}
