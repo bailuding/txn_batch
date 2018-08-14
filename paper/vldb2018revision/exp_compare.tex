@@ -9,11 +9,13 @@ in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 
 
 We run the experiment on a machine with two Intel® Xeon® Processor E5-2690 v4 CPUs (each with 14 physical cores) and 256GiB of DRAM. The experiments pin threads to different cores and use NUMA-aware memory to allocate hugepages. 
 
-Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems with a write-intensive, highly-skewed workload varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and percentile latency with the maximal number of threads (28) under workloads at different degrees of skewness.}
+Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems with a write-intensive, highly-skewed workload varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and percentile latency with the maximal number of threads (28) under workloads at different degrees of skewness. ERMIA is not shown in the Figure~\ref{fig:oltp_kernel:latency} since the system does not report percentile latency.}
 
 \changed{
-As the degree of data contention increases, either with more threads or more skewed data distribution, reordering outperforms the three other kernels resulting in higher throughput and lower tail latencies. With 56 threads, reordering improves throughput by a factor of 1.8, reduces aborts by 1/3, and it reduces the 99.9\% 
-latency by 7/8!
+% Performance number
+% TPS@28 threads and theta=0.99: reorder 1.89M, cicada 0.85, lowest: 0.38
+% 99.9 latency@28 threads and theta=0.99: reorder 0.11MS, cicada: 0.38, highest: 1.2
+As the degree of data contention increases, either with more threads or more skewed data distribution, reordering outperforms the three other kernels resulting in higher throughput and lower tail latencies. With 28 threads, reordering improves throughput by a factor of up to 5.0x and it reduces the 99.9\% latency by up to 10/11!
 }
 
 \changed{
