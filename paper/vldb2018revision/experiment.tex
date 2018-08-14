@@ -48,7 +48,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the
 storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
 
 % baseline
-The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($bch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
+The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
 All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (number of committed transactions per second), average latency, and percentile latency.
@@ -367,21 +367,21 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{tps_r0.5_z0.99}.pdf}
 		%		\vspace{-2em}
 		\caption{Throughput of YCSB with Zipfian Zeta 0.99}
-		\label{fig:oltp_kernel:tps}
+		\label{fig:oltp_kernel:tps_z0.99}
 	\end{minipage}
 	\begin{minipage}[b]{0.31\linewidth}
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{tps_r0.5_t28}.pdf}
 		%	\vspace{-2em}
 		\caption{Throughput of YCSB with 28 threads}
-		\label{fig:oltp_kernel:latency}
+		\label{fig:oltp_kernel:tps_t28}
 	\end{minipage}
 	\begin{minipage}[b]{0.31\linewidth}
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{latency_r0.5_t28}.pdf}
 		%	\vspace{-2em}
 		\caption{Percentile latency of YCSB with 28 threads}
-		\label{fig:oltp_kernel:abort}
+		\label{fig:oltp_kernel:latency}
 	\end{minipage}
 \end{figure*}
 
