@@ -1,4 +1,4 @@
-\section{Batching and Reordering: Concepts}\label{sec:overview}
+\section{\changed{Overview}}\label{sec:overview}
 
 %In this section, we introduce our novel ideas of batching at the storage and the validator in an OCC system, and we formulate the resulting algorithmic problems. 
 
@@ -288,8 +288,8 @@ In business applications, the monetary value of different transactions varies. O
 
 
 \changed{
-	{\bf Thread-aware policies.}
-	Many recent OLTP kernels use a decentralized architecture~\cite{lim2017cicada, tu2013speedy}, where there is no centralized validator.  
+	{\bf Thread-aware reordering.}
+	Many recent OLTP systems use a decentralized architecture~\cite{lim2017cicada, tu2013speedy}, where there is no centralized validator.  
 	%for validation or storage access. 
 	Each transaction is scheduled to a dedicated \emph{thread} and processed by this thread synchronously for its entire lifetime. Since a transaction is executed synchronously, a transaction can only conflict with transactions executed by other threads. 
 	In such architectures, while batching operations across transactions does not apply, we can reorder the transactions to reduce inter-thread conflicts and to achieve better data locality as a side-effect. Intuitively, for a batch of incoming transactions, we schedule the transactions that access the same objects (i.e., \emph{conflicting} transactions) to execute on the same thread to reduce conflicts across threads. On the same thread, conflicting transactions are executed serially and thus do not conflict. Because conflicting transactions access the same objects, reordering also improves caching.

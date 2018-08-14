@@ -75,7 +75,7 @@ will see a stale value and is guaranteed to fail validation.
 
 % contribution
 {\bf Contributions of this paper.}
-We explore the benefits of transaction batching and operation reordering in OCC with backward validation, with a focus on storage and validator batching. 
+We explore the benefits of transaction batching and reordering in optimistic concurrency control with backward validation, focusing on storage and validator batching. 
 \cut{Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. }
 %Previous work on the Centiman system\cite{ding2015centiman} proposed a loosely coupled architecture for OCC on top of key-value stores. The system we present here follows Centiman's architecture and enhances its design with batching and reordering.
 %\begin{itemize}
@@ -99,15 +99,22 @@ that balance abort rates and reordering overheads.
 We also extend these algorithms to weighted versions that can
 incorporate policies such as transaction priorities (Section \ref{sec:valbatching}).
 
-
+\cut{
 % contribution 3: parallel validation
 %\item 
-$\bullet$ Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing (Section \ref{sec:parallel}).
+$\bullet$ Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
+}
 
+\cut{
 % contribution 4: experiment
 %\item 
 $\bullet$ In a detailed experimental study of the impact of storage and validator batching in a prototype system, as well as on top of a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering can improve the throughput by up to a factor of 3.1x and can reduce the average transaction latency by up to 82\% for a micro benchmark and the Small Bank Benchmark~\cite{alomari2008icde} (Section \ref{sec:experiments}).
 %\end{itemize}
+}
+
+\changed{
+	$\bullet$ In a detailed experimental study of in a prototype system, as well as on top of a state-of-the-art OLTP system and a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering can improve the throughput to up to a factor of 5x and reduce the tail latency to up to a factor of 11x (Section \ref{sec:experiments}).We further describe and evaluate how to reduce the amortized overhead of reordering through parallelism (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
+}
 
 \eat{
 %paper organization
