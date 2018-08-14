@@ -6,3 +6,6 @@
 **/*.log
 **/main.out
 **/acmart-master
+**/*bak*
+**/tmp*
+**/~*
