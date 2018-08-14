@@ -24,8 +24,8 @@ Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix 
 %\vspace{-0.5em}
 %\item How does parallel reordering affect performance?
 
+\begin{table*}[h]
 \changed{
-	\begin{center}
 		\captionof{table}{Summary of parameters and trade-offs}
 	\begin{tabular}{|c|c|}
 		\hline
@@ -43,8 +43,8 @@ Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix 
 		\hline
 	\end{tabular}
 	\label{tbl:exp}
-\end{center}
 }
+\end{table*}
 
 
 \subsection{Experimental Setup}
@@ -307,60 +307,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 \begin{figure*}[t]
 	\centering
-	%	\begin{minipage}[b]{0.31\linewidth}
-	%	\centering
-	%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
-	%	\vspace{-2em}
-	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
-	%	\label{fig:load_z0.8:latency}
-	%\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
-		\centering
-		\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_tps}
-%		\vspace{-2em}
-		\caption{Throughput of DBMS-X with SmallBank benchmark}
-		\label{fig:hekaton:tps}
-	\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_latency}
-%	\vspace{-2em}
-	\caption{Average latency of DBMS-X with SmallBank benchmark}
-	\label{fig:hekaton:latency}
-	\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_abort}
-%	\vspace{-2em}
-	\caption{Abort rate of DBMS-X with SmallBank benchmark}
-	\label{fig:hekaton:abort}
-	\end{minipage}
-%	\begin{minipage}[b]{0.31\linewidth}
-%	\centering
-%	\includegraphics[width=\textwidth]{{{./exp_fig/compare/abort}}}
-%	\vspace{-2em}
-%	\caption{Abort rate with micro benchmark}
-%	\label{fig:compare:abort}
-%	\end{minipage}
-	%	 \begin{minipage}[b]{0.31\linewidth}
-	%	\centering
-	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
-	%	\vspace{-2em}
-	%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
-	%	\label{fig:small_bank_z0.9:tps}
-	%	\end{minipage}
-	%	\begin{minipage}[b]{0.31\linewidth}
-	%	\centering
-	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
-	%	\vspace{-2em}
-	%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
-	%	\label{fig:small_bank_z0.9:latency}
-	%	\end{minipage}
-	%    \vspace{-1em}
-\end{figure*}
-
-\begin{figure*}[t]
-	\centering
 	\begin{minipage}[b]{0.31\linewidth}
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{tps_r0.5_z0.99}.pdf}
@@ -384,6 +330,60 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	\end{minipage}
 \end{figure*}
 
+
+\begin{figure*}[t]
+	\centering
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+	%	\label{fig:load_z0.8:latency}
+	%\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_tps}
+		%		\vspace{-2em}
+		\caption{Throughput of DBMS-X with SmallBank benchmark}
+		\label{fig:hekaton:tps}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_latency}
+		%	\vspace{-2em}
+		\caption{Average latency of DBMS-X with SmallBank benchmark}
+		\label{fig:hekaton:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/hekaton/pdf/hekaton_abort}
+		%	\vspace{-2em}
+		\caption{Abort rate of DBMS-X with SmallBank benchmark}
+		\label{fig:hekaton:abort}
+	\end{minipage}
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/compare/abort}}}
+	%	\vspace{-2em}
+	%	\caption{Abort rate with micro benchmark}
+	%	\label{fig:compare:abort}
+	%	\end{minipage}
+	%	 \begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
+	%	\vspace{-2em}
+	%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:tps}
+	%	\end{minipage}
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:latency}
+	%	\end{minipage}
+	%    \vspace{-1em}
+\end{figure*}
 
 % *******************
 % * Experiments
@@ -424,7 +424,7 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(5) Integrating our techniques to a high performance OLTP kernel (Cicada) shows that, compared with the state-of-the-art OLTP kernels, the thread-aware reordering policy improves transaction throughput by a factor of up to 5.0x and reduces the 99.9\% latency by up to 10/11 under a write-intensive workload.}
+\changed{(5) Integrating our techniques to a high performance OLTP kernel (Cicada) shows that, compared with the-state-of-the-art OLTP kernels, the thread-aware reordering policy improves transaction throughput by a factor of up to 5.0x and reduces the 99\% latency by a factor of up to 11x under a write-intensive workload.}
 
 (6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
 %\end{enumerate}  

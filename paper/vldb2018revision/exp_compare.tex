@@ -2,24 +2,27 @@
 %\subsection{Compare with Other OLTP Kernels}
 \subsection{Integration with Cicada}
 \label{sec:OtherOLTP}
-We implemented our idea of transaction batching and reordering also in the Cicada open-source OLTP system~\cite{lim2017cicada}. In Cicada, every thread executes its transactions independently, and there is no centralized thread for transaction validation and storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step as described in Section~\ref{subsec:validator_reordering:policy}. 
+We implemented our idea of transaction batching and reordering also into the Cicada, an open-source OLTP kernel~\cite{lim2017cicada}. In Cicada, every thread executes its transactions independently, and there is no centralized thread for transaction validation and storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step using thread-aware policy as described in Section~\ref{subsec:validator_reordering:policy}. 
 
 We compare our strategy ($rc$) with a number of the-state-of-the-art OLTP kernels, including Cicada ($cicada$)~\cite{lim2017cicada}, Silo ($silo$)~\cite{tu2013speedy}, ERMIA ($ermia$)~\cite{kim2016ermia}, and TicToc ($tictoc$)~\cite{yu2016tictoc}, using the same YCSB benchmark configuration used 
 in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 16 keys with a 50\% read ratio.
 
 We run the experiment on a machine with two Intel® Xeon® Processor E5-2690 v4 CPUs (each with 14 physical cores) and 256GiB of DRAM. The experiments pin threads to different cores and use NUMA-aware memory to allocate hugepages. 
 
-Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems with a write-intensive, highly-skewed workload varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and percentile latency with the maximal number of threads (28) under workloads at different degrees of skewness. ERMIA is not shown in the Figure~\ref{fig:oltp_kernel:latency} since the system does not report percentile latency.}
+Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems with a write-intensive, highly-skewed workload varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and percentile latency with the maximal number of threads (28) under workloads with different degrees of skewness. ERMIA is not shown in Figure~\ref{fig:oltp_kernel:latency} since the system does not report percentile latency.}
 
 \changed{
 % Performance number
 % TPS@28 threads and theta=0.99: reorder 1.89M, cicada 0.85, lowest: 0.38
 % 99.9 latency@28 threads and theta=0.99: reorder 0.11MS, cicada: 0.38, highest: 1.2
-As the degree of data contention increases, either with more threads or more skewed data distribution, reordering outperforms the three other kernels resulting in higher throughput and lower tail latencies. With 28 threads, reordering improves throughput by a factor of up to 5.0x and it reduces the 99.9\% latency by up to 10/11!
+As the degree of data contention increases, either with more threads or more skewed data distribution, reordering outperforms the other kernels with higher throughput and lower tail latencies. With 28 threads, reordering improves throughput by a factor of up to 5.0x and it reduces the 99\% latency by up to a factor of 11x!
 }
 
 \changed{
-In this experiment, we configure our strategy to reorder a batch size of $4\times num\_threads$ and schedule $4$ transactions to each thread within a batch after reordering. The reordering is up to 5x faster than processing a transaction, which can be further parallelized and preprocessed in a separate component, e.g., at web servers.
+In this experiment, we configure our strategy with a batch size of $4\times num\_threads$ and schedule $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never scheduled across batch boundaries and will at most get delayed within a small window. The reordering is up to 5x faster than processing a transaction, which can be further parallelized. }
+
+\changed{
+In practice, many applications and services use a middle-layer, such as web servers, to consolidate transactions from clients before submitting them to databases. The reordering and batching can also happen at the web servers as a preprocessing step.
 }
 
 \subsection{Implementation on DBMS-X}
@@ -27,16 +30,18 @@ In this experiment, we configure our strategy to reorder a batch size of $4\time
 
 In our final experiment, we implemented the idea of transaction batching and reordering on top of a commercial DBMS-X. DBMS-X is a high performance OLTP engine using optimistic concurrency control. Upon receiving transactions, it processes transactions concurrently with a first-come-first-served order.
 
+\cut{
 In many applications and services, clients submit transactions to databases via a middle-layer, such as a web server. This server consolidates requests from many clients, processes the requests, reroutes the requests to different database servers, and responds to the clients. The web server often batches transactions from different clients to improve throughput and resource efficiency. 
+}
 
 We incorporate the idea of transaction batching and reordering to DBMS-X at the client side.
 We implemented validator reordering for the transactions batched at the middle-layer -- before submitting the batched transactions to the database server. Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions, and then we maximize the number of transaction commits with our reordering algorithm, using a policy considering both how many dependencies a transaction involves and how long it has been waiting. The transactions excluded from the batch, together with future incoming transactions, will be included in the next batch for reordering.
 
+\changed{We issue transactions to DBMS-X using JDBC. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X.}
+
 We use SmallBank benchmark of Zipfian skew 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{BatchReorder}) with two baselines: no batching (\emph{NoBatch}) and batch without reordering (\emph{Batch}). In \emph{NoBatch}, we submit transactions to DBMS-X one at a time. In \emph{Batch} and \emph{BatchReorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50, which gives reasonable throughput for this workload.
 
 Figure~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the throughput, the latency, and the abort rate when we increase the number of database connections. 
-
-\changed{We issue transactions to DBMS-X using JDBC. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrent level of DBMS-X.}
 	
 When we do not batch the transactions, the number of concurrent transactions is small and the throughput is low. As a result of low concurrency level, the chance of conflicting is slim. Thus, both abort rate and latency are low. As we send transactions in batches, the throughput increases dramatically. 
 
