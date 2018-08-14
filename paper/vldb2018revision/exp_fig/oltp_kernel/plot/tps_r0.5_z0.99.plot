@@ -15,16 +15,16 @@ set style line 9 lc rgb "#2E8B57" lw 3 lt 1 pt 9 ps 2
 set terminal postscript eps noenhanced color font 'Times' size 5inch,3.5inch
 
 # set margin
-#set lmargin at screen 0.1
-#set rmargin at screen 1
-#set tmargin at screen 1
-#set bmargin at screen 0.1
+set lmargin at screen 0.15
+set rmargin at screen 1
+set tmargin at screen 1
+set bmargin at screen 0.2
 
 # set font sizes
-set xlabel font "Times,40" offset 0,-7.5
+set xlabel font "Times,40" offset 0,-8.5
 set ylabel font "Times,40" offset -3.5,0
 
-set xtics font "Times,40" offset 0,-5
+set xtics font "Times,40" offset 0,-6
 set ytics font "Times,40"
 
 set key font "Times,40" at graph .98,graph .95 spacing 1 width -1 samplen 1
@@ -39,10 +39,10 @@ set ytics 0, 0.5, 3
 set key maxrows 2 at graph 0.99,graph 0.97 Left width -1.5 spacing 0.8
 
 plot \
-'./data/cicada_r0.5_z0.99_tps.dat' \
-using 1:2 title 'cicada' ls 1, \
 './data/reorder_b5_r0.5_z0.99_tps.dat' \
 using 1:2 title 'rc' ls 6, \
+'./data/cicada_r0.5_z0.99_tps.dat' \
+using 1:2 title 'cicada' ls 1, \
 './data/silo_z0.99_tps.dat' \
 using 1:2 title 'silo' ls 8, \
 './data/tictoc_z0.99_tps.dat' \
