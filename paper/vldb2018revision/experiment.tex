@@ -399,20 +399,32 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 \subsection{Summary}
 
-The main practical takeaways from our experimental study are as follows:
-\vspace{-.5em}
-\begin{enumerate}[leftmargin=*]
-\item The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
+The main practical takeaways from our experiments are as follows:
+
+%\vspace{-.5em}
+%\begin{enumerate}[leftmargin=*]
+%\item 
+(1) The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
 %\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
-\vspace{-0.5em}
-\item Batching and reordering increase throughput by up to a factor of 2.7, and reduce average and percentile latency by up to 67\% and 82\% respectively.
+%\vspace{-0.5em}
+%\item
+ 
+(2) Batching and reordering increase throughput by up to a factor of 2.7, and reduce average and percentile latency by up to 67\% and 82\% respectively.
 Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by a factor of up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
-\vspace{-0.5em}
-\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts significantly reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
-\vspace{-0.5em}
-\item As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and tail latency, especially when data contention is medium to high.
-\vspace{-0.5em}
-\item In the Small Bank benchmark, batching and reordering improves the throughput by up to a factor of 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
-\vspace{-0.5em}
-\item Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
-\end{enumerate}  
+%\vspace{-0.5em}
+%\item 
+
+(3) For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts significantly reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
+%\vspace{-0.5em}
+%\item 
+
+(4) As we increase the level of parallelism in validator reordering, we see improvements in throughput, latency, and tail latency, especially when data contention is medium to high.
+%\vspace{-0.5em}
+%\item 
+
+(5) In the Small Bank benchmark, batching and reordering improves the throughput by up to a factor of 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+%\vspace{-0.5em}
+%\item 
+
+(6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
+%\end{enumerate}  
