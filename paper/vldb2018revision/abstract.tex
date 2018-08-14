@@ -3,6 +3,8 @@
 	
 In this paper, we present an OLTP system based on optimistic concurrency control that incorporates batching at multiple stages of transaction execution. 
 %Execution batching enables enables reordering of operations to improve performance and reduce conflicts: 
-Storage batching enables reordering of transaction reads and writes at the storage layer, reducing same object conflicts. Validator batching enables reordering of transactions before validation, reducing conflicts between transactions. Dependencies between transactions make transaction reordering a non-trivial problem, and we propose several efficient and practical algorithms that can be customized to various transaction precedence policies such as reducing tail latency. We also show how to parallelize validator batching for better performance. 
-An in-depth evaluation on both prototype and production system shows that our techniques can significantly increase system throughput and reduce latency, including tail latency. 
+Storage batching enables reordering of transaction reads and writes at the storage layer, reducing same object conflicts. Validator batching enables reordering of transactions before validation, reducing conflicts between transactions. Dependencies between transactions make transaction reordering a non-trivial problem, and we propose several efficient and practical algorithms that can be customized to various transaction precedence policies such as reducing tail latency. \changed{We also show how to parallelize validator batching for better performance, and how to assign transactions to threads for systems without a centralized validator.
+
+In-depth experiments on a research prototype, an open-source OLTP system, and a production OLTP system show that our techniques can  more than triple system throughput and reduce average latency and tail latency by over 80\%.
+} 
 \end{abstract}
