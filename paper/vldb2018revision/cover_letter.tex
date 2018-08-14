@@ -148,7 +148,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	Please see R1 for details.
+	 We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. Please see Comment R1 for more details.
 }
 
 \begin{itemize}
@@ -163,9 +163,9 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \changed{
 	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 6.1.
 	
-	We added an experiment to compare with other state-of-the-art OLTP kernels. Please see R1 for details.
 	
-	DBMS-X is Hekaton in Microsoft SQL Server, and it uses a very specific OCC protocols. Our techniques are not customized for its protocol specifications, as long as it uses optimistic concurrency control. Due to confidentiality, we can not disclose the name of the system or too much details of the system to make it identifiable. 
+	We cannot disclose the name of DB-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OLTP kernels to create a comparison beyond DB-X. Please see Comment R1 for details.
+	
 }
 
 
@@ -181,7 +181,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	As described in Section 6.1, our prototype for micro benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
+	As described in Section 6.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
 	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In the integrated system, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is at least 2x the throughput compared with the state-of-the-art OLTP kernels.  
 }
