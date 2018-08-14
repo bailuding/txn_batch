@@ -4,7 +4,7 @@ In our evaluation, we wanted to understand the effect of batching and reordering
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
 \begin{enumerate}[leftmargin=*]
-\item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How does these algorithms affect the end-to-end system performance?
+\item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How \changed{do} these algorithms affect the end-to-end system performance?
 \vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
@@ -32,7 +32,7 @@ The storage continuously processes read and write requests. When storage batchin
 
 % validator
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
-We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of transations one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 % Details of validator implementation.
 By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.
 
@@ -51,7 +51,7 @@ storage, implemented as an in-memory hash table. In our micro benchmark, we popu
 The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($bch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
-All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \emph{good throughput} (number of committed transactions per second), average latency, and percentile latency.
+All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (number of committed transactions per second), average latency, and percentile latency.
 
 % *******************
 % * Figures

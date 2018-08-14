@@ -1,7 +1,7 @@
 \section{Introduction}\label{sec:intro}
 
 % batching is important
-Transaction processing is a fundamental aspect of database functionality, and improving OLTP system performance is a key research goal. The throughput of OLTP systems can be increased through \emph{batching} of operations; specifically, some component can buffer a number of operations as they arrive then processes them as a group \cite{friedman1997packing,debrabant2013anti,hagmann1987reimplementing}.
+Transaction processing is a fundamental aspect of database functionality, and improving OLTP system performance is a key research goal. The throughput of OLTP systems can be increased through \emph{batching} of operations; specifically, some component can buffer a number of operations as they arrive then \changed{process} them as a group \cite{friedman1997packing,debrabant2013anti,hagmann1987reimplementing}.
 Batching can improve system performance for several reasons. First, at the networking layer, it increases the communication efficiency by packing messages~\cite{ding2015centiman,friedman1997packing}. Second, it amortizes the cost of system calls by condensing multiple requests into a single one, as in group commit~\cite{debrabant2013anti,hagmann1987reimplementing}. Third, it reduces the number of requests by discarding duplicate or stale requests, such as writes to the same record~\cite{faleiro2014lazy}. All of those are optimizations based on low-level techniques, and they do not take the semantics of the system into account.
 
 % our proposal at a high level: batching at higher level for OCC 
@@ -75,7 +75,8 @@ will see a stale value and is guaranteed to fail validation.
 
 % contribution
 {\bf Contributions of this paper.}
-We explore the benefits of transaction batching and operation reordering in OCC with backward validation, with a focus on storage and validator batching. Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. 
+We explore the benefits of transaction batching and operation reordering in OCC with backward validation, with a focus on storage and validator batching. 
+\cut{Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. }
 %Previous work on the Centiman system\cite{ding2015centiman} proposed a loosely coupled architecture for OCC on top of key-value stores. The system we present here follows Centiman's architecture and enhances its design with batching and reordering.
 %\begin{itemize}
 % contribution 1: system design
