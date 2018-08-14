@@ -1,6 +1,7 @@
 \changed{
 %\subsection{Compare with Other OLTP Kernels}
 \subsection{Other OLTP Kernels}
+\label{sec:OtherOLTP}
 We implemented our idea of transaction batching and reordering also in the Cicada open-source OLTP system~\cite{lim2017cicada}. In Cicada, every thread executes its transactions independently, and there is no centralized thread for transaction validation and storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step as described in Section~\ref{subsec:validator_reordering:policy}. We compare our strategy using the same YCSB benchmark configuration used 
 in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 16 keys, with a 95\% read ratio and 0.99 Zipfian distribution, varying the number of threads from 8 to 56. 
 Figures~\ref{fig:oltp_kernel:tps},~\ref{fig:oltp_kernel:abort},~\ref{fig:oltp_kernel:latency} show the throughput, abort rate, and latency percentiles in Cicada. Cicada implements different OLTP kernels; and we added reordering ("rc").
