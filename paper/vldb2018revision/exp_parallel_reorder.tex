@@ -1,4 +1,40 @@
-\subsection{Parallel Validator Reordering}
+\section{Experimental Evaluation: Parallel Validator Reordering}
+\label{sec:experiments:parallel}
+
+\begin{figure*}[t]
+	\centering
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/tps}
+		%	\vspace{-2em}
+		\caption{Throughput with different number of reordering workers}
+		\label{fig:reorder:tps}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/latency}
+		%	\vspace{-2em}
+		\caption{Average latency with different number of reordering workers}
+		\label{fig:reorder:latency}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/percent95_latency}
+		%	\vspace{-2em}
+		\caption{Percentile latency with different number of reordering workers}
+		\label{fig:reorder:p95}
+	\end{minipage}    
+	%    \begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
+	%	\vspace{-2em}
+	%	\caption{Throughput with various batch sizes}
+	%	\label{fig:bsize:tps}
+	%	\end{minipage}    
+	%    \vspace{-1em}
+\end{figure*}
+
+
 In this experiment, we study the benefit of introducing parallelism into the validator. Since we have observed that the reordering of FVS is the most time consuming subcomponent in the validator, we increase the number of threads to parallelize batch reordering as described in Section~\ref{subsec:validator_reordering:parallel}. 
 Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the throughput
 and the average latency with the number of reordering workers from 1 to 4

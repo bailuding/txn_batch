@@ -3,30 +3,41 @@
 In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at the validator.
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
+\changed{
 \begin{enumerate}[leftmargin=*]
-\item How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How \changed{do} these algorithms affect the end-to-end system performance?
+\item 
+	How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How \changed{do} these algorithms affect the end-to-end system performance? (Section~\ref{sec:exp_algorithms})
 \vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
-  affect system performance?
+  affect system performance? (Section~\ref{subsec:experiment:batching})
 \vspace{-0.5em}
 \item What is the impact of the different policies from Section~\ref{subsec:validator_reordering:policy}?
 \vspace{-0.5em}
-\item How does parallel reordering affect performance?
+\item How do we incorporate our techniques on top of a commercial DBMS and what is the resulting performance?
 \vspace{-0.5em}
-\item How do we incorporate our techniques on top of a commercial DBMS, and how do our techniques improve its performance under data contention?
+\item  and how do our techniques improve its performance under data contention?
 \end{enumerate}
+Appendix \ref{sec:experiments:parallel} evaluates the parallelization of our algorithms.
+% Appendix~\ref{sec:parallel}.
+}
+%\vspace{-0.5em}
+%\item How does parallel reordering affect performance?
 
-\subsection{Implementation and Experimental Setup}
+
+
+
+\subsection{Experimental Setup}
 \label{subsec:experiment:implementation}
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
+\changed{We first describe the experimental setup for our research system. Section \ref{subsec:experiment:compare} describes experiments with a commercial database system and Section \ref{sec:OtherOLTP} describes experiments with an open-source OLTP sytem. 
+	}
 Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
 
-The processor is \emph{non-blocking}: it continuously processes the requests from its consume-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel to improve its throughput.
-
+The processor is \emph{non-blocking}: It continuously processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel to improve its throughput.
 
 The storage continuously processes read and write requests. When storage batching is enabled, the storage buffers requests into batches, and uses the strategy described in Section~\ref{subsec:storage_reordering} to first execute all the write requests and then all the read requests in the batch.
 
@@ -51,7 +62,7 @@ storage, implemented as an in-memory hash table. In our micro benchmark, we popu
 The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
-All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (number of committed transactions per second), average latency, and percentile latency.
+All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average latency, and percentile latency for to show tail latencies.
 
 % *******************
 % * Figures
@@ -154,38 +165,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	\end{minipage}
 \end{figure*}
 
-\begin{figure*}[t]
-	\centering
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/reorder/tps}
-%	\vspace{-2em}
-	\caption{Throughput with different number of reordering workers}
-	\label{fig:reorder:tps}
-	\end{minipage}    
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/reorder/latency}
-%	\vspace{-2em}
-	\caption{Average latency with different number of reordering workers}
-	\label{fig:reorder:latency}
-	\end{minipage}    
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{./exp_fig/reorder/percent95_latency}
-%	\vspace{-2em}
-	\caption{Percentile latency with different number of reordering workers}
-	\label{fig:reorder:p95}
-	\end{minipage}    
-%    \begin{minipage}[b]{0.31\linewidth}
-%	\centering
-%	\includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
-%	\vspace{-2em}
-%	\caption{Throughput with various batch sizes}
-%	\label{fig:bsize:tps}
-%	\end{minipage}    
-%    \vspace{-1em}
-\end{figure*}
 
 %\begin{figure*}[t]
 %    \centering
@@ -393,7 +372,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 %\input{exp_batch_size}
 \input{exp_basic}
 \input{exp_policy}
-\input{exp_parallel_reorder}
 \input{exp_benchmark} % include load and small bank experiments.
 \input{exp_compare}
 
