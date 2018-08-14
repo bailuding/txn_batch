@@ -41,7 +41,7 @@
 \date{}
 \maketitle
 
-We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and the revised submission.
+We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and in the revised submission.
 
 \section{Changes based on meta-reviewer comments}
 
@@ -65,9 +65,9 @@ We would also like to note that we used exactly the same parameter settings and 
 	We fixed all the typos mentioned by the reviewers.
 }
 
-\section{Changes based on individual reviewer comments}
+\section{Changes based on individual reviewers' comments}
 
-In this section we explain how we addressed individual reviewer comments which are not directly subsumed by a metareviewer comment. We have addressed comments on clarifications of the writing, and omitted similar comments that can be addressed by previous responses.
+In this section we explain how we addressed the comments of individual reviewers in case the comments are not directly subsumed by a meta-reviewer comment. We have addressed comments on clarifications of the writing, and omitted similar comments that can be addressed by previous responses.
 
 \subsection{Reviewer 1}
 
@@ -75,7 +75,7 @@ In this section we explain how we addressed individual reviewer comments which a
 \item[(R1.1)] \emph{Add an experiment to show the performance of the proposed techniques in systems where the clients do not send their next transaction until their previous one is finished.}
 \end{itemize}
 \changed{
-	We integrated our techniques to Cicada, where each thread processes a transaction synchronously. Please see R1 for details.
+	We integrated our techniques to Cicada, where each thread processes a transaction synchronously. Please see Major Comment R1 for details.
 }
 
 \begin{itemize}
@@ -83,7 +83,7 @@ In this section we explain how we addressed individual reviewer comments which a
 \end{itemize}
 
 \changed{
-	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrent level of DBMS-X as it receives more active transactions.
+	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X as it receives more active transactions.
 	
 	We added a more detailed description of why batching helps DBMS-X in Section 5.7.
 }
@@ -97,15 +97,15 @@ In this section we explain how we addressed individual reviewer comments which a
 }
 
 \begin{itemize}
-\item[(R1.4)] \emph{Add an experiment to demonstrate to generality of the sort-based algorithm by using more policies or benchmarks.}
+\item[(R1.4)] \emph{Add an experiment to demonstrate the generality of the sort-based algorithm by using more policies or benchmarks.}
 \end{itemize}
 
 \changed{
 We agree that the policies should be customized based on the objective of transaction processing system and its architecture.
 
-We extended our sort-based framework to incorporate a thread-aware policy for an important class of multi-threaded OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread.
+We also appreciate this comment, and we say that full generality will be hard to show. We extended our sort-based framework to incorporate a thread-aware policy for an important class of multi-threaded OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread. We thus believe that our sort-based approach is rather general, and that we have a shown a wide variety of both scenarios and also different types of systems where this approach has merit. 
 
-We implemented the policy on top of Cicada and please see Section 5.6 for the evaluation details.
+We implemented the policy on top of Cicada; please see Section 5.6 for the evaluation details.
 }
 
 \subsection{Reviewer 2}
@@ -115,7 +115,7 @@ We implemented the policy on top of Cicada and please see Section 5.6 for the ev
 \end{itemize}
 
 \changed{
-	We retreated this statement from the introduction. In our experiments, we integrated our techniques to two systems that are not based on key-value stores, i.e., Cicada (supporting hash index and B+ tree index) and DBMS-X (using BW-tree). The result shows that a variety of storage and transaction processing architectures can benefit from our techniques.
+	We retreated this statement from the introduction. In our experiments, we integrated our techniques to two systems that are not based on key-value stores, i.e., Cicada (supporting hash index and B+ tree index) and DBMS-X (using the BW-tree). The result shows that a variety of storage and transaction processing architectures can benefit from our techniques.
 }
 
 \begin{itemize}
@@ -137,10 +137,7 @@ We implemented the policy on top of Cicada and please see Section 5.6 for the ev
 
 \todo{Better wording needed}
 \changed{
-	\begin{itemize}
-		\item Our contribution is a general framework of batching and reordering for OCC based OLTP systems.
-		\item The framework uses a sort-based policy to customize for different transaction processing performance objectives and system architectures.
-	\end{itemize}
+	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based policy can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that this combination is novel and will have practical impact.
 }
 
 \begin{itemize}
