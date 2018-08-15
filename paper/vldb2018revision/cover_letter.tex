@@ -36,7 +36,7 @@
 \fi
 
 \begin{document}
-\title{Response to Reviews for ``\emph{Improving Optimistic Concurrency Control Through Transaction Batching and Operation Reordering}''}
+\title{Response to Reviews for Paper 723 ``\emph{Improving Optimistic Concurrency Control Through Transaction Batching and Operation Reordering}'' in Research Track, March 2018}
 \author{Bailu Ding, Lucja Kot, Johannes Gehrke}
 \date{}
 \maketitle
@@ -52,7 +52,7 @@ We would like to thank the reviewers and the meta-reviewer for their insightful 
 \end{itemize}
 
 \changed{
-We integrated our techniques into Cicada, an open-source high performance OLTP engine, and we compared its performance with the state-of-the-art in-memory OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput to up to a factor of 5x and reduce the tail latency to up to a factor of 11x on the write-intensive YCSB benchmark compared with these systems.
+We integrated our techniques into Cicada, an open-source high-performance OLTP engine based on OCC, and we compared its performance with the state-of-the-art in-memory OCC-based OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by up to 5x and reduce the tail latency by up to 91\% on the write-intensive YCSB benchmark compared with these systems.
 
 We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 5.6.
 }
@@ -125,7 +125,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 
 %\todo{Add to appendix}
 \changed{
-	We added a table to summarize the trade-off of different parameters and policies in Table 1 in Section 5\cut{, and we added some associated explanation}. In addition, our experiments both on DBMS-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems to improve their performance\cut{, and that that resulting performance improvements appear for all systems rather}.
+	We summarized the trade-off of different parameters and policies in Table 1 Section 5\cut{, and we added some associated explanation}. In addition, our implementations both on DBMS-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems to improve their performance\cut{, and that that resulting performance improvements appear for all systems rather}.
 }
 
 \subsection{Reviewer 3}
@@ -138,7 +138,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 
 %\todo{Better wording needed}
 \changed{
-	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based framework can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that our contributions are novel, and that they will have practical impact.
+	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based framework can be customized for different transaction processing performance objectives and for different system architectures. Thus, we believe that our contributions are novel, and that they will have practical impact.
 }
 
 \begin{itemize}
@@ -165,7 +165,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 6.1.
 	
 	
-	We cannot disclose the name of DBMS-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OLTP systems for a comparison beyond DBMS-X. Please see Comment R1 for details.
+	We cannot disclose the name of DBMS-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OCC-based OLTP systems for a comparison beyond DBMS-X. Please see Comment R1 for details.
 	
 }
 
@@ -184,7 +184,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \changed{
 	As described in Section 6.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
-	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is 2.2x-5.0x of the throughput compared with the evaluated state-of-the-art OLTP systems.  
+	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is up to 5.0x of the throughput compared with the evaluated state-of-the-art OCC-based OLTP systems.  
 }
 
 \begin{itemize}
