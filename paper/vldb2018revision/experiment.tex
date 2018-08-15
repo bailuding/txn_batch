@@ -406,8 +406,8 @@ The main practical takeaways from our experiments are as follows:
 %\vspace{-0.5em}
 %\item
  
-(2) Batching and reordering increase throughput by up to a factor of 2.7, and reduce average and percentile latency by up to 67\% and 82\% respectively.
-Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by a factor of up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
+(2) Batching and reordering increase throughput by up to 2.7x, and reduce average and percentile latency by up to 67\% and 82\% respectively.
+Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
 %\vspace{-0.5em}
 %\item 
 
@@ -419,11 +419,11 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(4)} In the Small Bank benchmark, batching and reordering improves the throughput by up to a factor of 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+\changed{(4)} In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
 %\vspace{-0.5em}
 %\item 
 
-\changed{(5) Integrating our techniques to a high performance OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by a factor of up to 5.0x and reduces the 99\% latency by a factor of up to 11x under a write-intensive workload.}
+\changed{(5) Integrating our techniques to a high performance OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 5.0x and reduces the 99\% latency by up to 91\% under a write-intensive workload.}
 
-(6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by a factor of up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
+(6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
 %\end{enumerate}  
