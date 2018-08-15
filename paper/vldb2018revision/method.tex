@@ -273,13 +273,13 @@ We can combine the SCC-based greedy algorithm and the precise brute-force FVS se
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Policies}
 \label{subsec:validator_reordering:policy}
-Policies are of utmost importance for our algorithms. Recall that a policy is a ranking function on vertices of the graph, and a good policy ranks vertices which are likely to be in a desirable FVS highly. \changed{We discuss three policies for different performance objectives and system architectures.}
+Policies are of utmost importance for our algorithms. Recall that a policy is a ranking function on vertices of the graph, and a good policy ranks vertices which are likely to be in a desirable FVS highly. \changed{We discuss three kinds of policies for different performance objectives and system architectures.}
 
 % minimize number of conflicts
-\changed{{\bf Minimize the number of conflicts.}}
+\changed{{\bf Minimize the number of aborts.}}
 We first discuss policies that aim at minimizing the number of conflicts, i.e., the size of the FVS. The simplest such policy is \texttt{random} that assigns all nodes random rankings. Alternatively, we can rank nodes using degree-based heuristics, based on the intuition that the removal of a node will break many cycles if the node is high in some measurement of its graph degree. Such heuristics have  been shown to work well for FVS computation~\cite{cutello2015targeting}. For example, the policy \texttt{max-degree} chooses the node with the largest degree (either in-degree or out-degree), \texttt{sum-degree} chooses the node with the largest total degree (in-degree plus out-degree), and \texttt{prod-degree} chooses the node with the largest product of in-degree and out-degree. 
 
-\changed{{\bf Minimize the tail latency.}}
+\changed{{\bf Minimize tail latency.}}
 % minimize tail latency
 More sophisticated policies are possible if the system is optimizing for a metric beyond maximizing the number of commits. For example, we may want to bound the transactions' tail latency; we can do that by incorporating latency information in our policies. We can rank transactions based on how many times they have been aborted and restarted; thus, transactions that have been restarted many times are much less likely to enter the FVS and have a higher chance of committing. Alternatively, we can also devise policies that combine the information about a transaction's number of restarts and its graph degree. For example, we can compute the ranking of a vertex as the product of its in-degree and out-degree divided by an exponential function of the number of restarts of the corresponding transaction. 
 % help with transactions with monetary value
@@ -290,14 +290,14 @@ In business applications, the monetary value of different transactions varies. O
 
 \changed{
 	%{\bf Thread-aware reordering.}
-	{\bf Reduce Inter-Thread Conflicts.}
+	{\bf Reduce inter-thread conflicts.}
 	Many recent OCC-based OLTP systems use a decentralized architecture~\cite{lim2017cicada, tu2013speedy, yu2016tictoc, kim2016ermia}, where there is no centralized validation.  
 	%for validation or storage access. 
 	Each transaction is scheduled to a dedicated \emph{thread} and processed by this thread synchronously for its entire lifetime. Since a transaction is executed synchronously, it can only conflict with transactions executed by other threads. 
 	
 	
-	In such an architecture, while batching operations across transactions does not apply, we can assign transactions to threads to reduce inter-thread conflicts, and as a side-effect, achieve better caching. Intuitively, for a batch of incoming transactions, we schedule conflicting transactions to execute on the same thread where they are processed serially. Because conflicting transactions access the same objects, reordering also improves caching within a thread.
+	In such an architecture, while batching operations across transactions does not apply, we can assign transactions to threads to reduce inter-thread conflicts. Intuitively, for a batch of incoming transactions, we schedule conflicting transactions to execute on the same thread where they are processed serially. Because conflicting transactions access the same objects, reordering also improves caching within a thread.
 	
-	We extend our sort-based algorithm to a \emph{thread-aware policy} for a multi-threaded decentralized OLTP architecture which schedules transactions thread by thread. We batch a number of transactions and schedule the same number of transactions on each thread.\footnote{More sophisticated assignments are possible, but we leave them for future work.} At each thread, we assign weights to transactions first based on the number of conflicts to transactions in the batch that have already been scheduled to this thread, then the number of object accesses shared between this transaction and the scheduled transactions, and finally its number of conflicts to the unscheduled transactions in this batch. For each thread, our sort-based algorithm will first pick the transaction with the most conflicts against the remaining transactions, and then it iteratively updates the weights of the transactions left to pick the next one with the highest weight. This policy greedily puts conflicting transactions on the same thread to minimize conflicts across threads; in general, it tries to schedule transactions accessing the same objects to the same thread. As we will see later in our experiments (Section \ref{sec:OtherOLTP}), this simple policy significantly improves throughput and reduces tail latencies.
+	We extend our sort-based algorithm to a \emph{thread-aware policy} which assigns transactions thread by thread. We batch a number of transactions and assign the same number of transactions to each thread.\footnote{More sophisticated assignments are possible, but we leave them for future work.} At each thread, we compute the weight of a transaction first based on the number of conflicts to the set of transactions $T$ in the batch that have already been assigned to this thread, then the number of object accesses shared between this transaction and $T$, and finally its number of conflicts to the unassigned transactions in this batch. For each thread, our sort-based algorithm will first pick the transaction with the most conflicts against the remaining transactions, and then it iteratively updates the weights of the transactions left to pick the next one with the highest weight. This policy greedily puts conflicting transactions on the same thread to minimize conflicts across threads; as a side effect, it tries to assign transactions accessing the same objects to the same thread, resulting in better caching. As we will see later in our experiments (Section \ref{sec:OtherOLTP}), this simple policy significantly improves throughput and reduces tail latency.
 }% end changed
 

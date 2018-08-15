@@ -3,7 +3,7 @@
 
 In this experiment, we explore validator reordering with more sophisticated policies as discussed in Section~\ref{subsec:validator_reordering:policy}.
 %\eat{; specifically, we look at policies that aim to reduce the transaction tail latency}. Specifically, we explore the possibility of reducing transaction tail latency with latency-specific policies.
-Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($mc$) as well as no batching ($base$) and batching without reordering ($bch$). 
+Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($mc$) as well as no batching ($base$) and batching without reordering (\changed{$batch$}). 
 Our first tail-latency aware policy ($rct$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the node with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
 Our second latency-aware policy ($rdeg$) combines the number of restarts and the incoming/outgoing degrees of a transaction into a weight. It computes the weight of a node as
 the product of in-degree and out-degree over the exponential of the number of

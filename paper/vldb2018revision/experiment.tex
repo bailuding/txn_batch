@@ -6,7 +6,7 @@ We wanted to answer the following questions:
 \changed{
 \begin{enumerate}[leftmargin=*]
 \item 
-	How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How \changed{do} these algorithms affect the end-to-end system performance? (Section~\ref{sec:exp_algorithms})
+	How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How do these algorithms affect the end-to-end system performance? (Section~\ref{sec:exp_algorithms})
 %\vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
@@ -17,8 +17,8 @@ We wanted to answer the following questions:
 \item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Sections~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
 Table~\ref{tbl:exp} summarizes the settings we evaluated and describes the tradeoff encapsulated in each parameter. 
-We also describe parallelization of our algorithms in detail in Appendix \ref{sec:parallel} and 
-show the resulting benefits in Appendix \ref{sec:experiments:parallel}.
+We also describe parallelization of our algorithms in detail in Appendix~\ref{sec:parallel} and 
+show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 % Appendix~\ref{sec:parallel}.
 }
 %\vspace{-0.5em}
@@ -26,20 +26,20 @@ show the resulting benefits in Appendix \ref{sec:experiments:parallel}.
 
 \begin{table*}[h]
 \changed{
-		\captionof{table}{Summary of parameters and trade-offs}
+		\captionof{table}{\changed{Summary of settings and trade-offs}}
 	\begin{tabular}{|c|c|}
 		\hline
 		{\bf Setting} & {\bf Trade-off} \\
 		\hline
-		Batch size & Larger batch sizes give more flexibility of reordering but increases transaction latency. \\
+		Batch size & Larger batch sizes give more flexibility of reordering but can increase transaction latency. \\
 		\hline
 		FVS algorithms & The sort-based algorithm is cheaper but includes more transactions in the FVS. \\
 		\hline
-		Policy: Reduce conflicts & Reorder transactions to minimize the number of aborts.\\
+		Policy: Minimize aborts & Reorder transactions to reduce the number of aborts.\\
 		\hline
-		Policy: Reduce tail latency & Reorder transactions to minimize tail latency at the cost of slightly increased aborts.\\
+		Policy: Minimize tail latency & Reorder transactions to reduce tail latency at the cost of slightly increased aborts.\\
 		\hline
-		Policy: Thread-Aware & Reorder transactions to achieve thread-locality. \\
+		Policy: Reduce inter-thread conflicts & Reorder transactions to achieve thread locality for decentralized system architecture. \\
 		%for decentralized multi-threaded OLTP architectures based on OCC.\\
 		\hline
 	\end{tabular}
@@ -53,7 +53,7 @@ show the resulting benefits in Appendix \ref{sec:experiments:parallel}.
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-\changed{We first describe the experimental setup for our research prototype where we tease apart the impact of different parameters in our algorithms. Section \ref{sec:OtherOLTP} describes our experiments with an open-source OLTP system, and Section \ref{subsec:experiment:compare} describes our experiments with a commercial database system; both of these sections have their own experimental setup.}
+\changed{We first describe the experimental setup for our research prototype where we isolate the impact of different parameters in our algorithms. Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setup respectively.}
 
 Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
@@ -409,12 +409,8 @@ The main practical takeaways from our experiments are as follows:
 %\vspace{-0.5em}
 %\item
  
-(2) Batching and reordering increase throughput by up to 2.7x, and reduce average and percentile latency by up to 67\% and 82\% respectively.
+(2) Batching and reordering increases throughput by up to 2.7x, and reduces average and percentile latency by up to 67\% and 82\%.
 Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
-%\vspace{-0.5em}
-%\item 
-
-(3) For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts significantly reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
 %\vspace{-0.5em}
 %\item 
 
@@ -422,11 +418,16 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(4)} In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+\changed{(3)} In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
 %\vspace{-0.5em}
 %\item 
 
-\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 2.2x and reduces the 99\% latency by up to 71\% compared with the next best under a write-intensive workload.}
+\changed{(4)} For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
+%\vspace{-0.5em}
+%\item 
 
-(6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
+
+\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 2.2x and reduces the 99\% latency by up to 71\% compared with the next best under write-intensive YCSB workload.}
+
+(6) Integrating the idea of transaction batching and reordering to a commercial database system shows that, under high data contention, our techniques increase the throughput by up to 2.8x and reduce the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
 %\end{enumerate}  
