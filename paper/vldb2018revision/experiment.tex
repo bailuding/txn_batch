@@ -31,13 +31,13 @@ Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix 
 		\hline
 		batch size & Larger batch size has more flexibility of reordering but increases transaction latency. \\
 		\hline
-		FVS algorithms & Sort-based algorithm reorders faster at the cost of excluding more transactions from FVS. \\
+		FVS algorithms & Sort-based algorithm has lower overhead at the cost of including more transactions in FVS. \\
 		\hline
 		policy: reduce conflicts & Reorder transactions to minimize the number of aborts.\\
 		\hline
 		policy: reduce tail latency & Reorder transactions to minimize tail latency at the cost of slightly increased aborts.\\
 		\hline
-		policy: thread-aware & Reorder transactions to minimize conflicts between threads and increase cache locality.\\
+		policy: thread-aware & Reorder transactions for decentralized multi-threaded OLTP architectures based on OCC.\\
 		\hline
 	\end{tabular}
 	\label{tbl:exp}
