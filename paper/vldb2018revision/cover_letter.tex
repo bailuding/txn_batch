@@ -52,9 +52,9 @@ We would like to thank the reviewers and the meta-reviewer for their insightful 
 \end{itemize}
 
 \changed{
-We integrated our techniques into Cicada, an open-source high-performance OLTP engine based on OCC, and we compared its performance with the state-of-the-art in-memory OCC-based OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by up to 2.2x and reduce the tail latency by up to 71\% compared with the next best on the write-intensive YCSB benchmark compared with these systems.
+We integrated our techniques into Cicada, an open-source high-performance OLTP engine based on OCC, and we compared its performance with the state-of-the-art in-memory OCC-based OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by up to 2.2x and reduce the tail latency by up to 71\% compared with the next best among them on the write-intensive YCSB benchmark.
 
-We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 5.6.
+We would also like to note that we used exactly the same parameter settings as in the original Cicada paper. The new results are described in Section 5.6.
 }
 
 \begin{itemize}
@@ -62,7 +62,7 @@ We would also like to note that we used exactly the same parameter settings and 
 \end{itemize}
 
 \changed{
-	We fixed all the typos mentioned by the reviewers.
+	We fixed all the them; please see responses to comments from individual reviewers for details.
 }
 
 \section{Changes based on individual reviewers' comments}
@@ -83,7 +83,7 @@ In this section we explain how we addressed the comments of individual reviewers
 \end{itemize}
 
 \changed{
-	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions submitted get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X as it receives more active transactions.
+	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the submitted transactions get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X as it receives more active transactions.
 	
 	We added a more detailed description of why batching helps DBMS-X in Section 5.7.
 }
@@ -101,10 +101,9 @@ In this section we explain how we addressed the comments of individual reviewers
 \end{itemize}
 
 \changed{
-We agree that the policies should be customized based on the performance objective and the architecture of the OLTP system.
-
 \cut{We also appreciate this comment, and we say that full generality will be hard to show. }
-While the full generality of the sort-based algorithm will be hard to show, we extended the algorithm with a thread-aware policy for an important class of multi-threaded, decentralized OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread. We thus believe that our sort-based approach is rather general, and that we have a shown a wide variety of both scenarios and also different types of systems where this approach has merit. 
+
+While the full generality of the sort-based algorithm will be hard to show, we extended the algorithm with a thread-aware policy for an important class of multi-threaded, decentralized OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread. We thus believe that our sort-based approach is rather general, and that we have shown a wide variety of both scenarios and different types of systems where this approach has merit. 
 
 We implemented the policy on top of Cicada; please see Section 5.6 for the evaluation details.
 }
@@ -125,7 +124,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 
 %\todo{Add to appendix}
 \changed{
-	We summarized the trade-off of different parameters and policies in Table 1 Section 5\cut{, and we added some associated explanation}. In addition, our implementations both on DBMS-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems to improve their performance\cut{, and that that resulting performance improvements appear for all systems rather}.
+	We summarized the trade-off of different parameters and policies in Table 1 Section 5\cut{, and we added some associated explanation}. In addition, our implementations both on DBMS-X and on the open-source system Cicada show that our approach can be relatively easy to incorporate into other systems to improve their performance\cut{, and that that resulting performance improvements appear for all systems rather}.
 }
 
 \subsection{Reviewer 3}
@@ -162,10 +161,10 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 6.1.
+	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 5.1.
 	
 	
-	We cannot disclose the name of DBMS-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OCC-based OLTP systems for a comparison beyond DBMS-X. Please see Comment R1 for details.
+	We cannot disclose the name of DBMS-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new experiment to compare with other state-of-the-art OCC-based OLTP systems for a comparison beyond DBMS-X. Please see Comment R1 for details.
 	
 }
 
@@ -182,7 +181,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	As described in Section 6.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
+	As described in Section 5.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
 	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is up to 2.2x of the throughput compared with the next best evaluated state-of-the-art OCC-based OLTP systems.  
 }
