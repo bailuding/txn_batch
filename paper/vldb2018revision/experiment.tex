@@ -312,7 +312,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{tps_r0.5_z0.99}.pdf}
 		%		\vspace{-2em}
-		\caption{Throughput of YCSB with Zipfian Zeta 0.99}
+		\caption{Throughput of YCSB with skew factor 0.99}
 		\label{fig:oltp_kernel:tps_z0.99}
 	\end{minipage}
 	\begin{minipage}[b]{0.31\linewidth}
@@ -425,7 +425,7 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 5.0x and reduces the 99\% latency by up to 91\% under a write-intensive workload.}
+\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 2.2x and reduces the 99\% latency by up to 71\% compared with the next best under a write-intensive workload.}
 
 (6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
 %\end{enumerate}  

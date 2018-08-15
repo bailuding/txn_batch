@@ -52,7 +52,7 @@ We would like to thank the reviewers and the meta-reviewer for their insightful 
 \end{itemize}
 
 \changed{
-We integrated our techniques into Cicada, an open-source high-performance OLTP engine based on OCC, and we compared its performance with the state-of-the-art in-memory OCC-based OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by up to 5x and reduce the tail latency by up to 91\% on the write-intensive YCSB benchmark compared with these systems.
+We integrated our techniques into Cicada, an open-source high-performance OLTP engine based on OCC, and we compared its performance with the state-of-the-art in-memory OCC-based OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by up to 2.2x and reduce the tail latency by up to 71\% compared with the next best on the write-intensive YCSB benchmark compared with these systems.
 
 We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 5.6.
 }
@@ -184,7 +184,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \changed{
 	As described in Section 6.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
-	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is up to 5.0x of the throughput compared with the evaluated state-of-the-art OCC-based OLTP systems.  
+	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is up to 2.2x of the throughput compared with the next best evaluated state-of-the-art OCC-based OLTP systems.  
 }
 
 \begin{itemize}
