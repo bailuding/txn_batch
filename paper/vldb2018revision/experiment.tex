@@ -10,9 +10,9 @@ We wanted to answer the following questions:
 \vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
-  affect system performance? (Section~\ref{subsec:experiment:batching})
+  affect system performance? (Section~\ref{subsec:experiment:batching} and~\ref{subsec:experiment:smallbank})
 \vspace{-0.5em}
-\item What is the impact of different policies for alternative performance goals? (Section~\ref{subsec:validator_reordering:policy})
+\item What do different policies from Section~\ref{subsec:validator_reordering:policy} impact alternative performance goal? (Section~\ref{subsec:experiment:policy})
 \vspace{-0.5em}
 \item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial DBMS, and what is the resulting performance? (Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
@@ -61,7 +61,7 @@ The storage continuously processes read and write requests. When storage batchin
 
 % validator
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
-We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering:parallel}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 % Details of validator implementation.
 By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.
 
@@ -157,6 +157,53 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
     \end{minipage}
 \end{figure*}
 
+
+\begin{figure*}[t]
+	\centering
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with micro benchmark (skew factor 0.8)}
+	%	\label{fig:load_z0.8:latency}
+	%\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/tps}}}
+		%	\vspace{-2em}
+		\caption{Throughput with Small Bank benchmark}
+		\label{fig:small_bank:tps}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/latency}}}
+		%	\vspace{-2em}
+		\caption{Average latency with Small Bank benchmark}
+		\label{fig:small_bank:latency}
+	\end{minipage}
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/percent95_latency}}}
+		%	\vspace{-2em}
+		\caption{Percentile latency with Small Bank benchmark}
+		\label{fig:small_bank:p95}
+	\end{minipage}
+	%	 \begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
+	%	\vspace{-2em}
+	%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:tps}
+	%	\end{minipage}
+	%	\begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
+	%	\vspace{-2em}
+	%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
+	%	\label{fig:small_bank_z0.9:latency}
+	%	\end{minipage}
+	%    \vspace{-1em}
+\end{figure*}
 
 \begin{figure*}[t]
 	\centering
@@ -256,52 +303,6 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 %    \vspace{-1em}
 %\end{figure*}
 
-\begin{figure*}[t]
-	\centering
-%	\begin{minipage}[b]{0.31\linewidth}
-%	\centering
-%	\includegraphics[width=\textwidth]{{{./exp_fig/load/Z0.8_latency}}}
-%	\vspace{-2em}
-%	\caption{Average latency with micro benchmark (skew factor 0.8)}
-%	\label{fig:load_z0.8:latency}
-%\end{minipage}
-	 \begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/tps}}}
-%	\vspace{-2em}
-	\caption{Throughput with Small Bank benchmark}
-	\label{fig:small_bank:tps}
-	\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/latency}}}
-%	\vspace{-2em}
-	\caption{Average latency with Small Bank benchmark}
-	\label{fig:small_bank:latency}
-	\end{minipage}
-	\begin{minipage}[b]{0.31\linewidth}
-	\centering
-	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/percent95_latency}}}
-%	\vspace{-2em}
-	\caption{Percentile latency with Small Bank benchmark}
-	\label{fig:small_bank:p95}
-	\end{minipage}
-%	 \begin{minipage}[b]{0.31\linewidth}
-%	\centering
-%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_tps}}}
-%	\vspace{-2em}
-%	\caption{Throughput with Small Bank benchmark (skew factor 0.9)}
-%	\label{fig:small_bank_z0.9:tps}
-%	\end{minipage}
-%	\begin{minipage}[b]{0.31\linewidth}
-%	\centering
-%	\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/Z0.9_latency}}}
-%	\vspace{-2em}
-%	\caption{Average latency with Small Bank benchmark (skew factor 0.9)}
-%	\label{fig:small_bank_z0.9:latency}
-%	\end{minipage}
-%    \vspace{-1em}
-\end{figure*}
 
 \begin{figure*}[t]
 	\centering
@@ -389,8 +390,8 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \input{exp_greedy}
 %\input{exp_batch_size}
 \input{exp_basic}
-\input{exp_policy}
 \input{exp_benchmark} % include load and small bank experiments.
+\input{exp_policy}
 \input{exp_compare}
 
 \subsection{Summary}
