@@ -62,7 +62,7 @@ account. We call this objective function a \emph{policy} $P$.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.3\columnwidth]{./alg_fig/fvs-eg}
+	\includegraphics[width=0.5\columnwidth]{./alg_fig/fvs-eg}
 	%\vspace{-1em}
 	\caption{An example of a directed graph; node 1 forms a feedback vertex set.}
 	%\vspace{-1em}
@@ -99,6 +99,7 @@ We now process $G$ to find a feedback vertex set. Both before and during the
 execution of our FVS algorithms, we \emph{trim} the graph to remove all the nodes
 that have no incoming edges and/or no outgoing edges since such nodes cannot
 participate in any cycles.
+
 
 \subsection{Algorithms}
 \label{subsec:validator_reordering:algorithm}

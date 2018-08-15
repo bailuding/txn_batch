@@ -7,17 +7,18 @@ We wanted to answer the following questions:
 \begin{enumerate}[leftmargin=*]
 \item 
 	How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How \changed{do} these algorithms affect the end-to-end system performance? (Section~\ref{sec:exp_algorithms})
-\vspace{-0.5em}
+%\vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
   affect system performance? (Sections~\ref{subsec:experiment:batching} and~\ref{subsec:experiment:smallbank})
-\vspace{-0.5em}
-\item What do different policies from Section~\ref{subsec:validator_reordering:policy} impact alternative performance goal? (Section~\ref{subsec:experiment:policy})
-\vspace{-0.5em}
+%\vspace{-0.5em}
+\item How do different policies from Section~\ref{subsec:validator_reordering:policy} impact alternative performance goal? (Section~\ref{subsec:experiment:policy})
+%\vspace{-0.5em}
 \item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Sections~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
-Table~\ref{tbl:exp} summarizes the parameters we evaluated and describes the tradeoff encapsulated in each parameter. 
-Recall that we further evaluate the parallelization of our algorithms in details in Appendix \ref{sec:experiments:parallel}.
+Table~\ref{tbl:exp} summarizes the settings we evaluated and describes the tradeoff encapsulated in each parameter. 
+We also describe parallelization of our algorithms in detail in Appendix \ref{sec:parallel} and 
+show the resulting benefits in Appendix \ref{sec:experiments:parallel}.
 % Appendix~\ref{sec:parallel}.
 }
 %\vspace{-0.5em}
@@ -28,11 +29,11 @@ Recall that we further evaluate the parallelization of our algorithms in details
 		\captionof{table}{Summary of parameters and trade-offs}
 	\begin{tabular}{|c|c|}
 		\hline
-		{\bf Parameter} & {\bf Trade-off} \\
+		{\bf Setting} & {\bf Trade-off} \\
 		\hline
-		batch size & Larger batch sizes give more flexibility of reordering but increases transaction latency. \\
+		Batch size & Larger batch sizes give more flexibility of reordering but increases transaction latency. \\
 		\hline
-		FVS algorithms & Sort-based algorithm has lower overhead at the cost of including more transactions in FVS. \\
+		FVS algorithms & The sort-based algorithm is cheaper but includes more transactions in the FVS. \\
 		\hline
 		Policy: Reduce conflicts & Reorder transactions to minimize the number of aborts.\\
 		\hline
@@ -52,7 +53,7 @@ Recall that we further evaluate the parallelization of our algorithms in details
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-\changed{We first describe the experimental setup for our research prototype. Section \ref{subsec:experiment:compare} describes experiments with a commercial database system and Section \ref{sec:OtherOLTP} describes experiments with an open-source OLTP system. }
+\changed{We first describe the experimental setup for our research prototype where we tease apart the impact of different parameters in our algorithms. Section \ref{sec:OtherOLTP} describes our experiments with an open-source OLTP system, and Section \ref{subsec:experiment:compare} describes our experiments with a commercial database system; both of these sections have their own experimental setup.}
 
 Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
@@ -82,7 +83,7 @@ storage, implemented as an in-memory hash table. In our micro benchmark, we popu
 The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
-All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average latency, and percentile latency for to show tail latencies.
+All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average latency, and percentile latency to show tail latencies.
 
 % *******************
 % * Figures

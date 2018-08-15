@@ -1,13 +1,13 @@
 \changed{
 %\subsection{Compare with Other OLTP Kernels}
-\subsection{Integration with Cicada}
+\subsection{Experiments with Cicada}
 \label{sec:OtherOLTP}
 We integrated the idea of transaction batching and reordering into Cicada, an open-source OLTP system~\cite{lim2017cicada}. Cicada represents an important class of in-memory OCC-based OLTP system architectures. In Cicada, every thread executes its transactions independently, and there are no centralized threads for transaction validation and storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step using the thread-aware policy as described in Section~\ref{subsec:validator_reordering:policy}. 
 
 We compare our strategy ($rc$) with a number of the-state-of-the-art OLTP systems, including Cicada ($cicada$)~\cite{lim2017cicada}, Silo ($silo$)~\cite{tu2013speedy}, ERMIA ($ermia$)~\cite{kim2016ermia}, and TicToc ($tictoc$)~\cite{yu2016tictoc}, using the same YCSB benchmark configuration used 
 in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 16 requests, with 50\% read and 50\% RMW. The database consists of 10 million keys, each with 100-byte payload.
 
-We run the experiment on a machine with two Intel Xeon Processor E5-2690 v4 CPUs (each with 14 physical cores) and 256GiB of DRAM. We pin threads to different cores and use NUMA-aware memory to allocate hugepages. 
+We run the experiment on a machine with two Intel Xeon Processor E5-2690 v4 CPUs (each with 14 physical cores) and 256GB of DRAM. We pin threads to different cores and use NUMA-aware memory to allocate hugepages. These settings replicate the experimental setup from the original Cicada paper as closely as possible.
 
 Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems with a write-intensive, highly-skewed workload, varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and tail latency with the maximal number of threads (28) under workloads with different degrees of skew. ERMIA is not shown in Figure~\ref{fig:oltp_kernel:latency} since it does not report percentile latencies.
 }
@@ -27,7 +27,7 @@ In practice, many applications and services use a middle-layer, such as web serv
 %as transaction requests get consolidated.
 }
 
-\subsection{Implementation on DBMS-X}
+\subsection{Experiments with DBMS-X}
 \label{subsec:experiment:compare}
 
 In our final experiment, we implemented the idea of transaction batching and reordering on top of a commercial OLTP system, called DBMS-X. DBMS-X is a high performance OLTP engine using optimistic concurrency control. Upon receiving transactions, it processes transactions concurrently with a first-come-first-served order.
