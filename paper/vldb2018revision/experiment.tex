@@ -14,9 +14,9 @@ We wanted to answer the following questions:
 \vspace{-0.5em}
 \item What do different policies from Section~\ref{subsec:validator_reordering:policy} impact alternative performance goal? (Section~\ref{subsec:experiment:policy})
 \vspace{-0.5em}
-\item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial DBMS, and what is the resulting performance? (Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
+\item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
-Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix \ref{sec:experiments:parallel} evaluates the parallelization of our algorithms.
+Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. We further evaluate the parallelization of our algorithms in details in Appendix \ref{sec:experiments:parallel}.
 % Appendix~\ref{sec:parallel}.
 }
 %\vspace{-0.5em}
@@ -50,9 +50,9 @@ Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. Appendix 
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-\changed{We first describe the experimental setup for our research system. Section \ref{subsec:experiment:compare} describes experiments with a commercial database system and Section \ref{sec:OtherOLTP} describes experiments with an open-source OLTP sytem. 
-	}
-Our system architecture has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
+\changed{We first describe the experimental setup for our research prototype. Section \ref{subsec:experiment:compare} describes experiments with a commercial database system and Section \ref{sec:OtherOLTP} describes experiments with an open-source OLTP system. }
+
+Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and validator. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
 
 The processor is \emph{non-blocking}: It continuously processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel to improve its throughput.
@@ -423,7 +423,7 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(5) Integrating our techniques to a high performance OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 5.0x and reduces the 99\% latency by up to 91\% under a write-intensive workload.}
+\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system (Cicada) shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 5.0x and reduces the 99\% latency by up to 91\% under a write-intensive workload.}
 
 (6) Integrating the idea of transaction reordering on top of a commercial database system with the Small Bank benchmark shows that, under high data contention, our technique increases the throughput by up to 2.8x, and it reduces the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
 %\end{enumerate}  

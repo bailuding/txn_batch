@@ -19,10 +19,10 @@ As the degree of data contention increases, either with more threads or more ske
 }
 
 \changed{
-In this experiment, we configure our strategy with a batch size of $4\times num\_threads$ and schedule $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never scheduled across batch boundaries and will at most get delayed within a small window. The reordering is up to 5x faster than processing a transaction, which can be further parallelized. }
+In this experiment, we configure our strategy with a batch size of $4\times num\_threads$ and schedule $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never scheduled across batch boundaries and will at most get delayed within a small window. The reordering is 5x faster than processing a transaction, which can be further parallelized. }
 
 \changed{
-In practice, many applications and services use a middle-layer, such as web servers, to consolidate transactions from clients before submitting them to databases. The reordering and batching can also happen at the web servers as a preprocessing step.
+In practice, many applications and services use a middle-layer, such as web servers, to consolidate transactions from clients before submitting them to databases. The reordering and batching can happen at the web servers as a preprocessing step as transaction requests get consolidated.
 }
 
 \subsection{Implementation on DBMS-X}

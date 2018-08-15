@@ -3,8 +3,9 @@
 	
 In this paper, we present an OLTP system based on optimistic concurrency control that incorporates batching at multiple stages of transaction execution. 
 %Execution batching enables enables reordering of operations to improve performance and reduce conflicts: 
-Storage batching enables reordering of transaction reads and writes at the storage layer, reducing \changed{conflicts on the same object}. Validator batching enables reordering of transactions before validation, reducing conflicts between transactions. Dependencies between transactions make transaction reordering a non-trivial problem, and we propose several efficient and practical algorithms that can be customized to various transaction precedence policies such as reducing tail latency. \changed{We also show how to parallelize validator batching for better performance and how to reorder transactions with a thread-aware policy in multi-threaded OLTP architectures without a centralized validator.
-
-In-depth experiments on a research prototype, an open-source OLTP system, and a production OLTP system show that our techniques can increase system throughput by up to 5.0x and reduce tail latency by up to 91\%.
+Storage batching enables reordering of transaction reads and writes at the storage layer, reducing \changed{conflicts on the same object}. Validator batching enables reordering of transactions before validation, reducing conflicts between transactions. Dependencies between transactions make transaction reordering a non-trivial problem, and we propose several efficient and practical algorithms that can be customized to various transaction precedence policies such as reducing tail latency. \changed{We also show how to reorder transactions with a thread-aware policy in multi-threaded OLTP architectures without a centralized validator.\cut{We also show how to parallelize validator batching for better performance}
+	
+	
+In-depth experiments on a research prototype, an open-source OLTP system, and a production OLTP system show that our techniques can increase system throughput by up to 5.0x and reduce tail latency by up to 91\% on workloads with high data contention.
 } 
 \end{abstract}
