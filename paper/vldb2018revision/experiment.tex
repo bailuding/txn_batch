@@ -10,13 +10,14 @@ We wanted to answer the following questions:
 \vspace{-0.5em}
 %(2) What is the impact of batch size on performance? 
 \item How does storage and validator batching and reordering
-  affect system performance? (Section~\ref{subsec:experiment:batching} and~\ref{subsec:experiment:smallbank})
+  affect system performance? (Sections~\ref{subsec:experiment:batching} and~\ref{subsec:experiment:smallbank})
 \vspace{-0.5em}
 \item What do different policies from Section~\ref{subsec:validator_reordering:policy} impact alternative performance goal? (Section~\ref{subsec:experiment:policy})
 \vspace{-0.5em}
-\item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
+\item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Sections~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
-Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. We further evaluate the parallelization of our algorithms in details in Appendix \ref{sec:experiments:parallel}.
+Table~\ref{tbl:exp} summarizes the parameters we evaluated and describes the tradeoff encapsulated in each parameter. 
+Recall that we further evaluate the parallelization of our algorithms in details in Appendix \ref{sec:experiments:parallel}.
 % Appendix~\ref{sec:parallel}.
 }
 %\vspace{-0.5em}
@@ -29,15 +30,16 @@ Table~\ref{tbl:exp} summarizes the trade-offs of parameters evaluated. We furthe
 		\hline
 		{\bf Parameter} & {\bf Trade-off} \\
 		\hline
-		batch size & Larger batch size has more flexibility of reordering but increases transaction latency. \\
+		batch size & Larger batch sizes give more flexibility of reordering but increases transaction latency. \\
 		\hline
 		FVS algorithms & Sort-based algorithm has lower overhead at the cost of including more transactions in FVS. \\
 		\hline
-		policy: reduce conflicts & Reorder transactions to minimize the number of aborts.\\
+		Policy: Reduce conflicts & Reorder transactions to minimize the number of aborts.\\
 		\hline
-		policy: reduce tail latency & Reorder transactions to minimize tail latency at the cost of slightly increased aborts.\\
+		Policy: Reduce tail latency & Reorder transactions to minimize tail latency at the cost of slightly increased aborts.\\
 		\hline
-		policy: thread-aware & Reorder transactions for decentralized multi-threaded OLTP architectures based on OCC.\\
+		Policy: Thread-Aware & Reorder transactions to achieve thread-locality. \\
+		%for decentralized multi-threaded OLTP architectures based on OCC.\\
 		\hline
 	\end{tabular}
 	\label{tbl:exp}
@@ -63,7 +65,7 @@ The storage continuously processes read and write requests. When storage batchin
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
 We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 % Details of validator implementation.
-By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor 2.
+By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor  value $2$.
 
 
 % Parallelization.
