@@ -10,3 +10,4 @@
 **/tmp*
 **/~*
 **/cover_letter.pdf
+*.synctex(busy)
