@@ -41,18 +41,18 @@
 \date{}
 \maketitle
 
-We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. We hope that we addressed all the issues that were pointed out. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in both the response and in the revised submission.
+We would like to thank the reviewers and the meta-reviewer for their insightful comments and suggestions. We hope that we addressed all the issues that were pointed out. Below is a summary of the changes we made in response to these comments. Changes are marked in blue in the response and the revised submission.
 
 \section{Changes based on meta-reviewer comments}
 
-We first summarize and address the major comments from the reviews.
+%We first summarize and address the major comments from the reviews.
 
 \begin{itemize}
 	\item[(R1)] \emph{Expand the experimental evaluation to include a comparison with other high-performance OLTP engines that use OCC.}
 \end{itemize}
 
 \changed{
-We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput by at least a factor of two on the write-intensive YCSB benchmark compared with these systems.
+We integrated our techniques into Cicada, an open-sourced high performance OLTP engine, and we compared its performance with the state-of-the-art in-memory OLTP engines such as Cicada, Silo, TicToc, and ERMIA. Our techniques improve throughput to up to a factor of 5x and reduce the tail latency to up to a factor of 11x on the write-intensive YCSB benchmark compared with these systems.
 
 We would also like to note that we used exactly the same parameter settings and the same setup as in the original Cicada paper. The new results are described in Section 5.6.
 }
@@ -75,7 +75,7 @@ In this section we explain how we addressed the comments of individual reviewers
 \item[(R1.1)] \emph{Add an experiment to show the performance of the proposed techniques in systems where the clients do not send their next transaction until their previous one is finished.}
 \end{itemize}
 \changed{
-	We integrated our techniques to Cicada, where each thread processes a transaction synchronously. Please see Major Comment R1 for details.
+	We integrated our techniques to Cicada, where each thread processes a transaction synchronously. Please see Comment R1 for details.
 }
 
 \begin{itemize}
@@ -83,7 +83,7 @@ In this section we explain how we addressed the comments of individual reviewers
 \end{itemize}
 
 \changed{
-	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X as it receives more active transactions.
+	Our prototype issues transactions to DBMS-X via JDBC, where it can submit transaction statements individually or in batch. Either way, the connection will block until all the transactions submitted get processed, i.e., commit or abort. As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X as it receives more active transactions.
 	
 	We added a more detailed description of why batching helps DBMS-X in Section 5.7.
 }
@@ -101,9 +101,10 @@ In this section we explain how we addressed the comments of individual reviewers
 \end{itemize}
 
 \changed{
-We agree that the policies should be customized based on the objective of transaction processing system and its architecture.
+We agree that the policies should be customized based on the performance objective and the architecture of the OLTP system.
 
-We also appreciate this comment, and we say that full generality will be hard to show. We extended our sort-based framework to incorporate a thread-aware policy for an important class of multi-threaded OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread. We thus believe that our sort-based approach is rather general, and that we have a shown a wide variety of both scenarios and also different types of systems where this approach has merit. 
+\cut{We also appreciate this comment, and we say that full generality will be hard to show. }
+While the full generality of the sort-based algorithm will be hard to show, we extended the algorithm with a thread-aware policy for an important class of multi-threaded, decentralized OLTP architecture, where each transaction is processed independently and synchronously by a dedicated thread. We thus believe that our sort-based approach is rather general, and that we have a shown a wide variety of both scenarios and also different types of systems where this approach has merit. 
 
 We implemented the policy on top of Cicada; please see Section 5.6 for the evaluation details.
 }
@@ -124,7 +125,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 
 %\todo{Add to appendix}
 \changed{
-	We added a table to summarize the trade-off of different parameters and policies in Table 1, and we added some associated explanation. In addition, our experiments both on DB-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems, and that that resulting performance improvements appear for all systems rather.
+	We added a table to summarize the trade-off of different parameters and policies in Table 1 in Section 5\cut{, and we added some associated explanation}. In addition, our experiments both on DBMS-X and on the open-source system Cicada show that our approach can be relatively easily be incorporated into other systems to improve their performance\cut{, and that that resulting performance improvements appear for all systems rather}.
 }
 
 \subsection{Reviewer 3}
@@ -137,7 +138,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 
 %\todo{Better wording needed}
 \changed{
-	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based policy can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that our contributions are novel, and that they will have practical impact.
+	We believe that our contribution is a rather general framework for batching and associated policy-based reordering of transactions for OLTP systems. As we have shown, our sort-based framework can be customized for different transaction processing performance objectives and for different system architectures. As thus, we believe that our contributions are novel, and that they will have practical impact.
 }
 
 \begin{itemize}
@@ -148,15 +149,15 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	 We integrated our techniques into the Cicada open-source OLTP kernel, and we compared its performance with the state-of-the-art in-memory OLTP kernels such as Cicada, Silo, TicToc, and ERMIA. We believe that this comparison -- including all the different kernels that are included in Cicada -- is quite comprehensive and provides a fair comparison to the current state-of-the-art. Please see Comment R1 for more details.
+	 We integrated our techniques into an open-sourced OLTP system (Cicada), and we compared its performance with the state-of-the-art in-memory OLTP systems such as Cicada, Silo, TicToc, and ERMIA. We believe that this comparison is quite comprehensive and provides a fair comparison to the current state-of-the-art. Please see Comment R1 for more details.
 }
 
 \begin{itemize}
-\item[(R3.3)] \emph{The authors provide a black box comparison of their approach in DB-X,
+\item[(R3.3)] \emph{The authors provide a black box comparison of their approach in DBMS-X,
 	but the basis of the comparison is unclear (also not sure what does
 	"Good Throughput/Transaction" mean). Although the effort is appreciated,
 	it would be much better to compare with relevant, disclosed existing
-	algorithm, or at the very least, the concurrency of the model of DB-X is
+	algorithm, or at the very least, the concurrency of the model of DBMS-X is
 	carefully explained. A black box graph adds no value.}
 \end{itemize}
 
@@ -164,7 +165,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 	"Good Throughput" means the number of committed transactions per second, since some literature refers to "Throughput" as the number of transactions processed per second, no matter they commit or abort. We changed to term to "throughput" and clarified its semantics in Section 6.1.
 	
 	
-	We cannot disclose the name of DB-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OLTP kernels to create a comparison beyond DB-X. Please see Comment R1 for details.
+	We cannot disclose the name of DBMS-X for confidentiality reasons, but it uses a very specific OCC protocol. However, our techniques are not at all customized for its protocol. 	We also added a whole new section to compare with other state-of-the-art OLTP systems for a comparison beyond DBMS-X. Please see Comment R1 for details.
 	
 }
 
@@ -183,7 +184,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \changed{
 	As described in Section 6.1, our prototype for the micro-benchmark experiment is implemented with asynchronous transaction processing architecture. Each thread multiplexes multiple transactions simultaneously to mask the latency of transaction workflow execution, IO accesses, and network communication. Thus, the number of threads can be much less than the number of active transactions. This architecture has loosely coupled components and can scale storage and compute independently, which is especially applicable for elastic transaction processing in the cloud.
 
-	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In the integrated system, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is at least 2x the throughput compared with the state-of-the-art OLTP kernels.  
+	We also integrated our techniques to Cicada, where each thread processes a transaction synchronously and independently. In this integration, each thread is pinned to a dedicated physical CPU core and the number of active transactions never exceeds the number of cores. We achieved close to 2 millions transactions per second under highly skewed, write-intensive workload, which is 2.2x-5.0x of the throughput compared with the evaluated state-of-the-art OLTP systems.  
 }
 
 \begin{itemize}
@@ -191,7 +192,7 @@ We implemented the policy on top of Cicada; please see Section 5.6 for the evalu
 \end{itemize}
 
 \changed{
-	Thank you for seeing this. We fixed the truncated labels and ticks.
+	Thank you for catching this. We fixed the truncated labels and ticks.
 }
 
 \end{document}
