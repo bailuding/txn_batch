@@ -39,7 +39,7 @@ In this experiment, we study the benefit of introducing parallelism into the val
 Figure~\ref{fig:reorder:tps} and~\ref{fig:reorder:latency} show the throughput
 and the average latency with the number of reordering workers from 1 to 4
 ($w1$, $w2$, $w3$, $w4$). The performance improves significantly with more reordering workers when the skew factor is medium to high. With 4 reordering workers, the throughput is increased by up to 2.6x, and the average latency is reduced by up to 39\%, as compared to the result with 1 reordering worker. \eat{When the contention is fairly low, adding more reordering workers is not beneficial for the overhead it incurs.}Figure~\ref{fig:reorder:p95} shows the percentile transaction latency. With more reordering workers, more transactions are reordered concurrently, and the transaction queuing time at validator is reduced. With 4 reordering workers, the tail latency is reduced by up to 41\%\eat{ as compared to with 1 reordering workers}. The improvement is not linear since the bottleneck of the system shifts to other
-components as we increase the capacity of the transaction reordering.
+components as we increase the capacity of reordering.
 
 %The system can further scale up once the capacity of other components is carefully engineered and scaled, which is out of scope for this paper.
 \eat{

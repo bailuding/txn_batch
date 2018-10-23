@@ -10,7 +10,7 @@ OCC is a popular concurrency control protocol due to its low overhead in low-con
 settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr,
 bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi,larson2011high}. However, it has been shown that OCC
 wastes resources when conflicts are frequent~\cite{agrawal1987concurrency}. We
-show how semantic batching (and associated reordering of transactions) can reduce the number of conflicts, improve
+show how semantic batching (and associated reordering of transactions) can reduce conflicts, improve
 throughput and latency, and allow us to use OCC with higher-contention workloads.
 
 
@@ -53,12 +53,12 @@ already-validated transactions in their write phase as well as transactions
 still in their read phase. The storage can buffer read and write requests into
 joint batches as they arrive. If a batch contains read and write requests for
 the same object, the system can apply all the writes first in their serialization
-order and then process the reads. Prioritizing writes over reads is always
+order and then process all the reads. Prioritizing writes over reads is always
 optimal as this reduces the number of aborts later in the validator as much as possible. This is
-because OCC reads come from uncommitted transactions, while writes come from
+because in OCC reads come from uncommitted transactions, while writes come from
 validated transactions that will commit soon. Thus, if the storage schedules a
 pending read before a pending write on the same object, the reading transaction
-will see a stale value and is guaranteed to fail validation. 
+will see a stale value and later fail validation. 
 
 % drawback of batching
 %Batching at these three levels in the system reduces aborts due to conflicts, and thus can increase throughput.\eat{However, it may also increase latency.}

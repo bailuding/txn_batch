@@ -2,7 +2,7 @@
 %\subsection{Compare with Other OLTP Kernels}
 \subsection{Experiments with Cicada}
 \label{sec:OtherOLTP}
-We integrated the idea of transaction batching and reordering into Cicada, an open-source OLTP system~\cite{lim2017cicada}. Cicada represents an important class of in-memory OCC-based OLTP system architectures. In Cicada, every thread executes its transactions independently, and there are no centralized threads for transaction validation or storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step using the thread-aware policy as described in Section~\ref{subsec:validator_reordering:policy}. 
+We integrated the idea of transaction batching and reordering into Cicada, an open-source OLTP system~\cite{lim2017cicada}. Cicada represents an important class of in-memory OCC-based OLTP system architectures. In Cicada, every thread executes its transactions independently, and there are no centralized threads for transaction validation or storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step using the thread-aware policy described in Section~\ref{subsec:validator_reordering:policy}. 
 
 We compare our strategy ($rc$) with a number of the-state-of-the-art OLTP systems, including Cicada ($cicada$)~\cite{lim2017cicada}, Silo ($silo$)~\cite{tu2013speedy}, ERMIA ($ermia$)~\cite{kim2016ermia}, and TicToc ($tictoc$)~\cite{yu2016tictoc}, using the same YCSB benchmark configuration as 
 in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 16 requests generated from a Zipfian distribution, with 50\% read and 50\% RMW. The database consists of 10 million keys, each with 100-byte payload.
@@ -14,7 +14,7 @@ Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of different systems
 % Performance number
 % TPS@28 threads and theta=0.99: reorder 1.89M, cicada 0.85, lowest: 0.38
 % 99.9 latency@28 threads and theta=0.99: reorder 0.11MS, cicada: 0.38, highest: 1.2
-As the degree of data contention increases, either with more threads or a more skewed data distribution, reordering outperforms the other systems with higher throughput and lower tail latency. With 28 threads and skew factor 0.99, reordering improves throughput by up to 2.2x and reduces 99\% latency by up to 71\% compared with the next best.
+As the degree of data contention increases, either with more threads or under a more skewed data distribution, using reordering outperforms the other systems with higher throughput and lower tail latency. With 28 threads and skew factor 0.99, using reordering improves throughput by up to 2.2x and reduces 99\% latency by up to 71\% compared with the next best.
 
 In this experiment, we configure our strategy with a batch size of $4\times num\_threads$ and assign $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never reordered across batch boundaries. The reordering has low overhead, which is up to 5x in throughput compared with transaction processing.\footnote{The reordering can be further parallelized as we discuss in Appendix \ref{sec:experiments:parallel}}.
 
@@ -37,7 +37,7 @@ We implemented validator reordering for the transactions batched at the middle t
 
 \changed{We issue transactions to DBMS-X using JDBC. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X.}
 
-We use the SmallBank benchmark with a Zipf skew of 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{BatchReorder}) with two baselines: no batching (\emph{NoBatch}) and batching without reordering (\emph{Batch}). In \emph{NoBatch}, we submit transactions to DBMS-X one at a time. In \emph{Batch} and \emph{BatchReorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50, which gives reasonable throughput for this workload.
+We use the SmallBank benchmark with a Zipf skew of 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{BatchReorder}) with two baselines: no batching (\emph{NoBatch}) and batching without reordering (\emph{Batch}). In \emph{NoBatch}, we submit transactions to DBMS-X one at a time. In \emph{Batch} and \emph{BatchReorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50, which is appropriate for this workload.
 
 Figures~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the resulting throughput, latency, and the abort rate when we increase the number of database connections.  When we do not batch transactions, the number of concurrent transactions is small and the throughput is low. As a result of this low concurrency level, the chance of conflicts is low. Thus, both abort rate and transaction latency are low. 
 

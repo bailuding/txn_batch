@@ -1,7 +1,14 @@
+@inproceedings{qadah2018quecc,
+	title={QueCC: A Queue-oriented, Control-free Concurrency Architecture},
+	author={Qadah, Thamir M and Sadoghi, Mohammad},
+	booktitle={ACM/IFIP International Middleware Conference},
+	year={2018}
+}
+
 @inproceedings{yu2016tictoc,
 	title={Tictoc: Time traveling optimistic concurrency control},
 	author={Yu, Xiangyao and Pavlo, Andrew and Sanchez, Daniel and Devadas, Srinivas},
-	booktitle={Proceedings of the 2016 International Conference on Management of Data},
+	booktitle={{SIGMOD}},
 	pages={1629--1642},
 	year={2016},
 	organization={ACM}
@@ -10,7 +17,7 @@
 @inproceedings{kim2016ermia,
 	title={Ermia: Fast memory-optimized database system for heterogeneous workloads},
 	author={Kim, Kangnyeon and Wang, Tianzheng and Johnson, Ryan and Pandis, Ippokratis},
-	booktitle={Proceedings of the 2016 International Conference on Management of Data},
+	booktitle={{SIGMOD}},
 	pages={1675--1687},
 	year={2016},
 	organization={ACM}
@@ -19,11 +26,10 @@
 @article{appuswamy17vldb,
 	author = {Appuswamy, Raja and Anadiotis, Angelos C. and Porobic, Danica and Iman, Mustafa K. and Ailamaki, Anastasia},
 	title = {Analyzing the Impact of System Architecture on the Scalability of OLTP Engines for High-contention Workloads},
-	journal = {Proc. VLDB Endow.},
+	journal = {{PVLDB}},
 	issue_date = {October 2017},
 	volume = {11},
 	number = {2},
-	month = oct,
 	year = {2017},
 	issn = {2150-8097},
 	pages = {121--134},
@@ -37,7 +43,7 @@
 @inproceedings{lim2017cicada,
 	title={Cicada: Dependably fast multi-core in-memory transactions},
 	author={Lim, Hyeontaek and Kaminsky, Michael and Andersen, David G},
-	booktitle={Proceedings of the 2017 ACM International Conference on Management of Data},
+	booktitle={{SIGMOD}},
 	pages={21--35},
 	year={2017},
 	organization={ACM}
@@ -46,8 +52,11 @@
 @article{larson2011high,
 	title={High-performance concurrency control mechanisms for main-memory databases},
 	author={Larson, Per-{\AA}ke and others},
-	journal={VLDB},
-	year={2011},
+	journal   = {{PVLDB}},
+	volume    = {5},
+	number    = {4},
+	pages     = {298--309},
+	year      = {2011},
 }
 
 @article{ding2016tr,
@@ -76,8 +85,9 @@
 @inproceedings{jorwekar2007automating,
   title={Automating the detection of snapshot isolation anomalies},
   author={Jorwekar, Sudhir and Fekete, Alan and others},
-  booktitle={VLDB},
-  year={2007}
+	booktitle = {PVLDB},
+	pages     = {1263--1274},
+	year      = {2007},
 }
 
 @inproceedings{roy2015homeostasis,
@@ -123,16 +133,19 @@
 @article{haritsa1993value,
   title={Value-based scheduling in real-time database systems},
   author={Haritsa, Jayant and others},
-  journal={The VLDB Journal},
-  year={1993},
+  journal   = {{VLDB} J.},
+  volume    = {2},
+  number    = {2},
+  pages     = {117--152},
+  year      = {1993},
 }
 
 @inproceedings{huang1991experimental,
   title={Experimental evaluation of real-time optimistic concurrency control schemes},
   author={Huang, Jiandong and Stankovic, John A and others},
-  booktitle={VLDB},
-  volume={91},
-  year={1991}
+	booktitle = {VLDB},
+	pages     = {35--46},
+	year      = {1991},
 }
 
 @inproceedings{lee1993using,
@@ -281,10 +294,11 @@ month={Oct},
 @article{debrabant2013anti,
   title={Anti-caching: A new approach to database management system architecture},
   author={DeBrabant, Justin and Pavlo, Andrew and others},
-  journal={VLDB},
-  volume={6},
-  number={14},
-  year={2013},
+  journal   = {{PVLDB}},
+  volume    = {6},
+  number    = {14},
+  pages     = {1942--1953},
+  year      = {2013},
 }
 
 
@@ -476,10 +490,14 @@ month={Oct},
   year={2014}
 }
 
-@book{karp1972reducibility,
+@inproceedings{karp1972reducibility,
   title={Reducibility among combinatorial problems},
   author={Karp, Richard M},
-  year={1972},
+	booktitle = {Proceedings of a symposium on the Complexity of Computer Computations,
+	held March 20-22, 1972, at the {IBM} Thomas J. Watson Research Center,
+	Yorktown Heights, New York, {USA}},
+	pages     = {85--103},
+	year      = {1972},
 }
 
 @article{kung81tods,
@@ -511,8 +529,12 @@ month={Oct},
                Colin W. Reid and others},
   title     = {Optimistic Concurrency Control by Melding Trees},
   journal   = {{PVLDB}},
-  year      = {2011}
+  year      = {2011},
+  volume={4},
+  number={11},
+  pages     = {944--955},
 }
+
 @inproceedings{corbett12osdi,
   author    = {James C. {Corbett~et~al.}},
   title     = {Spanner: Google's Globally-Distributed Database},
@@ -557,10 +579,11 @@ month={Oct},
                others},
   title     = {Serializability, not Serial: Concurrency Control and Availability
                in Multi-Datacenter Datastores},
-  journal   = {{PVLDB}},
+    journal   = {{PVLDB}},
   volume    = {5},
   number    = {11},
-  year      = {2012}
+  pages     = {1459--1470},
+  year      = {2012},
 }
 @inproceedings{baker11cidr,
   author    = {Jason Baker and
@@ -620,7 +643,10 @@ month={Oct},
                Daniel J. Abadi},
   title     = {Rethinking serializable multiversion concurrency control},
   journal   = {{PVLDB}},
-  year      = {2015}
+  year      = {2015},
+  volume    = {8},
+  number    = {11},
+  pages     = {1190--1201},
 } 
 @inproceedings{DBLP:conf/sosp/XieSLAK015,
   author    = {Chao Xie and
@@ -643,18 +669,17 @@ month={Oct},
 @article{wang2016mostly,
 	title={Mostly-optimistic concurrency control for highly contended dynamic workloads on a thousand cores},
 	author={Wang, Tianzheng and Kimura, Hideaki},
-	journal={Proceedings of the VLDB Endowment},
-	volume={10},
-	number={2},
-	pages={49--60},
-	year={2016},
-	publisher={VLDB Endowment}
+	journal   = {{PVLDB}},
+	volume    = {10},
+	number    = {2},
+	pages     = {49--60},
+	year      = {2016},
 }
 
 @inproceedings{wang2016scaling,
 	title={Scaling multicore databases via constrained parallel execution},
 	author={Wang, Zhaoguo and Mu, Shuai and Cui, Yang and Yi, Han and Chen, Haibo and Li, Jinyang},
-	booktitle={Proceedings of the 2016 International Conference on Management of Data},
+	booktitle={{SIGMOD}},
 	pages={1643--1658},
 	year={2016},
 	organization={ACM}

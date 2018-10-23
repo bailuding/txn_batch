@@ -73,6 +73,19 @@
 \newcommand{\tocut}[1]{\textcolor{red}{\it\st{#1}}}
 \fi
 
+\newcommand{\papertitle}{Improving Optimistic Concurrency Control Through Transaction Batching and Operation Reordering}
+
+\ifdefined\vldb
+% Include information below and uncomment for camera ready
+\vldbTitle{\papertitle}
+\vldbAuthors{Bailu Ding, Lucja Kot, Johannes Gehrke}
+\vldbDOI{https://doi.org/10.14778/3282495.3282502}
+\vldbVolume{12}
+\vldbNumber{2}
+\vldbYear{2018}
+\fi
+
+\usepackage[labelfont=bf]{caption} % Use bold for caption ID.
 
 \usepackage{graphicx}
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
@@ -102,8 +115,9 @@
 
 % ****************** TITLE ****************************************
 
-\title{Improving Optimistic Concurrency Control Through \\
-	Transaction Batching and Operation Reordering}
+%\title{Improving Optimistic Concurrency Control Through \\
+%	Transaction Batching and Operation Reordering}
+\title{\papertitle}
 
 % possible, but not really needed or used for PVLDB:
 %\subtitle{[Extended Abstract]
@@ -173,6 +187,8 @@
 %\input{reorder}
 \input{method}
 \input{experiment}
+
+\balance
 \input{related}
 \input{conclusion}
 

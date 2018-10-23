@@ -1,6 +1,6 @@
 \section{Evaluation}\label{sec:experiments}
 
-In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms and policies, and the impact of parallelization at the validator.
+In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms as well as different policies, and the impact of parallelization at the validator.
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
 \changed{
@@ -17,7 +17,7 @@ We wanted to answer the following questions:
 \item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Sections~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
 Table~\ref{tbl:exp} summarizes the settings we evaluated and describes the tradeoff encapsulated in each parameter. 
-We also describe parallelization of our algorithms in detail in Appendix~\ref{sec:parallel} and 
+We also describe parallelization of our algorithms in detail in Appendix \ref{sec:parallel} and 
 show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 % Appendix~\ref{sec:parallel}.
 }
@@ -25,6 +25,7 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 %\item How does parallel reordering affect performance?
 
 \begin{table*}[h]
+	\centering
 \changed{
 		\captionof{table}{\changed{Summary of settings and trade-offs}}
 	\begin{tabular}{|c|c|}
@@ -35,11 +36,11 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 		\hline
 		FVS algorithms & The sort-based algorithm is cheaper but includes more transactions in the FVS. \\
 		\hline
-		Policy: Minimize aborts & Reorder transactions to reduce the number of aborts.\\
+		Minimize aborts & Reorder transactions to reduce the number of aborts.\\
 		\hline
-		Policy: Minimize tail latency & Reorder transactions to reduce tail latency at the cost of slightly increased aborts.\\
+		Minimize tail latency & Reorder transactions to reduce tail latency at the cost of slightly increased aborts.\\
 		\hline
-		Policy: Reduce inter-thread conflicts & Reorder transactions to achieve thread locality for decentralized system architecture. \\
+		Reduce inter-thread conflicts & Reorder transactions to achieve thread locality for decentralized system architecture. \\
 		%for decentralized multi-threaded OLTP architectures based on OCC.\\
 		\hline
 	\end{tabular}
@@ -80,7 +81,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the
 storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
 
 % baseline
-The baseline configuration ($base$) represents the system running with both storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
+The baseline configuration ($base$) represents the system running with storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
 All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average latency, and percentile latency to show tail latencies.
@@ -396,6 +397,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \input{exp_benchmark} % include load and small bank experiments.
 \input{exp_policy}
 \input{exp_compare}
+
 
 \subsection{Summary}
 

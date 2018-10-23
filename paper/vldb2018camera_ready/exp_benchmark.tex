@@ -8,7 +8,7 @@ The Small Bank benchmark~\cite{alomari2008icde} contains transactions with a rea
 combination of read and write conflicts. The transactions come from the
 financial domain: compute the balance of a customer's checking and savings
 accounts, deposit money to a checking account, transfer money from a checking
-account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, i.e., 100K checking and 100K savings accounts.
+account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, including 100K checking and 100K savings accounts.
 
 Figure~\ref{fig:small_bank:tps},~\ref{fig:small_bank:latency},~\ref{fig:small_bank:p95} show the throughput, the average latency, and the percentile latency of transactions. Overall, batching and reordering improved the throughput by up to 3.1x, reduced average latency by up to 68\%, and tail latency by up to 62\%. Storage and validator reordering can always improve the throughput and reduce the latency on top of batching, confirming our findings in Section~\ref{subsec:experiment:batching}.
 
