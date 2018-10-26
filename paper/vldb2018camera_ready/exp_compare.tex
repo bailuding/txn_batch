@@ -1,7 +1,7 @@
 \changed{
 %\subsection{Compare with Other OLTP Kernels}
 \subsection{Experiments with Cicada}
-\label{sec:OtherOLTP}
+\label{sec:exp:cicada}
 We integrated the idea of transaction batching and reordering into Cicada, an open-source OLTP system~\cite{lim2017cicada}. Cicada represents an important class of in-memory OCC-based OLTP system architectures. In Cicada, every thread executes its transactions independently, and there are no centralized threads for transaction validation or storage access. We integrated our techniques with its architecture by batching and reordering the transactions in a preprocessing step using the thread-aware policy described in Section~\ref{subsec:validator_reordering:policy}. 
 
 We compare our strategy ($rc$) with a number of the-state-of-the-art OLTP systems, including Cicada ($cicada$)~\cite{lim2017cicada}, Silo ($silo$)~\cite{tu2013speedy}, ERMIA ($ermia$)~\cite{kim2016ermia}, and TicToc ($tictoc$)~\cite{yu2016tictoc}, using the same YCSB benchmark configuration as 
@@ -25,21 +25,18 @@ In practice, many applications and services use a middle tier, such as web serve
 \subsection{Experiments with DBMS-X}
 \label{subsec:experiment:compare}
 
-In our final experiment, we implemented the idea of transaction batching and reordering on top of a commercial OLTP system, called DBMS-X. DBMS-X is a high performance OLTP engine using optimistic concurrency control. Upon receiving transactions, it processes transactions concurrently with a first-come-first-served order.
-
-\cut{
-In many applications and services, clients submit transactions to databases via a middle-layer, such as a web server. This server consolidates requests from many clients, processes the requests, reroutes the requests to different database servers, and responds to the clients. The web server often batches transactions from different clients to improve throughput and resource efficiency. 
-}
-
-We incorporated transaction batching and reordering to DBMS-X at the client side.
+We implement our techniques on top of a commercial DBMS-X, a high performance OLTP engine using OCC. Upon receiving transactions, it processes transactions concurrently in a first-come-first-served order.
+%\cut{
+%In many applications and services, clients submit transactions to databases via a middle-layer, such as a web server. This server consolidates requests from many clients, processes the requests, reroutes the requests to different database servers, and responds to the clients. The web server often batches transactions from different clients to improve throughput and resource efficiency. 
+%}
+%\cut{We apply transaction batching and reordering to DBMS-X at the client side.}
 \changed{
-We implemented validator reordering for the transactions batched at the middle tier -- before submitting them to the database server.} Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions and \changed{then reorder them with our policy to minimize the number of aborts}. The transactions excluded from the batch, together with future incoming transactions, will be included in the next batch for reordering.
+We implement validator reordering for the transactions batched at the middle tier, i.e., before submitting them to the database server.} Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions and \changed{reorder them with our policy to minimize the number of aborts}. The transactions excluded from the batch, together with future incoming transactions, will be included in the next batch for reordering.
 
-\changed{We issue transactions to DBMS-X using JDBC. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of transaction statements from a connection, it can execute them concurrently. Batching transaction statements reduces the overhead of communication and can increase the concurrency level of DBMS-X.}
+\changed{We use JDBC to issue transactions. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of statements, it executes them concurrently. Batching transaction statements reduces communication overhead and increases the concurrency level.}
 
-We use the SmallBank benchmark with a Zipf skew of 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{BatchReorder}) with two baselines: no batching (\emph{NoBatch}) and batching without reordering (\emph{Batch}). In \emph{NoBatch}, we submit transactions to DBMS-X one at a time. In \emph{Batch} and \emph{BatchReorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50, which is appropriate for this workload.
+We use the SmallBank benchmark with a Zipf skew of 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{reorder}) with two baselines: no batching (\emph{nobatch}) and batching without reordering (\emph{batch}). In \emph{nobatch}, we submit transactions to DBMS-X one at a time. In \emph{batch} and \emph{reorder}, we batch transactions before sending them to DBMS-X. We choose a batch size of 50\cut{, which is appropriate for this workload}.
 
-Figures~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the resulting throughput, latency, and the abort rate when we increase the number of database connections.  When we do not batch transactions, the number of concurrent transactions is small and the throughput is low. As a result of this low concurrency level, the chance of conflicts is low. Thus, both abort rate and transaction latency are low. 
-
-As we send transactions in batches, the throughput increases dramatically. 
+Figures~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the throughput, latency, and the abort rate when we increase the number of database connections. Without batching, the concurrency level is small, resulting in low throughput and a slim chance of conflict (i.e., low abort rate). 
+As we batch transactions, the throughput increases dramatically. 
 However, as the load continues to increase, the system runs into data contention. This further leads to resource contention due to restarts. Thus, both abort rate and latency rise significantly. When we batch and reorder transactions, the performance improves on all metrics: Peak throughput increases by $1.25\times$, throughput increases by up to $3.1\times$, latency reduces by up to $66\%$, and the abort rate drops by up to $62\%$. \cut{In addition,} Moreover, the performance degrades much more gracefully with increasing load.

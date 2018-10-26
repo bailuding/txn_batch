@@ -1,6 +1,6 @@
 \section{Evaluation}\label{sec:experiments}
-
-In our evaluation, we wanted to understand the effect of batching and reordering, the performance of our validator reordering algorithms as well as different policies, and the impact of parallelization at the validator.
+\cut{In our evaluation, we study the performance of our validator reordering algorithms (Section~\ref{sec:exp_algorithms}), the end-to-end impact of batching and reordering (Section~\ref{subsec:experiment:batching}) with different policies (Section~\ref{subsec:experiment:policy}), and the impact of parallelization at the validator (Appendix~\ref{sec:experiments:parallel}). We also evaluate our techniques on an open source OLTP system (Section~\ref{sec:exp:cicada}) and a commercial DBMS (Section~\ref{subsec:experiment:compare}). Section~\ref{sec:exp:summary} summarizes all the results.}
+\cut{
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
 \changed{
@@ -23,6 +23,7 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 }
 %\vspace{-0.5em}
 %\item How does parallel reordering affect performance?
+}
 
 \begin{table*}[h]
 	\centering
@@ -48,13 +49,13 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 }
 \end{table*}
 
-
-\subsection{Experimental Setup}
-\label{subsec:experiment:implementation}
+\cut{
+\subsection{Implementation and Experimental Setup}
+\label{subsec:experiment:implementation}}
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-\changed{We first describe the experimental setup for our research prototype where we isolate the impact of different parameters in our algorithms. Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups respectively.}
+\changed{We first describe the experimental setup for our prototype to isolate and study the impact of different parameters in our algorithms. Section~\ref{sec:exp:cicada} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups respectively.}
 
 Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and a validator as shown in Figure~\ref{fig:occ_arch}. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from clients, sends read/write requests to the storage, sends validation requests to the validator, restarts aborted transactions, and replies commit messages to clients.\cut{ It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.}
@@ -71,13 +72,13 @@ By default, the validator uses the sort-based greedy algorithm with the \texttt{
 
 
 % Parallelization.
-We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, 
+We parallelize the transaction generation with two transaction clients.\cut{ the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load.} We use two storage workers concurrently process reads and writes, 
 and the writes are applied based on its data versioning as described in Section~\ref{subsec:storage_reordering}. 
-We parallelize the subcomponents in the validator as described in Appendix~\ref{sec:parallel}.
+We further parallelize \cut{the components in} the validator as described in Appendix~\ref{sec:parallel}.
 \cut{In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.}
 
 % Hard ware and data population.
-We implemented our prototype in Java. All the experiments run on a machine with
+We implement our prototype in Java. All the experiments run on a machine with
 Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the
 storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
 
@@ -397,24 +398,25 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \input{exp_greedy}
 %\input{exp_batch_size}
 \input{exp_basic}
-\input{exp_benchmark} % include load and small bank experiments.
+%\input{exp_benchmark} % include load and small bank experiments.
 \input{exp_policy}
 \input{exp_compare}
 
 
 \subsection{Summary}
+\label{sec:exp:summary}
 
 The main takeaways from our experiments are:
 
 %\vspace{-.5em}
 \begin{enumerate}[leftmargin=*, nolistsep]
-\item The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
+\item The sort-based greedy algorithm finds accurate FVS and reduces the running time of SCC-based greedy algorithms by $74\%$, resulting in the best system performance. 
 %\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-0.5em}
 %\item
  
 \item Batching and reordering increases throughput by up to $2.7\times$, and reduces the average and tail latency by up to $67\%$ and $82\%$ respectively.
-Batching by itself already improves throughput significantly, and adding reordering on top of it consistently improves throughput \cut{by up to $1.3\times$}. In addition, reordering significantly reduces the average and tail latency by up to $25\%$ and $70\%$ respectively. \cut{It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.}
+\cut{Batching by itself already improves throughput significantly, and adding reordering on top of it consistently improves throughput \cut{by up to $1.3\times$}. In addition, reordering significantly reduces the average and tail latency by up to $25\%$ and $70\%$ respectively.} While it is always beneficial to use storage reordering, validator reordering consistently improves tail latency but can hurt throughput and average latency under extremely high data contention.
 %\vspace{-0.5em}
 %\item 
 
@@ -422,7 +424,7 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+\item When incorporated into a commercial DBMS, on Small Bank benchmark, our techniques improve the throughput by up to $3.1\times$, and it reduces the average and percentile latency by up to $68\%$ and $62\%$.
 %\vspace{-0.5em}
 %\item 
 
