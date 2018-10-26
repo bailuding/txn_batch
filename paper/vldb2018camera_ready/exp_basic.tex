@@ -22,10 +22,13 @@ is slower due to denser graphs, while bringing less benefit. Thus, the best thro
 \eat{
 To summarize, it is always beneficial to enable storage batching since this technique reduces inter-batch aborts at a minimal cost. While validator batching consistently gives a percentile latency, it is most effective in mid-contention settings, when the reduction of intra-batch conflicts that it brings is sufficient to justify its cost. }
 
-We further evaluate batching and reordering on the Small Bank Benchmark~\cite{alomari2008icde}. The Small Bank benchmark contains transactions with a realistic and diverse
+We further evaluate batching and reordering on the Small Bank benchmark~\cite{alomari2008icde}. The Small Bank benchmark contains transactions with a realistic and diverse
 combination of read and write conflicts: compute the balance of a customer's checking and savings
 accounts, deposit money to a checking account, transfer money from a checking
 account to a savings account, move funds from one customer to another, and withdraw money from a customer's account. We use a Zipfian distribution to simulate skewed data accesses. We populate the database with 100K customers, including 100K checking and 100K savings accounts.
 
-Figure~\ref{fig:small_bank:tps},~\ref{fig:small_bank:latency},~\ref{fig:small_bank:p95} show the throughput, the average and percentile latency of transactions.\cut{ Overall, batching and reordering improved the throughput by up to $3.1\times$, reduced average latency by up to $68\%$, and tail latency by up to $62\%$.} The benefits of batching and reordering are similar to these on our micro benchmark.\cut{, storage and validator reordering can always improve the throughput and reduce the latency on top of batching. confirming our findings in Section~\ref{subsec:experiment:batching}.}
+The result on the Small Bank benchmark is very similar to that on our micro benchmark. We omit the figures due to space limit.
+
+\cut{
+Figure~\ref{fig:small_bank:tps},~\ref{fig:small_bank:latency},~\ref{fig:small_bank:p95} show the throughput, the average and percentile latency of transactions.\cut{ Overall, batching and reordering improved the throughput by up to $3.1\times$, reduced average latency by up to $68\%$, and tail latency by up to $62\%$.} The benefits of batching and reordering are similar to these on our micro benchmark.\cut{, storage and validator reordering can always improve the throughput and reduce the latency on top of batching. confirming our findings in Section~\ref{subsec:experiment:batching}.}}
 

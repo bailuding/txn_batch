@@ -1,5 +1,5 @@
 \section{Evaluation}\label{sec:experiments}
-\cut{In our evaluation, we study the performance of our validator reordering algorithms (Section~\ref{sec:exp_algorithms}), the end-to-end impact of batching and reordering (Section~\ref{subsec:experiment:batching}) with different policies (Section~\ref{subsec:experiment:policy}), and the impact of parallelization at the validator (Appendix~\ref{sec:experiments:parallel}). We also evaluate our techniques on an open source OLTP system (Section~\ref{sec:exp:cicada}) and a commercial DBMS (Section~\ref{subsec:experiment:compare}). Section~\ref{sec:exp:summary} summarizes all the results.}
+\cut{In our evaluation, we study the performance of our validator reordering algorithms (Section~\ref{sec:exp_algorithms}), the end-to-end impact of batching and reordering (Section~\ref{subsec:experiment:batching}) with different policies (Section~\ref{subsec:experiment:policy}), and the impact of parallelization at the validator (Section~\ref{sec:experiments:parallel}). We also evaluate our techniques on an open source OLTP system (Section~\ref{sec:exp:cicada}) and a commercial DBMS (Section~\ref{subsec:experiment:compare}). Section~\ref{sec:exp:summary} summarizes all the results.}
 \cut{
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
@@ -17,8 +17,8 @@ We wanted to answer the following questions:
 \item How do we incorporate our techniques on top of a state-of-the-art OLTP system and a commercial database, and what is the resulting performance? (Sections~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare})
 \end{enumerate}
 Table~\ref{tbl:exp} summarizes the settings we evaluated and describes the tradeoff encapsulated in each parameter. 
-We also describe parallelization of our algorithms in detail in Appendix \ref{sec:parallel} and 
-show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
+\cut{We also describe parallelization of our algorithms in detail in Appendix \ref{sec:parallel} and 
+show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.}
 % Appendix~\ref{sec:parallel}.
 }
 %\vspace{-0.5em}
@@ -74,7 +74,7 @@ By default, the validator uses the sort-based greedy algorithm with the \texttt{
 % Parallelization.
 We parallelize the transaction generation with two transaction clients.\cut{ the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load.} We use two storage workers concurrently process reads and writes, 
 and the writes are applied based on its data versioning as described in Section~\ref{subsec:storage_reordering}. 
-We further parallelize \cut{the components in} the validator as described in Appendix~\ref{sec:parallel}.
+We further parallelize \cut{the components in} the validator as described in Section~\ref{sec:parallel}.
 \cut{In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.}
 
 % Hard ware and data population.
@@ -165,7 +165,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
     \end{minipage}
 \end{figure*}
 
-
+\cut{
 \begin{figure*}[t]
 	\centering
 	%	\begin{minipage}[b]{0.31\linewidth}
@@ -212,6 +212,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	%	\end{minipage}
 	%    \vspace{-1em}
 \end{figure*}
+}
 
 \begin{figure*}[t]
 	\centering
@@ -400,6 +401,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 \input{exp_basic}
 %\input{exp_benchmark} % include load and small bank experiments.
 \input{exp_policy}
+\input{exp_parallel_reorder}
 \input{exp_compare}
 
 

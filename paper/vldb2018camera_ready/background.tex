@@ -28,6 +28,6 @@ In addition, we must ensure the writes of the two transactions are installed in 
 \eat{The above discussion implies that validation only needs to check, for every transaction $T(j)$ and all transactions $T(i)$ overlapping temporally with $T(j)$, where $i<j$, that $WS(i) \cap RS(j) = \emptyset$.}%\end of eat
 
 The versioned datastore also provides an easy way to determine whether $T(j)$ and $T(i)$ overlap temporally; every time a transaction performs a read, we tag the read with the version of the object that was read. If $T(j)$'s read set contains an object $X$ and the read saw version $k$, the validator only needs to check the write sets of all $T(i)$ with $k < i < j$ to see whether they contain $X$~\cite{ding2015centiman}.
-\changed{For the ease of explanation, we assume the validation phase is sequential, however all aspects of validation can be easily parallelized as discussed in Appendix~\ref{sec:validator_reordering:parallel}. 
+\changed{For the ease of explanation, we assume the validation phase is sequential, however all aspects of validation can be easily parallelized as discussed in Section~\ref{sec:validator_reordering:parallel}. 
 }
 %extend it to a parallelized design in Section~

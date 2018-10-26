@@ -101,7 +101,7 @@ incorporate reordering policies such as transaction priorities (Section \ref{sec
 \cut{
 % contribution 3: parallel validation
 %\item 
-$\bullet$ Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
+$\bullet$ Our third contribution is a design that reduces the amortized overhead of validation through parallelism. The parallelization is achieved with a three-stage pipeline, where the stages are batch preparation, transaction reordering, and transaction validation. Each of these stages can be further parallelized to allow concurrent processing (Section~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
 }
 
 \cut{
@@ -112,7 +112,7 @@ $\bullet$ In a detailed experimental study of the impact of storage and validato
 }
 
 \changed{
-	$\bullet$ In a detailed experimental study of a prototype system, as well as on top of a state-of-the-art OLTP system and a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering improve the throughput by up to $2.2\times$ and reduce the tail latency by up to $71\%$ compared with the state-of-the-art OLTP systems (Section \ref{sec:experiments}).We further show how to reduce the amortized overhead of reordering through parallelism (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
+	$\bullet$ In a detailed experimental study of a prototype system, as well as on top of a state-of-the-art OLTP system and a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering improve the throughput by up to $2.2\times$ and reduce the tail latency by up to $71\%$ compared with the state-of-the-art OLTP systems (Section \ref{sec:experiments}).\cut{We further show how to reduce the amortized overhead of reordering through parallelism (Section~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).}
 }
 
 \eat{
