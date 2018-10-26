@@ -1,8 +1,8 @@
 \section{Introduction}\label{sec:intro}
 
 % batching is important
-Transaction processing is a fundamental aspect of database functionality, and improving OLTP system performance is a key research goal. The throughput of OLTP systems can be increased through \emph{batching} of operations; specifically, some component can buffer a number of operations as they arrive then \changed{process} them as a group \cite{friedman1997packing,debrabant2013anti,hagmann1987reimplementing}.
-Batching can improve system performance for several reasons. First, at the networking layer, it increases the communication efficiency by packing messages~\cite{ding2015centiman,friedman1997packing}. Second, it amortizes the cost of system calls by condensing multiple requests into a single one, as in group commit~\cite{debrabant2013anti,hagmann1987reimplementing}. Third, it reduces the number of requests by discarding duplicate or stale requests, such as writes to the same record~\cite{faleiro2014lazy}. All of those are optimizations based on low-level techniques, and they do not take the semantics of the system into account.
+Transaction processing is a fundamental aspect of database functionality, and improving its performance is a key research goal. The throughput of OLTP systems can be increased through \emph{batching} of operations; specifically, some component can buffer operations as they arrive then \changed{process} them as a group \cite{friedman1997packing,debrabant2013anti,hagmann1987reimplementing}.
+Batching improvs system performance for several reasons. First, at the networking layer, it increases the communication efficiency by packing messages~\cite{ding2015centiman,friedman1997packing}. Second, it amortizes the cost of system calls by condensing multiple requests into a single one, as in group commit~\cite{debrabant2013anti,hagmann1987reimplementing}. Third, it reduces the number of requests by discarding duplicate or stale requests, such as writes to the same record~\cite{faleiro2014lazy}. All of those are optimizations based on low-level techniques, and they do not consider the semantics of the system.
 
 % our proposal at a high level: batching at higher level for OCC 
 We propose to embrace semantic batching as a core design principle throughout transaction execution for OLTP systems with optimistic concurrency control (OCC)~\cite{kung81tods}.
@@ -10,12 +10,11 @@ OCC is a popular concurrency control protocol due to its low overhead in low-con
 settings~\cite{adya97podc, baker11cidr, bernstein2015optimizing,bernstein11cidr,
 bernstein11vldb, corbett12osdi,warp, patterson12vldb,peng10osdi,larson2011high}. However, it has been shown that OCC
 wastes resources when conflicts are frequent~\cite{agrawal1987concurrency}. We
-show how semantic batching (and associated reordering of transactions) can reduce conflicts, improve
-throughput and latency, and allow us to use OCC with higher-contention workloads.
+show how semantic batching (and associated reordering of transactions) can reduce conflicts, improve throughput and latency, and allow us to use OCC with higher-contention workloads.
 
 
-Figure~\ref{fig:occ_arch} shows a prototypical architecture of a modern, loosely coupled OCC-based transaction processing system with a separation of compute and storage such as Centiman~\cite{ding2015centiman}. 
-The system consists of three components: processors, storage, and one or more validators. External clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
+Figure~\ref{fig:occ_arch} shows a prototypical architecture of a modern, loosely coupled OCC-based OLTP system with separate compute and storage components such as Centiman~\cite{ding2015centiman}. 
+The system has three components: processors, storage, and one or more validators. Clients issue transactions to the system. On arrival into the system, each transaction is assigned to a processor and enters its \emph{read} phase. The processor sends read requests to the storage, executes the transaction, and performs writes to a local workspace. After it has processed the transaction, it sends information about the transaction's reads and writes to the validator. 
 The transaction now enters the \emph{validation} phase, where 
 % In OCC with \emph{backward validation}, 
 the validator checks if there are conflicts with a previously committed transaction. \eat{, and makes a``success'' or ``failure'' validation decision.}
@@ -39,7 +38,7 @@ these techniques can be adapted and applied in OCC as well.
 
 % batching at validator
 The second possible place is the validator. The validator can batch validation requests and then select 
-a validation order that reduces the number of conflicts and
+a validation order to reduce the number of conflicts and
 aborts. Assume again two transactions $t$ and $t'$ where $t$ reads $x$,
 and $t'$ writes $x$ after $t$'s read. Without batching, if $t'$ arrives at
 the validator before $t$ and commits, $t$ will fail. With
@@ -74,8 +73,8 @@ will see a stale value and later fail validation.
 
 
 % contribution
-{\bf Contributions of this paper.}
-We explore the benefits of transaction batching and reordering in optimistic concurrency control with backward validation, focusing on storage and validator batching. 
+{\bf Contributions of this work.}
+We explore the benefits of transaction batching and reordering in OCC with backward validation, focusing on storage and validator batching. 
 \cut{Our system design is best suited for integration with an in-memory versioned key-value store, as we require the ability to customize the validation logic. }
 %Previous work on the Centiman system\cite{ding2015centiman} proposed a loosely coupled architecture for OCC on top of key-value stores. The system we present here follows Centiman's architecture and enhances its design with batching and reordering.
 %\begin{itemize}
@@ -84,20 +83,20 @@ We explore the benefits of transaction batching and reordering in optimistic con
 %\begin{itemize}
 %\item 
 
-$\bullet$ Our first contribution is to show how to integrate batching and reordering throughout the lifetime of a transaction to enhance OCC-based protocols. We analyze the reasons for conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce these aborts through semantic batching.
+$\bullet$ We show how to integrate batching and reordering throughout a transaction's lifetime to enhance OCC-based protocols. We analyze the sources of conflicts and aborts at each stage of a transaction's life cycle, and develop techniques to reduce the aborts through semantic batching.
 We introduce intra-batch storage reordering and
 intra-batch validator reordering, and we show that selecting the
 optimal transaction ordering at the validator batch is NP-hard.
 (Section \ref{sec:overview}).
 
 
-$\bullet$ Our second contribution is 
+$\bullet$ We propose 
 two practical classes of greedy algorithms for validator reordering 
 that balance abort rates and reordering overheads.
 %These algorithms produce good orderings in practice, and they are fast to
 %use in a real system. 
-We also extend these algorithms to weighted versions that can
-incorporate policies such as transaction priorities (Section \ref{sec:valbatching}).
+We also extend these algorithms to
+incorporate reordering policies such as transaction priorities (Section \ref{sec:valbatching}).
 
 \cut{
 % contribution 3: parallel validation
@@ -113,7 +112,7 @@ $\bullet$ In a detailed experimental study of the impact of storage and validato
 }
 
 \changed{
-	$\bullet$ In a detailed experimental study of in a prototype system, as well as on top of a state-of-the-art OLTP system and a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering can improve the throughput by up to 2.2x and reduce the tail latency by up to 71\% compared with the state-of-the-art OLTP systems (Section \ref{sec:experiments}).We further show how to reduce the amortized overhead of reordering through parallelism (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
+	$\bullet$ In a detailed experimental study of a prototype system, as well as on top of a state-of-the-art OLTP system and a commercial database system, we show that batching and reordering always increases transaction throughput and, surprisingly, also reduces transaction latency, especially the tail latency. For workloads with high data contention, batching and reordering improve the throughput by up to $2.2\times$ and reduce the tail latency by up to $71\%$ compared with the state-of-the-art OLTP systems (Section \ref{sec:experiments}).We further show how to reduce the amortized overhead of reordering through parallelism (Appendix~\ref{sec:parallel} and~\ref{sec:experiments:parallel}).
 }
 
 \eat{
