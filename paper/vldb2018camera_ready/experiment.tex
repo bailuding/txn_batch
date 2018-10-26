@@ -90,24 +90,26 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 % * Figures
 % *******************
 
-\begin{figure*}[t]
+\begin{figure}[t]
     \centering
-    \begin{minipage}[b]{0.47\linewidth}
+%    \begin{minipage}[b]{0.47\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{./exp_fig/fvs/fvs}
+        \includegraphics[width=.4\textwidth]{./exp_fig/fvs/fvs}
         %\vspace{-2em}
         \caption{Size of FVS per graph}
         \label{fig:fvs:fvs}
-    \end{minipage}
-\quad
-    \begin{minipage}[b]{0.48\linewidth}
+%    \end{minipage}
+\end{figure}
+
+\begin{figure}[t]
+%    \begin{minipage}[b]{0.48\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{./exp_fig/fvs/latency}
+        \includegraphics[width=.4\textwidth]{./exp_fig/fvs/latency}
         %\vspace{-2em}
         \caption{Running time of finding FVS}
         \label{fig:fvs:latency}
-    \end{minipage}
-\end{figure*}
+%    \end{minipage}
+\end{figure}
 
 
 \begin{figure*}[t]
@@ -116,21 +118,21 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
         \centering
         \includegraphics[width=\textwidth]{./exp_fig/greedy/tps}
         %\vspace{-2em}
-        \caption{Throughput with SCC-based and sort-based greedy algorithms}
+        \caption{Throughput with different greedy algorithms}
         \label{fig:greedy:tps}
     \end{minipage}
     \begin{minipage}[b]{0.31\linewidth}
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/greedy/latency}
 	%\vspace{-2em}
-	\caption{Average latency for greedy algorithms}
+	\caption{Average latency with different greedy algorithms}
 	\label{fig:greedy:latency}
 	\end{minipage}
     \begin{minipage}[b]{0.31\linewidth}
         \centering
         \includegraphics[width=\textwidth]{./exp_fig/greedy/percent95_latency}
      %   \vspace{-2em}
-        \caption{Percentile latency for greedy algorithms}
+        \caption{Percentile latency with different greedy algorithms}
         \label{fig:greedy:p95}
     \end{minipage}
 \end{figure*}
@@ -401,7 +403,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 
 \subsection{Summary}
 
-The main practical takeaways from our experiments are as follows:
+The main takeaways from our experiments are:
 
 %\vspace{-.5em}
 %\begin{enumerate}[leftmargin=*]
