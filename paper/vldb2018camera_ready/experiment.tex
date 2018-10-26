@@ -4,7 +4,7 @@ In our evaluation, we wanted to understand the effect of batching and reordering
 % as well as configuration parameters. In particular, 
 We wanted to answer the following questions:
 \changed{
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}[leftmargin=*, nolistsep]
 \item 
 	How well do our validator reordering algorithms from Section~\ref{subsec:validator_reordering:algorithm} perform? How do these algorithms affect the end-to-end system performance? (Section~\ref{sec:exp_algorithms})
 %\vspace{-0.5em}
@@ -56,12 +56,12 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.
 
 \changed{We first describe the experimental setup for our research prototype where we isolate the impact of different parameters in our algorithms. Section~\ref{sec:OtherOLTP} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups respectively.}
 
-Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and a validator. The components communicate through consumer-producer queues. 
-The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from transaction clients, sends read/write requests to the storage, sends validation requests to the validator, and replies to the transaction client. It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.
+Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and a validator as shown in Figure~\ref{fig:occ_arch}. The components communicate through consumer-producer queues. 
+The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from clients, sends read/write requests to the storage, sends validation requests to the validator, restarts aborted transactions, and replies commit messages to clients.\cut{ It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.}
 
-The processor is \emph{non-blocking}: It continuously processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a transaction client, it sends read requests on behalf of this transaction to the storage's consumer-producer queue, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to efficiently multiplex many transactions in parallel to improve its throughput.
+The processor is \emph{non-blocking}: It processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a client, it sends read requests on behalf of this transaction to the storage, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to multiplex many transactions in parallel to improve its throughput.
 
-The storage continuously processes read and write requests. When storage batching is enabled, the storage buffers requests into batches, and uses the strategy described in Section~\ref{subsec:storage_reordering} to first execute all the write requests and then all the read requests in the batch.
+The storage processes read and write requests. With storage batching, the storage buffers requests into batches and processes the requests as described in Section~\ref{subsec:storage_reordering}.\cut{first execute all the write requests and then all the read requests in the batch.}
 
 % validator
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
@@ -71,9 +71,10 @@ By default, the validator uses the sort-based greedy algorithm with the \texttt{
 
 
 % Parallelization.
-We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate the transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, 
+We have parallelized the transaction generation, the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load. Two storage workers concurrently process reads and writes, 
 and the writes are applied based on its data versioning as described in Section~\ref{subsec:storage_reordering}. 
-In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.
+We parallelize the subcomponents in the validator as described in Appendix~\ref{sec:parallel}.
+\cut{In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.}
 
 % Hard ware and data population.
 We implemented our prototype in Java. All the experiments run on a machine with
@@ -406,15 +407,14 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 The main takeaways from our experiments are:
 
 %\vspace{-.5em}
-%\begin{enumerate}[leftmargin=*]
-%\item 
-(1) The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
+\begin{enumerate}[leftmargin=*, nolistsep]
+\item The simple sort-based FVS greedy algorithm works really well in practice, and it reduces the running time of the SCC-based greedy algorithms by 74\%, leading to the best overall system performance. 
 %\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-0.5em}
 %\item
  
-(2) Batching and reordering increases throughput by up to 2.7x, and reduces average and percentile latency by up to 67\% and 82\%.
-Batching by itself already improves throughput significantly, and adding reordering on top of batching consistently improves throughput by up to 1.3x. In addition, reordering significantly reduces average latency and tail latency by up to 25\% and 70\%. It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.
+\item Batching and reordering increases throughput by up to $2.7\times$, and reduces the average and tail latency by up to $67\%$ and $82\%$ respectively.
+Batching by itself already improves throughput significantly, and adding reordering on top of it consistently improves throughput \cut{by up to $1.3\times$}. In addition, reordering significantly reduces the average and tail latency by up to $25\%$ and $70\%$ respectively. \cut{It is always beneficial to use storage reordering. Validator reordering consistently improves the tail latency but can hurt throughput and average latency when data contention is extremely high.}
 %\vspace{-0.5em}
 %\item 
 
@@ -422,16 +422,16 @@ Batching by itself already improves throughput significantly, and adding reorder
 %\vspace{-0.5em}
 %\item 
 
-\changed{(3)} In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
+\item In the Small Bank benchmark, batching and reordering improves the throughput by up to 3.1x, and it reduces the average and percentile latency by up to 68\% and 62\%.
 %\vspace{-0.5em}
 %\item 
 
-\changed{(4)} For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
+\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
 %\vspace{-0.5em}
 %\item 
 
 
-\changed{(5) Integrating our techniques to a high performance OCC-based OLTP system shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 2.2x and reduces the 99\% latency by up to 71\% compared with the next best under write-intensive YCSB workload.}
+\item Integrating our techniques to a high performance OCC-based OLTP system shows that, compared with the-state-of-the-art OLTP systems, the thread-aware reordering policy improves transaction throughput by up to 2.2x and reduces the 99\% latency by up to 71\% compared with the next best under write-intensive YCSB workload.
 
-(6) Integrating the idea of transaction batching and reordering to a commercial database system shows that, under high data contention, our techniques increase the throughput by up to 2.8x and reduce the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
-%\end{enumerate}  
+\item Integrating the idea of transaction batching and reordering to a commercial database system shows that, under high data contention, our techniques increase the throughput by up to 2.8x and reduce the average latency by up to 66\%. This indicates that there is much room for performance improvements using our techniques even for mature database systems.
+\end{enumerate}  

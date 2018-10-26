@@ -2,10 +2,10 @@
 
 %In this section, we introduce our novel ideas of batching at the storage and the validator in an OCC system, and we formulate the resulting algorithmic problems. 
 
-\emph{Batching} involves buffering a number of operations as they arrive at some component of the system and processing them as a group. 
-Given a batch, we run a lightweight algorithm that analyzes the batch and then reorders the operations in the batch in order to reduce aborts. We will introduce two types of reordering opportunities: Storage batching and validator batching.
+\emph{Batching} buffers a number of operations as they arrive at some component of the system and processes them as a group. 
+Given a batch, we run a lightweight algorithm to analyze the batch and then reorder the operations in the batch to reduce aborts. We discuss two types of reordering opportunities: Storage batching and validator batching.
 
-We first make a conceptual distinction between two types of transaction aborts: intra-batch and inter-batch aborts. Assume transaction $T$ abort due to its conflict with $T'$. If $T$ and $T'$ are in the same batch, we call the resulting abort of $T'$ an \emph{intra-batch abort}; otherwise, we call it an \emph{inter-batch abort}.
+We first make a conceptual distinction between two types of aborts: intra-batch and inter-batch aborts. Assume transaction $T$ abort due to its conflict with $T'$. If $T$ and $T'$ are in the same batch, we call the abort of $T'$ an \emph{intra-batch abort}; otherwise, we call it an \emph{inter-batch abort}.
 %Batching transactions that access the same objects together reduces inter-batch aborts. 
 %There has been a lot of research on data clustering either online or offline~\cite{elmore2015squall, pavlo2012skew}, especially for fine-grained data partitioning. 
 In this work, we focus on managing intra-batch aborts by strategically reordering the batched requests at storage and validator. 
@@ -13,7 +13,7 @@ Reducing inter-batch aborts is complementary to our effort.
 
 Our approach is agnostic to isolation levels as long as the reordering respects the corresponding definitions of conflicts for 
 write-read, write-write, and read-write dependencies. In the remainder of this paper, we describe 
-how to batch and reorder for serializability, but our techniques can be adapted accordingly to other isolation levels, e.g., snapshot isolation.
+how to batch and reorder for serializability, and our techniques can be adapted accordingly to other isolation levels, e.g., snapshot isolation.
 
 \eat{For example, in snapshot isolation, if the storage is multi-versioned and offers a consistent snapshot to reads, no reordering is needed. At the validator, two transactions in the same batch conflict with each other if they write to the same
 object. Thus, we create a dependency graph based on write-write conflicts, and the other parts of the
@@ -27,7 +27,7 @@ abort at the validator as it conflicts with the update from a committed transact
 Thus, applying updates at the storage layer as early as possible can 
 reduce the chance of aborts for incoming transactions.
 
-We implement this idea as follows. We buffer a number of read and write requests from transactions into batches. 
+\cut{We implement this idea as follows.} For storage batching, we buffer a number of read and write requests from transactions into batches. 
 As a batch of requests arrives at the storage layer, for each object, we apply the highest-version write request on that object. It is safe to discard all other writes on that object as explained in Section~\ref{sec:background}.\footnote{Recall that we assume full serializability; this may be different for snapshot isolation.} 
 Next, we handle all the read requests for the same object. This strategy works very well for reducing intra-batch aborts, 
 as it ensures that all available writes by committed transactions are applied to all objects before we handle any read requests on these objects. 
@@ -61,7 +61,7 @@ account. We call this objective function a \emph{policy} $P$.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.5\columnwidth]{./alg_fig/fvs-eg}
+	\includegraphics[width=0.4\columnwidth]{./alg_fig/fvs-eg}
 	%\vspace{-1em}
 	\caption{An example of a directed graph; node 1 forms a feedback vertex set.}
 	%\vspace{-1em}
