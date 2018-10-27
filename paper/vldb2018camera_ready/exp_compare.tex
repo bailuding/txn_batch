@@ -1,28 +1,27 @@
-\changed{
-%\subsection{Compare with Other OLTP Kernels}
-\subsection{Integrate with Cicada}
+\subsection{Integration with Cicada}
 \label{sec:exp:cicada}
 We integrate the idea of transaction batching and reordering into Cicada, an open-source OLTP system~\cite{lim2017cicada}. Cicada represents an important class of in-memory OCC-based OLTP system architectures. In Cicada, every thread executes its transactions independently, and there are no centralized threads for transaction validation or storage access. We apply our techniques to this architecture by batching and reordering the transactions in a preprocessing step using the thread-aware policy described in Section~\ref{subsec:validator_reordering:policy}. 
+
+We configure our strategy with a batch size of $4$ times the number of threads and assign $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never reordered across batch boundaries. The reordering has low overhead, which is up to 5x in throughput compared with transaction processing. It can be further parallelized as described in Section~\ref{sec:experiments:parallel}.
 
 We compare our strategy ($rc$) with a number of the-state-of-the-art OLTP systems, including Cicada ($cicada$)~\cite{lim2017cicada}, Silo ($silo$)~\cite{tu2013speedy}, ERMIA ($ermia$)~\cite{kim2016ermia}, and TicToc ($tictoc$)~\cite{yu2016tictoc}, using the same YCSB benchmark configuration as 
 in the original Cicada paper~\cite{lim2017cicada}. Each transaction consists of 16 requests generated from a Zipfian distribution, with 50\% read and 50\% read-modify-write. The database consists of 10 million keys, each with 100-byte payload.
 
 We run the experiment on a machine with two Intel Xeon Processor E5-2690 v4 CPUs (each with 14 physical cores) and 256GB of DRAM. We pin threads to different cores and use NUMA-aware memory to allocate hugepages.
 
-Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of these systems with a write-intensive, highly-skewed workload, varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and tail latency with the maximal number of threads (i.e., 28) under workloads with different degrees of data contention.\footnote{ERMIA is not shown in Figure~\ref{fig:oltp_kernel:latency} since it does not report percentile latency.} 
+Figure~\ref{fig:oltp_kernel:tps_z0.99} shows the throughput of these systems with a write-intensive, highly-skewed workload, varying the number of threads. Figures~\ref{fig:oltp_kernel:tps_t28} and~\ref{fig:oltp_kernel:latency} show the throughput and tail latencies with the maximal number of threads (i.e., 28) under workloads with different degrees of data contention.\footnote{ERMIA is not shown in Figure~\ref{fig:oltp_kernel:latency} since it does not report percentile latencies.} 
 
 % Performance number
 % TPS@28 threads and theta=0.99: reorder 1.89M, cicada 0.85, lowest: 0.38
 % 99.9 latency@28 threads and theta=0.99: reorder 0.11MS, cicada: 0.38, highest: 1.2
-As the degree of data contention increases, either with more threads or more data skew, using reordering outperforms the other systems with higher throughput and lower tail latency. With 28 threads and skew factor 0.99, using reordering improves throughput by up to 2.2x and reduces 99\% latency by up to 71\% compared with the next best.
+As the degree of data contention increases, either with more threads or more data skew, using reordering outperforms the other systems resulting in higher throughput and lower tail latencies. With 28 threads and skew factor 0.99, using reordering improves throughput by up to 2.2x and reduces the $99\%$ tail latency by up to $71\%$.
 
-In this experiment, we configure our strategy with a batch size of $4\times num\_threads$ and assign $4$ transactions to each thread within a batch after reordering, i.e., a transaction is never reordered across batch boundaries. The reordering has low overhead, which is up to 5x in throughput compared with transaction processing. It can be further parallelized as described in Section~\ref{sec:experiments:parallel}.
-
-In practice, many applications and services use a middle tier, such as web servers, to maintain business logic and to serve as an arrival layer for transactions from clients before submitting them to the data tier. The reordering and batching can happen in the web servers as a preprocessing step before submitting the transactions to the data tier.
+\cut{
+In practice, many applications and services use a middle tier, such as web servers, to maintain business logic and to serve as an arrival layer for transactions from clients before submitting them to the data tier. The reordering and batching can happen in the web servers as a preprocessing step before submitting the transactions to the data tier.}
 %as transaction requests get consolidated.
-}
 
-\subsection{Integrate with DBMS-X}
+
+\subsection{Integration with DBMS-X}
 \label{subsec:experiment:compare}
 
 We implement our techniques on top of a commercial DBMS-X, a high performance OLTP engine using OCC.\cut{ Upon receiving transactions, it processes transactions concurrently in a first-come-first-served order.}
@@ -31,12 +30,12 @@ We implement our techniques on top of a commercial DBMS-X, a high performance OL
 %}
 %\cut{We apply transaction batching and reordering to DBMS-X at the client side.}
 \changed{
-We implement validator reordering for the transactions batched at the middle tier, i.e., before submitting them to the database server.} Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions and \changed{reorder them to minimize the number of aborts}. The transactions excluded from the batch, together with future incoming transactions, will be included in the next batch for reordering.
+We implement validator reordering for the transactions batched at the middle tier, i.e., before submitting them to the database server.} Since the transactions haven't started executing and their read timestamps are not yet available, we conservatively assume that all the transactions in a batch read from the same snapshot of the database. We analyze the potential conflicts between the transactions and \changed{reorder them to minimize the number of aborts}. The transactions excluded from the batch, together with future incoming transactions, are included in the next batch for reordering.
 
-\changed{We use JDBC to issue transactions. A connection to DBMS-X can send transaction statements individually or in batch with JDBC calls, where the call returns after all the transactions are processed (either commit or abort). As DBMS-X receives a batch of statements, it executes them concurrently. Batching the statements reduces communication overhead and increases the concurrency level.}
+\changed{We use JDBC to issue transactions. A connection to DBMS-X can send transaction statements individually or in batch through JDBC calls, where the call returns after all the transactions are processed. Whenever DBMS-X receives a batch of statements, it executes them concurrently. Batching the statements reduces communication overhead and increases the concurrency level.}
 
 We use the SmallBank benchmark as described in Section~\ref{subsec:experiment:batching}, with a Zipf skew of 0.9 as a high-data-contention scenario. We compare transaction batching and reordering (\emph{reorder}) with two baselines: no batching (\emph{nobatch}) and batching without reordering (\emph{batch}). In \emph{nobatch}, we submit transactions to DBMS-X one at a time. In \emph{batch} and \emph{reorder}, we batch transactions before sending them to DBMS-X. We choose 50 as a proper batch size\cut{, which is appropriate for this workload}.
 
-Figures~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the throughput, latency, and abort rate when we increase the number of database connections. Without batching, the concurrency level is small, resulting in low throughput and a slim chance of conflict (i.e., low abort rate). 
+Figures~\ref{fig:hekaton:tps}, ~\ref{fig:hekaton:abort}, and ~\ref{fig:hekaton:latency} show the throughput, latency, and abort rate when we increase the number of database connections. Without batching, the concurrency level is small, resulting in low throughput and a slim chance of conflict (i.e., a low abort rate). 
 As we batch transactions, the throughput increases dramatically. 
-However, as the load continues to increase, the system runs into data contention. This further leads to resource contention due to restarts. Thus, both abort rate and latency rise significantly. When we batch and reorder transactions, the performance improves on all metrics: Peak throughput increases by $1.25\times$, throughput increases by up to $3.1\times$, latency reduces by up to $66\%$, and the abort rate drops by up to $62\%$. \cut{In addition,} Moreover, the performance degrades much more gracefully with increasing load.
+However, as the load continues to increase, the system runs into data contention. This further leads to resource contention due to restarts. Thus, both the abort rate and the average latency rise significantly. When we batch and reorder transactions, the performance improves on all metrics: Peak throughput increases by $1.25\times$, throughput increases by up to $3.1\times$, latency reduces by up to $66\%$, and the abort rate drops by up to $62\%$. \cut{In addition,} Moreover, the performance degrades much more gracefully with increasing load.

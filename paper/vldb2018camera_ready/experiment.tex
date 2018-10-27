@@ -39,9 +39,9 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.}
 		\hline
 		Minimize aborts & Reorder transactions to reduce the number of aborts.\\
 		\hline
-		Minimize tail latency & Reorder transactions to reduce tail latency at the cost of slightly increased aborts.\\
+		Minimize tail latency & Reorder transactions to reduce tail latencies at the cost of slightly increased aborts.\\
 		\hline
-		Reduce inter-thread conflicts & Reorder transactions to achieve thread locality for decentralized system architecture. \\
+		Reduce inter-thread conflicts & Reorder transactions to achieve thread locality for a decentralized system architecture. \\
 		%for decentralized multi-threaded OLTP architectures based on OCC.\\
 		\hline
 	\end{tabular}
@@ -55,10 +55,10 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.}
 
 %Our system architecture consists of four components: a transaction client, a processor thread, a storage thread, and a validator thread. The threads communicate through queues of requests; that is, there is a generator queue, a processor queue, a storage queue, and a validator queue.
 
-\changed{We first describe the experimental setup for our prototype to isolate and study the impact of different parameters in our algorithms. Section~\ref{sec:exp:cicada} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups respectively.}
+\changed{We first describe the experimental setup for our prototype to isolate and study the impact of different parameters in our algorithms. Section~\ref{sec:exp:cicada} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups, respectively.}
 
 Our \changed{research prototype system architecture} has four components: transaction clients, processors, storage, and a validator as shown in Figure~\ref{fig:occ_arch}. The components communicate through consumer-producer queues. 
-The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from clients, sends read/write requests to the storage, sends validation requests to the validator, restarts aborted transactions, and replies commit messages to clients.\cut{ It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.}
+The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from clients, sends read/write requests to the storage, sends validation requests to the validator, restarts aborted transactions, and sends commit messages back to the clients.\cut{ It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.}
 
 The processor is \emph{non-blocking}: It processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a client, it sends read requests on behalf of this transaction to the storage, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to multiplex many transactions in parallel to improve its throughput.
 
@@ -66,7 +66,8 @@ The storage processes read and write requests. With storage batching, the storag
 
 % validator
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
- \cut{A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order. } When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+%\cut{A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.}
+When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 % Details of validator implementation.
 By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor $2$.
 
@@ -86,8 +87,8 @@ storage, implemented as an in-memory hash table. In our micro benchmark, we popu
 The baseline configuration ($base$) represents the system running with storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping buffering transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
-We implement our prototype in Java. All the experiments run on a machine with
-Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation is not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average and percentile latency.
+Our prototype is implemented in Java. All the experiments are run on a machine with
+an Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show the averages of 10 runs, each lasting for 60 seconds between a 10-second warm-up and a 10-second cool-down. The standard deviation is not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average, and percentile latencies.
 
 % *******************
 % * Figures
@@ -135,7 +136,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
         \centering
         \includegraphics[width=\textwidth]{./exp_fig/greedy/percent95_latency}
      %   \vspace{-2em}
-        \caption{Percentile latency with different greedy algorithms}
+        \caption{Percentile latencies with different greedy algorithms}
         \label{fig:greedy:p95}
     \end{minipage}
 \end{figure*}
@@ -161,7 +162,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
     	\centering
     	\includegraphics[width=\textwidth]{./exp_fig/basic/percent95_latency}
     %	\vspace{-2em}
-    	\caption{Percentile latency under workloads of Zipfian distribution}
+    	\caption{Percentile latencies under workloads of Zipfian distribution}
     	\label{fig:basic:p95}
     \end{minipage}
 \end{figure*}
@@ -194,7 +195,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
 		\centering
 		\includegraphics[width=\textwidth]{{{./exp_fig/small_bank/percent95_latency}}}
 		%	\vspace{-2em}
-		\caption{Percentile latency with Small Bank benchmark}
+		\caption{Percentile latencies with Small Bank benchmark}
 		\label{fig:small_bank:p95}
 	\end{minipage}
 	%	 \begin{minipage}[b]{0.31\linewidth}
@@ -235,7 +236,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
 	\centering
 	\includegraphics[width=\textwidth]{./exp_fig/restart/percent100_latency}
 %	\vspace{-2em}
-	\caption{Percentile latency with tail latency optimized policies}
+	\caption{Percentile latencies with tail latency optimized policies}
 	\label{fig:restart:p100}
 	\end{minipage}
 \end{figure*}
@@ -314,6 +315,48 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
 %\end{figure*}
 
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=.9\columnwidth]{./figures/validator}
+	%	\vspace{-2em}
+	\caption{The architecture of parallel validator. It is decoupled into three subcomponents for pipeline parallelism: batch preparation, transaction reordering, and transaction validation. Each subcomponent can be further parallelized.}
+	%	\vspace{-1em}
+	\label{fig:reorder:validator}
+\end{figure}
+
+\begin{figure*}[!htbp]
+	\centering
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/tps}
+		%	\vspace{-2em}
+		\caption{Throughput varying the number of reordering workers}
+		\label{fig:reorder:tps}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/latency}
+		%	\vspace{-2em}
+		\caption{Average latency varying the number of reordering workers}
+		\label{fig:reorder:latency}
+	\end{minipage}    
+	\begin{minipage}[b]{0.31\linewidth}
+		\centering
+		\includegraphics[width=\textwidth]{./exp_fig/reorder/percent95_latency}
+		%	\vspace{-2em}
+		\caption{Percentile latencies varying the number of reordering workers}
+		\label{fig:reorder:p95}
+	\end{minipage}    
+	%    \begin{minipage}[b]{0.31\linewidth}
+	%	\centering
+	%	\includegraphics[width=\textwidth]{./exp_fig/bsize/tps}
+	%	\vspace{-2em}
+	%	\caption{Throughput with various batch sizes}
+	%	\label{fig:bsize:tps}
+	%	\end{minipage}    
+	%    \vspace{-1em}
+\end{figure*}
+
 \begin{figure*}[t]
 	\centering
 	\begin{minipage}[b]{0.31\linewidth}
@@ -334,7 +377,7 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
 		\centering
 		\includegraphics[width=\textwidth]{./exp_fig/oltp_kernel/pdf/{latency_r0.5_t28}.pdf}
 		%	\vspace{-2em}
-		\caption{Percentile latency of YCSB with 28 threads}
+		\caption{Percentile latencies of YCSB with 28 threads}
 		\label{fig:oltp_kernel:latency}
 	\end{minipage}
 \end{figure*}
@@ -412,31 +455,31 @@ Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show 
 The main takeaways from our experiments are:
 
 %\vspace{-.5em}
-\begin{enumerate}[leftmargin=*, nolistsep]
-\item The sort-based greedy algorithm finds accurate FVS and reduces the running time of SCC-based greedy algorithms by $74\%$, resulting in the best end-to-end system performance among all the algorithms. 
+%\begin{enumerate}[leftmargin=*, nolistsep]
+(1) The sort-based greedy algorithm finds accurate FVS and reduces the running time of SCC-based greedy algorithms by $74\%$, resulting in the best end-to-end system performance among all the algorithms. 
 %\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-0.5em}
 %\item
  
-\item Batching and reordering increases throughput by up to $2.7\times$, and reduces the average and tail latency by up to $67\%$ and $82\%$ respectively.
-\cut{Batching by itself already improves throughput significantly, and adding reordering on top of it consistently improves throughput \cut{by up to $1.3\times$}. In addition, reordering significantly reduces the average and tail latency by up to $25\%$ and $70\%$ respectively.} While it is always beneficial to use storage reordering, validator reordering consistently improves tail latency but can hurt throughput and average latency under extremely high data contention.
+(2) Batching and reordering increases throughput by up to $2.7\times$, and it reduces the average and tail latencies by up to $67\%$ and $82\%$, respectively.
+\cut{Batching by itself already improves throughput significantly, and adding reordering on top of it consistently improves throughput \cut{by up to $1.3\times$}. In addition, reordering significantly reduces the average and tail latencies by up to $25\%$ and $70\%$, respectively.} While it is always beneficial to use storage reordering, validator reordering consistently improves tail latencies but can hurt throughput and average latency under extremely high data contention.
 %\vspace{-0.5em}
 %\item 
 
-%(4) As we increase the level of parallelism in validator reordering, we see improvements in %throughput, latency, and tail latency, especially when data contention is medium to high.
+%(4) As we increase the level of parallelism in validator reordering, we see improvements in %throughput, latency, and tail latencies, especially when data contention is medium to high.
 %\vspace{-0.5em}
 %\item 
 \cut{
-\item When integrated into a commercial DBMS, on Small Bank benchmark, our techniques improve the throughput by up to $3.1\times$, and it reduces the average and percentile latency by up to $68\%$ and $62\%$ respectively.}
+\item When integrated into a commercial DBMS, on Small Bank benchmark, our techniques improve the throughput by up to $3.1\times$, and it reduces the average and percentile latencies by up to $68\%$ and $62\%$, respectively.}
 %\vspace{-0.5em}
 %\item 
 
-\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or average latency.
+(3) For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latencies by up to 82\%, without sacrificing either throughput or average latency.
 %\vspace{-0.5em}
 %\item 
 
 
-\item Integrated to a high performance OCC-based OLTP system, our techniques with thread-aware reordering policy improves the throughput by up to $2.2\times$ and reduces the tail latency by up to $71\%$ compared with other state-of-the-art OLTP systems under write-intensive workload.
+(4) Integrated to a high performance OCC-based OLTP system, our techniques with a thread-aware reordering policy improve the throughput by up to $2.2\times$ and reduces tail latencies by up to $71\%$ compared with other state-of-the-art OLTP systems under write-intensive workload.
 
-\item Integrated to a commercial DBMS-X, our techniques increase the throughput by up to $2.8\times$ and reduce the average latency by up to $66\%$ under high data contention. This shows that there is much room for performance improvements using our techniques even for mature DBMSs.
-\end{enumerate}  
+(5) Integrated to a commercial DBMS-X, our techniques increase the throughput by up to $2.8\times$ and reduce the average latency by up to $66\%$ under high data contention. This shows that there is much room for performance improvements using our techniques even for mature DBMSs.
+%\end{enumerate}  

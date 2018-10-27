@@ -7,12 +7,12 @@ Our baselines are the \texttt{prod-degree} policy that maximizes the number of c
 Our first tail-latency aware policy ($rct$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the node with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
 Our second latency-aware policy ($rdeg$) combines the number of restarts and the incoming/outgoing degrees of a transaction into a weight. It computes the weight of a node as
 the product of in-degree and out-degree over the exponential of the number of
-restarts with base 2. When choosing a node to include in the FVS, it picks the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
+restarts with base 2. When choosing a node to include in the FVS, it picks the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted several times.
 Figures~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the throughput
 and average latency, where the impact of tail-latency aware policies is negligible as compared to when we maximize the number of commits ($mc$).
 Figure~\ref{fig:restart:p100} shows the 
-tail latency. 
-\cut{While our first latency-aware policy $rct$ performs similar to $mc$,} The more advanced policy $rdeg$ consistently performs significantly better than all the others, and it reduces the tail latency by up to 86\%.
+tail latencies. 
+\cut{While our first latency-aware policy $rct$ performs similar to $mc$,} The more advanced policy $rdeg$ consistently performs significantly better than all the others, and it reduces the tail latencies by up to 86\%.
 \cut{
 Thus, with latency-aware policies, we effectively reduce transaction tail latencies without sacrificing either the throughput or the average latency.
 }
