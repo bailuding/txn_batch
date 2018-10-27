@@ -1,7 +1,7 @@
 \subsection{Reducing Tail Latency}
 \label{subsec:experiment:policy}
 
-In this experiment, we explore validator reordering with more sophisticated policies as discussed in Section~\ref{subsec:validator_reordering:policy}.
+We now explore validator reordering with more sophisticated policies as discussed in Section~\ref{subsec:validator_reordering:policy}.
 %\eat{; specifically, we look at policies that aim to reduce the transaction tail latency}. Specifically, we explore the possibility of reducing transaction tail latency with latency-specific policies.
 Our baselines are the \texttt{prod-degree} policy that maximizes the number of commits ($mc$) as well as no batching ($base$) and batching without reordering (\changed{$batch$}). 
 Our first tail-latency aware policy ($rct$) favors transactions that have already been aborted and restarted. When choosing a node to include in the FVS, it chooses the node with the smallest number of restarts, breaking ties using \texttt{prod-degree}.
@@ -9,10 +9,10 @@ Our second latency-aware policy ($rdeg$) combines the number of restarts and the
 the product of in-degree and out-degree over the exponential of the number of
 restarts with base 2. When choosing a node to include in the FVS, it picks the node with the highest weight. Thus, a node with a high degree product can have its weight reduced if the corresponding transaction has restarted many times.
 Figures~\ref{fig:restart:tps} and~\ref{fig:restart:latency} show the throughput
-and the average latency. The impact of tail-latency aware policies on transaction throughput and average latency are negligible as compared to when we maximize the number of commits ($mc$).
+and average latency, where the impact of tail-latency aware policies is negligible as compared to when we maximize the number of commits ($mc$).
 Figure~\ref{fig:restart:p100} shows the 
-tail latencies above 90\%. 
-While our first latency-aware policy $rct$ performs similar to $mc$, the more sophisticated policy $rdeg$ consistently performs significantly better than all the others, and it reduces the tail latency by up to 86\%.
+tail latency. 
+\cut{While our first latency-aware policy $rct$ performs similar to $mc$,} The more advanced policy $rdeg$ consistently performs significantly better than all the others, and it reduces the tail latency by up to 86\%.
 \cut{
 Thus, with latency-aware policies, we effectively reduce transaction tail latencies without sacrificing either the throughput or the average latency.
 }

@@ -9,7 +9,7 @@
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=.9\columnwidth]{./figures/validator}
+	\includegraphics[width=.8\columnwidth]{./figures/validator}
 	%	\vspace{-2em}
 	\caption{The architecture of parallel validator. It is decoupled into three subcomponents for pipeline parallelism: batch preparation, transaction reordering, and transaction validation. Each subcomponent can be further parallelized.}
 	%	\vspace{-1em}
@@ -79,7 +79,7 @@ with each component working on a different batch in parallel. The batches then s
 
 {\bf A further refinement: pre-validation.} As mentioned in Section~\ref{subsec:validator_reordering}, prior to reordering, we can remove non-viable transactions, i.e., transactions conflict with previously committed transactions. While this \emph{pre-validation} adds an additional validation for transactions on top of the final validation which serializes them, it reduces the number of transactions to reorder and the reordering algorithm runs faster. Empirically, we observe that the reordering component is the bottleneck piece, and removing non-viable transactions with pre-validation significantly improves performance. Thus, after batch creation, we first pre-validate the batch, reorder the remaining transactions, and then perform a second and final validation against the current database state.
 
-In Figure \ref{fig:reorder:validator}, the bottom row shows a set of database snapshots, each after a batch of transactions being validated. With pre-validation, a batch $B$ will get validated against a ``stale'' database state $S$. Those transactions within batch $B$ that pass the pre-validation are then reordered and validated a second time in the transaction validation component against the ``correct'' database state $S'$. Since $S'$ now reflects all the updates from transactions committed while $B$ is in the reordering component, transactions in $B$ can show conflicts during the final validation even \changed{though} they are once already pre-validated.
+In Figure \ref{fig:reorder:validator}, the bottom row shows a set of database snapshots, each after a batch of transactions that has been validated. With pre-validation, a batch $B$ will get validated against a ``stale'' database state $S$. Those transactions within batch $B$ that pass the pre-validation are then re-ordered and validated a second time in the transaction validation component against the ``correct'' database state $S'$. Since $S'$ now reflects all the updates from transactions committed while $B$ is in the reordering component, transactions in $B$ can show conflicts during the final validation even \changed{though} they are once already pre-validated.
 
 %. We denote a database snapshot as $S_k$, where transactions whose timestamps are less or equal to $k$ have been committed as of this snapshot. In the reordering subcomponent, a batch of transactions $B$ is validated against the latest database snapshot $S_m$. The remaining transactions after pre-filtering are reordered as a batch $B'$ and sent to the validation\eat{ subcomponent}. $B'$ is again validated against the current database snapshot $S_n$. Since the validation subcomponent can be validating uncommitted transactions while $B$ is being processed at the reordering subcomponent, when $B'$ arrives at the validation\eat{ subcomponent},  we may have $n\geq m$. Thus, transactions in $B'$ can still abort due to conflicts with previously committed transactions in $S_n$.
 

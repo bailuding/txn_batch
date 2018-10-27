@@ -57,7 +57,7 @@ show the resulting benefits in Appendix~\ref{sec:experiments:parallel}.}
 
 \changed{We first describe the experimental setup for our prototype to isolate and study the impact of different parameters in our algorithms. Section~\ref{sec:exp:cicada} and~\ref{subsec:experiment:compare} describe our experiments with an open-source OLTP system and a commercial database system; both of these sections will describe their own experimental setups respectively.}
 
-Our \changed{research prototype system architecture} has four components: Transaction clients, processors, storage, and a validator as shown in Figure~\ref{fig:occ_arch}. The components communicate through consumer-producer queues. 
+Our \changed{research prototype system architecture} has four components: transaction clients, processors, storage, and a validator as shown in Figure~\ref{fig:occ_arch}. The components communicate through consumer-producer queues. 
 The transaction client continuously produces new transactions until the system reaches the maximum permitted concurrency level. The processor acts as a transaction coordinator and \emph{multiplexes} multiple transactions in parallel. It receives transaction requests from clients, sends read/write requests to the storage, sends validation requests to the validator, restarts aborted transactions, and replies commit messages to clients.\cut{ It also restarts aborted transactions so that it only communicates commit decisions to the transaction client.}
 
 The processor is \emph{non-blocking}: It processes requests from its consumer-producer queue without waiting for the response of the request. For example, when it receives a transaction request from a client, it sends read requests on behalf of this transaction to the storage, and then it continues to process the next request in its queue without waiting for the response from the storage. This asynchronous processing allows the processor to multiplex many transactions in parallel to improve its throughput.
@@ -66,27 +66,28 @@ The storage processes read and write requests. With storage batching, the storag
 
 % validator
 The validator performs backward validation. For every transaction, a validation request consists of the keys and versions of its reads and the keys of its writes. The validator caches the write keys of committed transactions in an in-memory hash table, until these writes are overwritten by later updates.
-We have decoupled the validator into three components as described in Section~\ref{subsec:validator_reordering}. A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order.  When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
+ \cut{A batch preparation worker receives validation requests from the processor, packages transactions into batches, and sends them to transaction reordering workers. A transaction reordering worker pre-validates all the transactions in the batch against the current state of the validator cache, reorders the transactions, and sends ordered transactions to the validation workers. A validation worker processes batches of \changed{transactions} one by one. It validates transactions against the current validator cache and applies updates from committed transactions to the cache based on the transaction serialization order. } When batching is enabled, the validator collects the requests into a batch as they arrive, and runs one of the algorithms from Section~\ref{subsec:validator_reordering:algorithm} to determine a serialization order. Every transaction that passes the validation is assigned an integer \emph{commit timestamp}, which corresponds to the version number of the updates it will install in storage. 
 % Details of validator implementation.
-By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor  value $2$.
+By default, the validator uses the sort-based greedy algorithm with the \texttt{prod-degree} policy and multi factor $2$.
 
 
 % Parallelization.
-We parallelize the transaction generation with two transaction clients.\cut{ the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load.} We use two storage workers concurrently process reads and writes, 
+We parallelize the transaction generation with two transaction clients.\cut{ the storage, and the transaction reordering at the validator. By default, two transaction clients populate transactions concurrently to supply sufficient load.} We run two storage workers concurrently to process reads and writes, 
 and the writes are applied based on its data versioning as described in Section~\ref{subsec:storage_reordering}. 
-We further parallelize \cut{the components in} the validator as described in Section~\ref{sec:parallel}.
+We decouple the validator into subcomponents and parallelize them as described in Section~\ref{sec:validator_reordering:parallel}.
+\cut{We further parallelize \cut{the components in} the validator as described in Section~\ref{sec:parallel}.}
 \cut{In the validator, we first introduced pipeline parallelism by processing the three subcomponents concurrently. Since we observed that the transaction reordering consumes much more time than the other components, we use multi-threading and four transaction reordering workers by default.}
 
 % Hard ware and data population.
-We implement our prototype in Java. All the experiments run on a machine with
-Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. We use a key-value model for the
-storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a transactional workload where each transaction reads 5 objects and writes to 5 objects drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to 300, i.e., at any time there are at most 300 live transactions in the system. The default batch size is 40 for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
+We use a key-value model for the
+storage, implemented as an in-memory hash table. In our micro benchmark, we populate the database with 100K objects, each with an 8-byte key. The values are left null as they are not relevant to our evaluation. We generate a workload where each transaction reads 5 objects and writes to 5 objects, drawn from a Zipfian distribution~\cite{gray1994quickly}, with one of the reads and one of the writes on the same object. We limit the concurrency level to $300$, i.e., at any time there are at most $300$ active transactions. The default batch size is $40$ for both storage and validator. We choose the concurrency level and batch size empirically to properly load the system.
 
 % baseline
-The baseline configuration ($base$) represents the system running with storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping packing transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
+The baseline configuration ($base$) represents the system running with storage and validator batching turned off. We optimize the code path for transactions without batching to avoid the overhead from batching and reordering, including skipping buffering transactions into batches as well as the reordering workers in validator. We further add a batch mode ($batch$) to separately measure the effects of batching and reordering, where requests are batched at both storage and validator, but no reordering is performed. The batch mode has improved performance over $base$, because it benefits from better caching with tighter loops in the processing. 
 
 % Misc
-All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation was not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average latency, and percentile latency to show tail latencies.
+We implement our prototype in Java. All the experiments run on a machine with
+Intel Xeon E5-2630 CPU @2.20GHz and 16GB RAM. All our experimental figures show the averages of 10 runs, each lasting for 60 seconds in between a 10-second warm-up and a 10-second cool-down. The standard deviation is not significant in any of the experiments, so we omit the error bars for clarity of presentation. We report \changed{throughput} (the number of committed transactions per second), average and percentile latency.
 
 % *******************
 % * Figures
@@ -165,7 +166,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
     \end{minipage}
 \end{figure*}
 
-\cut{
+%\cut{
 \begin{figure*}[t]
 	\centering
 	%	\begin{minipage}[b]{0.31\linewidth}
@@ -212,7 +213,7 @@ All our experimental figures show the averages of 10 runs, each lasting for 60 s
 	%	\end{minipage}
 	%    \vspace{-1em}
 \end{figure*}
-}
+%}
 
 \begin{figure*}[t]
 	\centering
@@ -412,7 +413,7 @@ The main takeaways from our experiments are:
 
 %\vspace{-.5em}
 \begin{enumerate}[leftmargin=*, nolistsep]
-\item The sort-based greedy algorithm finds accurate FVS and reduces the running time of SCC-based greedy algorithms by $74\%$, resulting in the best system performance. 
+\item The sort-based greedy algorithm finds accurate FVS and reduces the running time of SCC-based greedy algorithms by $74\%$, resulting in the best end-to-end system performance among all the algorithms. 
 %\item There is a sweet spot for the batch size, where the system achieves its best combination of throughput and latency. We empirically selected the best batch size for our configuration and workload based on the results.
 %\vspace{-0.5em}
 %\item
@@ -425,17 +426,17 @@ The main takeaways from our experiments are:
 %(4) As we increase the level of parallelism in validator reordering, we see improvements in %throughput, latency, and tail latency, especially when data contention is medium to high.
 %\vspace{-0.5em}
 %\item 
-
-\item When incorporated into a commercial DBMS, on Small Bank benchmark, our techniques improve the throughput by up to $3.1\times$, and it reduces the average and percentile latency by up to $68\%$ and $62\%$.
+\cut{
+\item When integrated into a commercial DBMS, on Small Bank benchmark, our techniques improve the throughput by up to $3.1\times$, and it reduces the average and percentile latency by up to $68\%$ and $62\%$ respectively.}
 %\vspace{-0.5em}
 %\item 
 
-\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or the average latency.
+\item For alternative reordering policies at the validator, prioritizing transactions with a combination of the degree of a transaction in the dependency graph and its number of restarts reduces tail latency by up to 82\%, without sacrificing either the throughput or average latency.
 %\vspace{-0.5em}
 %\item 
 
 
-\item Integrated to a high performance OCC-based OLTP system, our techniques with thread-aware reordering policy improves the throughput by up to $2.2\times$ and reduces the tail latency by up to $71\%$ compared with other state-of-the-art systems under write-intensive workload.
+\item Integrated to a high performance OCC-based OLTP system, our techniques with thread-aware reordering policy improves the throughput by up to $2.2\times$ and reduces the tail latency by up to $71\%$ compared with other state-of-the-art OLTP systems under write-intensive workload.
 
 \item Integrated to a commercial DBMS-X, our techniques increase the throughput by up to $2.8\times$ and reduce the average latency by up to $66\%$ under high data contention. This shows that there is much room for performance improvements using our techniques even for mature DBMSs.
 \end{enumerate}  

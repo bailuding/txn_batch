@@ -1,6 +1,6 @@
 \section{Conclusions and Future Work}\label{sec:conclusion}
 
-We show how to significantly improve transaction performance in transaction processing systems based on optimistic concurrency control through storage and validator batching and reordering. Besides clean problem formulations and
+We show how to significantly improve transaction performance in OLTP systems based on optimistic concurrency control through storage and validator batching and reordering. Besides clean problem formulations and
 reducing validator reordering to the problem of finding the \changed{minimal} feedback vertex set (FVS), we propose two new practical greedy algorithms for this problem
 that are fast and that perform well in practice. We show that our algorithms can integrate different policies into the reordering to optimize for \changed{a variety of performance objectives and system architectures, such as low tail latency and multi-threaded decentralized OLTP architectures}. We \changed{further} propose a parallel validator design to reduce the overhead of reordering. Our extensive experimental study both in a prototype system, \changed{as well as with a state-of-the-art OLTP system and a commercial database system} show that both storage and validator batching consistently improve throughput, and that validator reordering 
 significantly reduces latency profiles. We also demonstrate how we optimize for low tail latency with alternative policies, and how our parallelization further improves
